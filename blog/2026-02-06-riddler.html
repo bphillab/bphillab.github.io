@@ -56,10 +56,10 @@
 
 		<h2>Extra Credit Analytical Result</h2>
 		<p>Let M be the longest current streak among the three teams. For any team, the event "streak >= k" means it won its last k games, which happens with probability 2<sup>-k</sup>. For k >= 2, no two teams can both have streak >= k because their last k games overlap in a head-to-head matchup (only one can win). Therefore:</p>
-		<p>P(M >= 1) = 1 and, for k >= 2, P(M >= k) = 3 · 2<sup>-k</sup>.</p>
+		<p>P(M >= 1) = 1 and, for k >= 2, P(M >= k) = 3 * 2<sup>-k</sup>.</p>
 		<p>So the expected value is:</p>
-		<p>E[M] = Σ<sub>k>=1</sub> P(M >= k) = 1 + Σ<sub>k>=2</sub> 3 · 2<sup>-k</sup> = 1 + 3/2 = 2.5.</p>
-		<p>The full distribution is P(M = 1) = 1/4 and P(M = k) = 3 · 2<sup>-(k+1)</sup> for k >= 2.</p>
+		<p>E[M] = sum<sub>k>=1</sub> P(M >= k) = 1 + sum<sub>k>=2</sub> 3 * 2<sup>-k</sup> = 1 + 3/2 = 2.5.</p>
+		<p>The full distribution is P(M = 1) = 1/4 and P(M = k) = 3 * 2<sup>-(k+1)</sup> for k >= 2.</p>
 
 		<h2>Notes</h2>
 		<p>The "current streak" is the consecutive run of the most recent winner. The simulation approximates that by generating many long sequences and averaging the final run length.</p>
