@@ -50,9 +50,9 @@
 		<p>Use the slider to set s (miles) and see the rover's three-step path projected on latitude and longitude lines. The readout shows how far the rover finishes from its starting point.</p>
 		<div style="margin: 20px 0 10px;">
 			<label for="s-slider" style="font-size: 1.1em; font-weight: bold;">s (miles):</label>
-			<input id="s-slider" type="range" min="1" max="33333" step="1" value="1000" style="width: 320px; vertical-align: middle;">
+			<input id="s-slider" type="range" min="1" max="100000" step="1" value="1000" style="width: 320px; vertical-align: middle;">
 			<span id="s-value" style="font-size: 1.1em;">1000</span>
-			<input id="s-input" type="number" min="1" max="33333" step="1" value="1000" style="width: 110px; margin-left: 10px;">
+			<input id="s-input" type="number" min="1" max="100000" step="1" value="1000" style="width: 110px; margin-left: 10px;">
 		</div>
 		<div style="margin: 0 0 10px;">
 			<label for="lon-slider" style="font-size: 1.05em; font-weight: bold;">Rotate globe (deg):</label>
@@ -406,7 +406,7 @@
 					if (!isFinite(value)) {
 						return 1;
 					}
-					return Math.min(33333, Math.max(1, value));
+					return Math.min(100000, Math.max(1, value));
 				}
 
 				function render(value) {
