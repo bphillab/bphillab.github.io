@@ -35,6 +35,10 @@
 				background: #f7f7f7;
 				cursor: pointer;
 			}
+			.ec-controls button.active {
+				background: #e6eef7;
+				border-color: #8ca7c1;
+			}
 			.ec-readout {
 				margin-top: 8px;
 				font-size: 0.96em;
@@ -138,8 +142,8 @@
 		<div class="ec-explorer">
 			<canvas id="ec-canvas" width="520" height="520" style="width:100%;max-width:520px;height:auto;border:1px solid #ccc;background:#fff;"></canvas>
 			<div class="ec-controls">
-				<button id="ec-set-a">Place Point A</button>
-				<button id="ec-set-b">Place Point B</button>
+				<button id="ec-set-a" title="After clicking this button, click inside the circle to place A">Set A By Click</button>
+				<button id="ec-set-b" title="After clicking this button, click inside the circle to place B">Set B By Click</button>
 				<button id="ec-random">Random Points</button>
 			</div>
 			<p id="ec-readout" class="ec-readout">Loading explorer...</p>
@@ -343,8 +347,15 @@
 				}
 
 				function setButtonStates() {
-					setAButton.style.background = placeMode === "A" ? "#e6eef7" : "#f7f7f7";
-					setBButton.style.background = placeMode === "B" ? "#e6eef7" : "#f7f7f7";
+					setAButton.classList.toggle("active", placeMode === "A");
+					setBButton.classList.toggle("active", placeMode === "B");
+					if (placeMode) {
+						canvas.style.cursor = "crosshair";
+					} else if (dragTarget) {
+						canvas.style.cursor = "grabbing";
+					} else {
+						canvas.style.cursor = "default";
+					}
 				}
 
 				function pointerPosition(event) {
@@ -355,7 +366,7 @@
 					};
 				}
 
-				canvas.addEventListener("mousedown", function (event) {
+				function handlePointerDown(event) {
 					var pos = pointerPosition(event);
 					var pUnit = canvasToUnit(pos.x, pos.y);
 					var r2 = pUnit.x * pUnit.x + pUnit.y * pUnit.y;
@@ -365,6 +376,7 @@
 					var hit = nearestPointTarget(pUnit);
 					if (hit) {
 						dragTarget = hit;
+						setButtonStates();
 						return;
 					}
 					if (placeMode) {
@@ -378,12 +390,13 @@
 						setButtonStates();
 						draw();
 					}
-				});
+				}
 
-				canvas.addEventListener("mousemove", function (event) {
+				function handlePointerMove(event) {
 					if (!dragTarget) {
 						return;
 					}
+					event.preventDefault();
 					var pos = pointerPosition(event);
 					var pUnit = clampToDisk(canvasToUnit(pos.x, pos.y));
 					if (dragTarget === "A") {
@@ -392,20 +405,53 @@
 						pointB = pUnit;
 					}
 					draw();
+				}
+
+				function handlePointerUp() {
+					dragTarget = null;
+					setButtonStates();
+				}
+
+				canvas.addEventListener("mousedown", handlePointerDown);
+				canvas.addEventListener("mousemove", handlePointerMove);
+				window.addEventListener("mouseup", handlePointerUp);
+
+				canvas.addEventListener("touchstart", function (event) {
+					if (event.touches.length > 0) {
+						handlePointerDown(event.touches[0]);
+						event.preventDefault();
+					}
+				}, { passive: false });
+
+				canvas.addEventListener("touchmove", function (event) {
+					if (event.touches.length > 0) {
+						handlePointerMove(event.touches[0]);
+						event.preventDefault();
+					}
+				}, { passive: false });
+
+				canvas.addEventListener("touchend", function () {
+					handlePointerUp();
 				});
 
-				window.addEventListener("mouseup", function () {
-					dragTarget = null;
+				canvas.addEventListener("touchcancel", function () {
+					handlePointerUp();
 				});
 
 				setAButton.addEventListener("click", function () {
 					placeMode = placeMode === "A" ? null : "A";
 					setButtonStates();
+					if (placeMode === "A") {
+						readout.textContent = "Click in the circle to place point A.";
+					}
 				});
 
 				setBButton.addEventListener("click", function () {
 					placeMode = placeMode === "B" ? null : "B";
 					setButtonStates();
+					if (placeMode === "B") {
+						readout.textContent = "Click in the circle to place point B.";
+					}
 				});
 
 				randomButton.addEventListener("click", function () {
