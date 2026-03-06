@@ -1,13 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<meta charset="utf-8">
-		<title>Moved</title>
-		<meta http-equiv="refresh" content="0; url=/blog/fiddler/2026/02/2026-02-20.html">
-		<link rel="canonical" href="/blog/fiddler/2026/02/2026-02-20.html">
+		<title>This Week's Fiddler - Feb 20, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<script defer src="/analytics.js"></script>
 		<script defer src="/mathjax.js"></script>
 	</head>
 	<body>
-		<p>This page moved to <a href="/blog/fiddler/2026/02/2026-02-20.html">/blog/fiddler/2026/02/2026-02-20.html</a>.</p>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+    		</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: Feb 20, 2026</h1>
+		<p><em>Posted on Feb 20, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>From Bart Wright comes a tale of two archers:</p>
+		<p>Two logicians are trying to earn a fabulous prize as a team. There are three targets, and, to win the prize, each logician must fire a single arrow and hit the same target as the other. Two of the targets are closer but are otherwise indistinguishable; the logicians know they each have a 98 percent chance of hitting either of these targets. The third target is farther away; the logicians know they each have a 70 percent chance of hitting that target.</p>
+		<p>The logicians can't cooperate or consult in advance, and they have no knowledge of which target their counterpart is aiming for or whether they are successful.</p>
+		<p>What is the probability they will win the prize?</p>
+		<p>Submit your answer.</p>
+
+		<h2>Solution</h2>
+		<p>Perfect logicians use a common optimal pure strategy.</p>
+		<p>If both choose the far target, they win with probability 0.70<sup>2</sup> = 0.49.</p>
+		<p>If both choose close targets, they must pick the same one of the two indistinguishable close targets (probability 1/2), and then both hit (probability 0.98<sup>2</sup>), so:</p>
+		<p>(1/2) * 0.98<sup>2</sup> = 0.4802.</p>
+		<p>Since 0.49 &gt; 0.4802, the optimal fixed strategy is for both to aim at the far target.</p>
+		<p><strong>Answer:</strong> 0.49 (49%).</p>
+
+		<h3>Main Problem Strategy Check</h3>
+		<p>With perfect logicians, strategy is fixed: both choose the better pure target. For this puzzle, that is the far target.</p>
+		<p id="main-pure" style="margin-top: 6px;">Pure strategies: all-close = 0.480200, all-far = 0.490000</p>
+		<p id="main-choice" style="margin-top: 6px;">Optimal fixed strategy: both aim far. Win probability = 0.490000 (49.0000%).</p>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>As before, there are still three targets, but their respective probabilities of being struck have changed. That said, two of the targets remain indistinguishable from each other and have the same probability of being struck. Moreover, all three probabilities are rational.</p>
+		<p>After doing some mental arithmetic, the logicians realize that it doesn't matter which target they aim for - their probability of winning the prize is the same no matter what.</p>
+		<p>What is their probability of winning the prize?</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>Let c be the (rational) hit probability for each close target, and f be the (rational) hit probability for the far target.</p>
+		<p>"It doesn't matter which target they aim for" means the win probability from choosing close equals the win probability from choosing far:</p>
+		<p>(1/2)c<sup>2</sup> = f<sup>2</sup>.</p>
+		<p>So c / f = &radic;2 (for f &gt; 0), which is impossible if both c and f are rational. Therefore the only rational possibility is c = f = 0.</p>
+		<p><strong>Extra credit answer:</strong> 0.</p>
+
+		<h3>Extra Credit Strategy Sandbox</h3>
+		<p>Enter close/far hit probabilities. Perfect logicians are assumed, so both use the same optimal pure strategy (or are indifferent if tied).</p>
+		<div style="margin: 10px 0;">
+			<label for="extra-close">Close-target hit probability c:</label>
+			<input id="extra-close" type="number" min="0" max="1" step="0.001" value="0.98" style="width: 110px;">
+		</div>
+		<div style="margin: 10px 0;">
+			<label for="extra-far">Far-target hit probability f:</label>
+			<input id="extra-far" type="number" min="0" max="1" step="0.001" value="0.70" style="width: 110px;">
+		</div>
+		<p id="extra-win-prob" style="margin-top: 6px;">Optimal fixed-strategy win probability: 0.490000 (49.0000%)</p>
+		<p id="extra-pure" style="margin-top: 6px;">Pure strategies: all-close = 0.480200, all-far = 0.490000</p>
+		<p id="extra-indifference" style="margin-top: 6px;">Difference (all-far - all-close): 0.009800</p>
+		<p id="extra-choice" style="margin-top: 6px;">Optimal fixed strategy: both aim far.</p>
+		<p id="extra-note" style="margin-top: 6px;">If the difference is 0, target choice is indifferent.</p>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/02/2026-02-13.html">Previous</a> | <a href="/blog/fiddler/2026/02/2026-02-27.html">Next</a></p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+		<script>
+			(function () {
+				function clamp01(value) {
+					if (isNaN(value)) {
+						return 0;
+					}
+					return Math.max(0, Math.min(1, value));
+				}
+
+				function pureOutcomes(closeProb, farProb) {
+					var closeWin = 0.5 * closeProb * closeProb;
+					var farWin = farProb * farProb;
+					return { closeWin: closeWin, farWin: farWin, difference: farWin - closeWin };
+				}
+
+				var mainPure = document.getElementById("main-pure");
+				var mainChoice = document.getElementById("main-choice");
+
+				var extraClose = document.getElementById("extra-close");
+				var extraFar = document.getElementById("extra-far");
+				var extraWin = document.getElementById("extra-win-prob");
+				var extraPure = document.getElementById("extra-pure");
+				var extraIndifference = document.getElementById("extra-indifference");
+				var extraChoice = document.getElementById("extra-choice");
+
+				function updateMain() {
+					var result = pureOutcomes(0.98, 0.70);
+					var best = Math.max(result.closeWin, result.farWin);
+					var choiceText;
+
+					if (Math.abs(result.difference) < 1e-12) {
+						choiceText = "Optimal fixed strategy: indifferent (close and far tie).";
+					} else if (result.difference > 0) {
+						choiceText = "Optimal fixed strategy: both aim far.";
+					} else {
+						choiceText = "Optimal fixed strategy: both aim close.";
+					}
+
+					mainPure.textContent =
+						"Pure strategies: all-close = " + result.closeWin.toFixed(6) +
+						", all-far = " + result.farWin.toFixed(6);
+					mainChoice.textContent =
+						choiceText + " Win probability = " + best.toFixed(6) +
+						" (" + (100 * best).toFixed(4) + "%).";
+				}
+
+				function updateExtra() {
+					var c = clamp01(parseFloat(extraClose.value));
+					var f = clamp01(parseFloat(extraFar.value));
+					var result = pureOutcomes(c, f);
+					var best = Math.max(result.closeWin, result.farWin);
+					var choiceText;
+
+					if (Math.abs(result.difference) < 1e-12) {
+						choiceText = "Optimal fixed strategy: indifferent (close and far tie).";
+					} else if (result.difference > 0) {
+						choiceText = "Optimal fixed strategy: both aim far.";
+					} else {
+						choiceText = "Optimal fixed strategy: both aim close.";
+					}
+
+					extraClose.value = c.toFixed(3);
+					extraFar.value = f.toFixed(3);
+					extraWin.textContent =
+						"Optimal fixed-strategy win probability: " + best.toFixed(6) +
+						" (" + (100 * best).toFixed(4) + "%)";
+					extraPure.textContent =
+						"Pure strategies: all-close = " + result.closeWin.toFixed(6) +
+						", all-far = " + result.farWin.toFixed(6);
+					extraIndifference.textContent =
+						"Difference (all-far - all-close): " + result.difference.toFixed(6);
+					extraChoice.textContent = choiceText;
+				}
+
+				extraClose.addEventListener("input", updateExtra);
+				extraFar.addEventListener("input", updateExtra);
+
+				updateMain();
+				updateExtra();
+			})();
+		</script>
 	</body>
 </html>

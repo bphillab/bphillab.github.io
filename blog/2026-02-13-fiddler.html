@@ -1,13 +1,468 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<meta charset="utf-8">
-		<title>Moved</title>
-		<meta http-equiv="refresh" content="0; url=/blog/fiddler/2026/02/2026-02-13.html">
-		<link rel="canonical" href="/blog/fiddler/2026/02/2026-02-13.html">
+		<title>This Week's Fiddler - Feb 13, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<script defer src="/analytics.js"></script>
 		<script defer src="/mathjax.js"></script>
 	</head>
 	<body>
-		<p>This page moved to <a href="/blog/fiddler/2026/02/2026-02-13.html">/blog/fiddler/2026/02/2026-02-13.html</a>.</p>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+    		</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: Feb 13, 2026</h1>
+		<p><em>Posted on Feb 13, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>From Pierre Bierre comes a planetary puzzle:</p>
+		<p>A rover is dropped down on a spherical planet with a radius of 1000 miles. The rover has been programmed with a very specific set of motions:</p>
+		<ol>
+			<li>First, it moves straight forward a fixed distance s, and stops.</li>
+			<li>Without moving forward, it turns left 60 degrees. (Importantly, the rover turns 60 degrees, not 120 degrees.)</li>
+			<li>Next, the rover moves straight forward in this new direction another distance s, and stops.</li>
+			<li>Without moving forward, it again turns left 60 degrees.</li>
+			<li>Finally, the rover moves straight forward in this new direction another distance s, and stops.</li>
+		</ol>
+		<p>To be picked up, the rover must complete its journey in the same place it was dropped down. What is the minimum value of s, with s &gt; 0, for which this works?</p>
+
+		<figure style="margin: 30px 0;">
+			<img src="/blog/fiddler/2026/02/2026-02-13-rover.png" alt="Illustration of the rover's three-segment path with 60-degree left turns on a spherical planet." style="max-width: 100%; height: auto;">
+			<figcaption style="font-size: 1.2em; color: #555;">Illustration courtesy of Pierre Bierre.</figcaption>
+		</figure>
+
+		<h2>Exact solution (first part)</h2>
+		<p>The rover traces three equal great-circle arcs with left turns of 60 degrees at each stop, so the path forms an equilateral spherical triangle whose interior angles are all 120 degrees. Let a be the angular side length in radians, a = s / R, where R = 1000 miles.</p>
+		<p>Spherical law of cosines for an equilateral triangle gives:</p>
+		<p>cos a = cos<sup>2</sup> a + sin<sup>2</sup> a cos A, with A = 120 degrees.</p>
+		<p>Since cos 120 degrees = -1/2, this becomes 3 cos<sup>2</sup> a - 2 cos a - 1 = 0, so cos a = 1 (the trivial a = 0 solution) or cos a = -1/3.</p>
+		<p>Therefore the minimum nonzero solution is:</p>
+		<p><strong>s = 1000 * arccos(-1/3) miles</strong>, which is approximately 1910.633236 miles.</p>
+		<p>Since the equations depend only on cos a, higher solutions come from other angles with the same cosine. The next one in (0, 2&pi;R] is:</p>
+		<p><strong>s = 1000 * (2&pi; - arccos(-1/3)) miles</strong>, which is approximately 4372.552071 miles.</p>
+		<p>In general, all positive solutions are:</p>
+		<p><strong>s = 1000 * (arccos(-1/3) + 2&pi;k)</strong> or <strong>s = 1000 * (2&pi; - arccos(-1/3) + 2&pi;k)</strong>, for integers k &ge; 0.</p>
+
+		<h2>Interactive path explorer</h2>
+		<p>Use the slider to set s (miles) and see the rover's three-step path projected on latitude and longitude lines. The readout shows how far the rover finishes from its starting point.</p>
+		<div style="margin: 20px 0 10px;">
+			<label for="s-slider" style="font-size: 1.1em; font-weight: bold;">s (miles):</label>
+			<input id="s-slider" type="range" min="1" max="100000" step="1" value="1000" style="width: 320px; vertical-align: middle;">
+			<span id="s-value" style="font-size: 1.1em;">1000</span>
+			<label for="s-input" style="font-size: 1.05em; font-weight: bold; margin-left: 10px;">Enter s:</label>
+			<input id="s-input" type="number" min="1" max="100000" step="1" value="1000" style="width: 110px; margin-left: 10px;">
+		</div>
+		<div style="margin: 0 0 10px;">
+			<label for="lon-slider" style="font-size: 1.05em; font-weight: bold;">Rotate globe (deg):</label>
+			<input id="lon-slider" type="range" min="-180" max="180" step="1" value="0" style="width: 320px; vertical-align: middle;">
+			<span id="lon-value" style="font-size: 1.05em;">0</span>
+		</div>
+		<p id="s-output" style="margin-top: 0;">Finish is 0.00 miles from the start.</p>
+		<canvas id="path-canvas" width="720" height="360" style="border: 1px solid #ccc; width: 100%; max-width: 720px; height: auto;"></canvas>
+		<h2>This Week's Extra Credit</h2>
+		<p>There are other values of s for which the rover will end its journey where it was dropped down. How many such positive values of s (including the answer you just found in the Fiddler) are less than 100,000 miles?</p>
+		<p id="solution-output" style="margin-top: 12px;">Computing solutions in the range (0, 100,000] miles...</p>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/02/2026-02-06.html">Previous</a> | <a href="/blog/fiddler/2026/02/2026-02-20.html">Next</a></p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+		<script>
+			(function () {
+				var radius = 1000;
+				var canvas = document.getElementById("path-canvas");
+				var ctx = canvas.getContext("2d");
+				var slider = document.getElementById("s-slider");
+				var input = document.getElementById("s-input");
+				var lonSlider = document.getElementById("lon-slider");
+				var lonValue = document.getElementById("lon-value");
+				var valueOut = document.getElementById("s-value");
+				var output = document.getElementById("s-output");
+				var centralLon = 0;
+
+				function vec(x, y, z) {
+					return { x: x, y: y, z: z };
+				}
+
+				function dot(a, b) {
+					return a.x * b.x + a.y * b.y + a.z * b.z;
+				}
+
+				function cross(a, b) {
+					return vec(
+						a.y * b.z - a.z * b.y,
+						a.z * b.x - a.x * b.z,
+						a.x * b.y - a.y * b.x
+					);
+				}
+
+				function norm(a) {
+					return Math.sqrt(dot(a, a));
+				}
+
+				function normalize(a) {
+					var n = norm(a);
+					return n ? vec(a.x / n, a.y / n, a.z / n) : vec(0, 0, 0);
+				}
+
+				function rotateAroundAxis(v, axis, angle) {
+					var u = normalize(axis);
+					var cosA = Math.cos(angle);
+					var sinA = Math.sin(angle);
+					return vec(
+						(cosA + u.x * u.x * (1 - cosA)) * v.x +
+							(u.x * u.y * (1 - cosA) - u.z * sinA) * v.y +
+							(u.x * u.z * (1 - cosA) + u.y * sinA) * v.z,
+						(u.y * u.x * (1 - cosA) + u.z * sinA) * v.x +
+							(cosA + u.y * u.y * (1 - cosA)) * v.y +
+							(u.y * u.z * (1 - cosA) - u.x * sinA) * v.z,
+						(u.z * u.x * (1 - cosA) - u.y * sinA) * v.x +
+							(u.z * u.y * (1 - cosA) + u.x * sinA) * v.y +
+							(cosA + u.z * u.z * (1 - cosA)) * v.z
+					);
+				}
+
+				function latLonFromVec(v) {
+					var lat = Math.asin(v.z);
+					var lon = Math.atan2(v.y, v.x);
+					return { lat: lat, lon: lon };
+				}
+
+				function project(lat, lon) {
+					var padding = 16;
+					var globeRadius = Math.min(canvas.width, canvas.height) / 2 - padding;
+					var centerX = canvas.width / 2;
+					var centerY = canvas.height / 2;
+					var lonRot = lon - centralLon;
+					var cosLat = Math.cos(lat);
+					var x = globeRadius * cosLat * Math.sin(lonRot);
+					var y = -globeRadius * Math.sin(lat);
+					var visible = cosLat * Math.cos(lonRot) >= 0;
+					return { x: centerX + x, y: centerY + y, visible: visible, r: globeRadius, cx: centerX, cy: centerY };
+				}
+
+				function drawGrid() {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					ctx.fillStyle = "#f7f4ee";
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+					var globe = project(0, 0);
+					var gradient = ctx.createRadialGradient(
+						globe.cx - globe.r * 0.3,
+						globe.cy - globe.r * 0.3,
+						globe.r * 0.2,
+						globe.cx,
+						globe.cy,
+						globe.r
+					);
+					gradient.addColorStop(0, "#ffffff");
+					gradient.addColorStop(0.6, "#e7edf2");
+					gradient.addColorStop(1, "#cfd7df");
+					ctx.fillStyle = gradient;
+					ctx.beginPath();
+					ctx.arc(globe.cx, globe.cy, globe.r, 0, Math.PI * 2);
+					ctx.fill();
+
+					ctx.strokeStyle = "#c3ccd4";
+					ctx.lineWidth = 1.2;
+					ctx.beginPath();
+					ctx.arc(globe.cx, globe.cy, globe.r, 0, Math.PI * 2);
+					ctx.stroke();
+
+					ctx.save();
+					ctx.beginPath();
+					ctx.arc(globe.cx, globe.cy, globe.r, 0, Math.PI * 2);
+					ctx.clip();
+
+					ctx.strokeStyle = "#d0d6dc";
+					ctx.lineWidth = 1;
+					var i;
+					for (i = -60; i <= 60; i += 30) {
+						var lat = i * Math.PI / 180;
+						ctx.beginPath();
+						var lon;
+						var started = false;
+						for (lon = -180; lon <= 180; lon += 4) {
+							var lonRad = lon * Math.PI / 180;
+							var xy = project(lat, lonRad);
+							if (xy.visible) {
+								if (!started) {
+									ctx.moveTo(xy.x, xy.y);
+									started = true;
+								} else {
+									ctx.lineTo(xy.x, xy.y);
+								}
+							} else {
+								started = false;
+							}
+						}
+						ctx.stroke();
+					}
+
+					for (i = -150; i <= 150; i += 30) {
+						var lonLine = i * Math.PI / 180;
+						ctx.beginPath();
+						var latStep;
+						var startedLine = false;
+						for (latStep = -90; latStep <= 90; latStep += 3) {
+							var latRad = latStep * Math.PI / 180;
+							var xyLine = project(latRad, lonLine);
+							if (xyLine.visible) {
+								if (!startedLine) {
+									ctx.moveTo(xyLine.x, xyLine.y);
+									startedLine = true;
+								} else {
+									ctx.lineTo(xyLine.x, xyLine.y);
+								}
+							} else {
+								startedLine = false;
+							}
+						}
+						ctx.stroke();
+					}
+					ctx.restore();
+				}
+
+				function sampleGreatCircle(p0, axis, angle, steps) {
+					var points = [];
+					var k;
+					for (k = 0; k <= steps; k += 1) {
+						var t = angle * (k / steps);
+						points.push(rotateAroundAxis(p0, axis, t));
+					}
+					return points;
+				}
+
+				function drawPath(points, color, width) {
+					if (!points.length) {
+						return;
+					}
+					ctx.strokeStyle = color;
+					ctx.lineWidth = width;
+					ctx.beginPath();
+					var start = latLonFromVec(points[0]);
+					var startXY = project(start.lat, start.lon);
+					var started = false;
+					if (startXY.visible) {
+						ctx.moveTo(startXY.x, startXY.y);
+						started = true;
+					}
+					var i;
+					for (i = 1; i < points.length; i += 1) {
+						var ll = latLonFromVec(points[i]);
+						var xy = project(ll.lat, ll.lon);
+						if (!xy.visible) {
+							started = false;
+							continue;
+						}
+						if (!started) {
+							ctx.moveTo(xy.x, xy.y);
+							started = true;
+						} else {
+							ctx.lineTo(xy.x, xy.y);
+						}
+					}
+					ctx.stroke();
+				}
+
+				function drawPoint(p, color, radius) {
+					var ll = latLonFromVec(p);
+					var xy = project(ll.lat, ll.lon);
+					if (!xy.visible) {
+						return;
+					}
+					ctx.fillStyle = color;
+					ctx.beginPath();
+					ctx.arc(xy.x, xy.y, radius || 4, 0, Math.PI * 2);
+					ctx.fill();
+				}
+
+				function computePath(s) {
+					var angle = s / radius;
+					var p = vec(1, 0, 0);
+					var t = vec(0, 1, 0);
+					var segments = [];
+					var stops = [];
+					var axes = [];
+					var i;
+					for (i = 0; i < 3; i += 1) {
+						var axis = cross(p, t);
+						axes.push(axis);
+						var arcPoints = sampleGreatCircle(p, axis, angle, 60);
+						segments.push(arcPoints);
+						p = rotateAroundAxis(p, axis, angle);
+						stops.push(p);
+						t = rotateAroundAxis(t, axis, angle);
+						if (i < 2) {
+							var left = normalize(cross(p, t));
+							var cos60 = 0.5;
+							var sin60 = Math.sqrt(3) / 2;
+							t = normalize(vec(
+								t.x * cos60 + left.x * sin60,
+								t.y * cos60 + left.y * sin60,
+								t.z * cos60 + left.z * sin60
+							));
+						}
+					}
+					return { segments: segments, end: p, stops: stops };
+				}
+
+				function endPosition(s) {
+					var angle = s / radius;
+					var p = vec(1, 0, 0);
+					var t = vec(0, 1, 0);
+					var i;
+					for (i = 0; i < 3; i += 1) {
+						var axis = cross(p, t);
+						p = rotateAroundAxis(p, axis, angle);
+						t = rotateAroundAxis(t, axis, angle);
+						if (i < 2) {
+							var left = normalize(cross(p, t));
+							var cos60 = 0.5;
+							var sin60 = Math.sqrt(3) / 2;
+							t = normalize(vec(
+								t.x * cos60 + left.x * sin60,
+								t.y * cos60 + left.y * sin60,
+								t.z * cos60 + left.z * sin60
+							));
+						}
+					}
+					return p;
+				}
+
+				function distanceFromStart(s) {
+					var end = endPosition(s);
+					var cosine = Math.max(-1, Math.min(1, dot(vec(1, 0, 0), end)));
+					return radius * Math.acos(cosine);
+				}
+
+				function goldenSectionMin(a, b, fn) {
+					var gr = (Math.sqrt(5) - 1) / 2;
+					var c = b - gr * (b - a);
+					var d = a + gr * (b - a);
+					var fc = fn(c);
+					var fd = fn(d);
+					var iter;
+					for (iter = 0; iter < 50; iter += 1) {
+						if (fc < fd) {
+							b = d;
+							d = c;
+							fd = fc;
+							c = b - gr * (b - a);
+							fc = fn(c);
+						} else {
+							a = c;
+							c = d;
+							fc = fd;
+							d = a + gr * (b - a);
+							fd = fn(d);
+						}
+					}
+					return { s: (a + b) / 2, value: fn((a + b) / 2) };
+				}
+
+				function computeSolutions(maxS) {
+					var step = 1;
+					var tol = 1e-3;
+					var solutions = [];
+					var prev = distanceFromStart(step);
+					var curr = distanceFromStart(step * 2);
+					var s;
+					for (s = step * 2; s <= maxS - step; s += step) {
+						var next = distanceFromStart(s + step);
+						if (curr <= prev && curr <= next) {
+							var left = s - step;
+							var right = s + step;
+							var result = goldenSectionMin(left, right, distanceFromStart);
+							if (result.value < tol) {
+								var near = false;
+								var i;
+								for (i = 0; i < solutions.length; i += 1) {
+									if (Math.abs(solutions[i] - result.s) < 0.5) {
+										near = true;
+										break;
+									}
+								}
+								if (!near) {
+									solutions.push(result.s);
+								}
+							}
+						}
+						prev = curr;
+						curr = next;
+					}
+					return solutions;
+				}
+
+				function clampS(value) {
+					if (!isFinite(value)) {
+						return 1;
+					}
+					return Math.min(100000, Math.max(1, value));
+				}
+
+				function render(value) {
+					var s = clampS(parseFloat(value));
+					slider.value = s.toFixed(0);
+					input.value = s.toFixed(0);
+					valueOut.textContent = s.toFixed(0);
+					centralLon = (parseFloat(lonSlider.value) || 0) * Math.PI / 180;
+					lonValue.textContent = lonSlider.value;
+					drawGrid();
+					var result = computePath(s);
+					var allPoints = result.segments[0].concat(result.segments[1].slice(1), result.segments[2].slice(1));
+					drawPath(allPoints, "#3b6ea8", 2);
+					drawPoint(vec(1, 0, 0), "#2f7a2f", 4);
+					if (result.stops && result.stops.length) {
+						drawPoint(result.stops[0], "#f2c84b", 4);
+						drawPoint(result.stops[1], "#f2c84b", 4);
+						drawPoint(result.stops[2], "#b8573a", 5);
+					} else {
+						drawPoint(result.end, "#b8573a", 5);
+					}
+
+					var endDistance = radius * Math.acos(Math.max(-1, Math.min(1, dot(vec(1, 0, 0), result.end))));
+					output.textContent = "Finish is " + endDistance.toFixed(2) + " miles from the start.";
+				}
+
+				slider.addEventListener("input", function () {
+					render(slider.value);
+				});
+				input.addEventListener("change", function () {
+					render(input.value);
+				});
+				lonSlider.addEventListener("input", function () {
+					render(slider.value);
+				});
+				render(slider.value);
+
+				var solutionOutput = document.getElementById("solution-output");
+				var countOutput = document.getElementById("solution-count-output");
+				var solutions = computeSolutions(100000);
+				if (!solutions.length) {
+					solutionOutput.textContent = "No solutions found in the range (0, 100,000] miles.";
+				} else {
+					solutions.sort(function (a, b) { return a - b; });
+					var list = solutions.map(function (s) {
+						return s.toFixed(3);
+					}).join(", ");
+					solutionOutput.textContent = "Found " + solutions.length + " solutions in (0, 100,000] miles: " + list + ".";
+				}
+
+				var solutionsWide = computeSolutions(100000);
+				countOutput.textContent = "Solutions in (0, 100,000] miles: " + solutionsWide.length + ".";
+			}());
+		</script>
 	</body>
 </html>

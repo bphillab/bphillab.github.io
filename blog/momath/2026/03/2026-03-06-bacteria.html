@@ -52,10 +52,10 @@
 		<h2>Answer</h2>
 		<p><strong>Impossible.</strong> In fact, it is already impossible to clear the smaller box from (0,0) to (2,2).</p>
 		<h2>Small Clearable Cases</h2>
-		<p>If we define the box as <code>0 &le; x,y &le; n</code>, then:</p>
+		<p>If we define the box as \(0 \le x,y \le n\), then:</p>
 		<p><strong>n = 0 is clearable:</strong> one division at (0,0) moves bacteria to (1,0) and (0,1), clearing the box.</p>
 		<p><strong>n = 1 is also clearable:</strong> there are valid sequences that clear the 2x2 box (for example, one shortest sequence uses 8 divisions).</p>
-		<p>The first impossible case is <code>n = 2</code>, which is exactly the 3x3 box used in the invariant proof below.</p>
+		<p>The first impossible case is \(n=2\), which is exactly the 3x3 box used in the invariant proof below.</p>
 		<h2>Interactive Explorer</h2>
 		<p>Click a bacterium to divide it (if legal). A division at (x,y) replaces that bacterium with bacteria at (x+1,y) and (x,y+1), only when both target points are empty.</p>
 		<div class="mindbender-play">
@@ -73,15 +73,28 @@
 
 		<h2>Why It Is Impossible</h2>
 		<p>Use the invariant weight:</p>
-		<p><code>W = sum over occupied (x,y) of 2^(-(x+y))</code>.</p>
-		<p>Initially, only (0,0) is occupied, so <code>W = 1</code>.</p>
-		<p>One division at (x,y) replaces weight <code>2^(-(x+y))</code> by:</p>
-		<p><code>2^(-(x+1+y)) + 2^(-(x+y+1)) = 2 * 2^(-(x+y+1)) = 2^(-(x+y))</code>.</p>
-		<p>So every allowed division preserves <code>W</code>; therefore <code>W</code> is always exactly 1.</p>
-		<p>If the 3x3 box <code>0 &le; x,y &le; 2</code> were clear, every bacterium would lie outside it. The maximum possible outside weight is the sum over all outside lattice points:</p>
-		<p><code>sum_{x,y>=0} 2^(-(x+y)) - sum_{x=0..2,y=0..2} 2^(-(x+y))</code></p>
-		<p><code>= 4 - (1 + 1/2 + 1/4)^2 = 4 - (7/4)^2 = 4 - 49/16 = 15/16 &lt; 1.</code></p>
-		<p>But <code>W</code> must remain 1, contradiction. So the 3x3 box can never be cleared, and therefore the 4x4 box from (0,0) to (3,3) cannot be cleared either.</p>
+		<p>\[
+			W=\sum_{\text{occupied }(x,y)}2^{-(x+y)}.
+		\]</p>
+		<p>Initially, only \((0,0)\) is occupied, so \(W=1\).</p>
+		<p>One division at \((x,y)\) replaces weight \(2^{-(x+y)}\) by:</p>
+		<p>\[
+			2^{-(x+1+y)} + 2^{-(x+y+1)}
+			= 2\cdot 2^{-(x+y+1)}
+			= 2^{-(x+y)}.
+		\]</p>
+		<p>So every allowed division preserves \(W\); therefore \(W\) is always exactly 1.</p>
+		<p>If the 3x3 box \(0 \le x,y \le 2\) were clear, every bacterium would lie outside it. The maximum possible outside weight is the sum over all outside lattice points:</p>
+		<p>\[
+			\sum_{x,y\ge 0}2^{-(x+y)}-\sum_{x=0}^{2}\sum_{y=0}^{2}2^{-(x+y)}
+		\]</p>
+		<p>\[
+			=4-\left(1+\frac12+\frac14\right)^2
+			=4-\left(\frac74\right)^2
+			=4-\frac{49}{16}
+			=\frac{15}{16}<1.
+		\]</p>
+		<p>But \(W\) must remain 1, contradiction. So the 3x3 box can never be cleared, and therefore the 4x4 box from \((0,0)\) to \((3,3)\) cannot be cleared either.</p>
 
 		<p><strong>More MoMath Mindbenders:</strong> Previous | Next</p>
 		<p><a href="/blog">Back to blog</a></p>

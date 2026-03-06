@@ -82,7 +82,7 @@
 		<p>What fraction of the lot does Team Centroid shovel?</p>
 
 		<h2>Main Solution</h2>
-		<p>The Team Centroid region is the intersection of six half-planes: for each vertex V, keep points P with <code>|PO| &lt; |PV|</code>, where O is the center.</p>
+		<p>The Team Centroid region is the intersection of six half-planes: for each vertex \(V\), keep points \(P\) with \(|PO| < |PV|\), where \(O\) is the center.</p>
 		<figure class="fiddler-figure">
 			<svg viewBox="0 0 420 380" aria-label="Regular hexagon with center and inner centroid region">
 				<polygon points="360,190 285,320 135,320 60,190 135,60 285,60" fill="#f8f8f8" stroke="#333" stroke-width="2"></polygon>
@@ -96,25 +96,34 @@
 			</svg>
 			<figcaption>The blue inner hexagon is the set of points closer to the center than to any vertex.</figcaption>
 		</figure>
-		<p>For a fixed vertex direction, the boundary <code>|PO| = |PV|</code> is the perpendicular bisector of OV, so along that direction it sits at distance <code>R/2</code> from O.</p>
+		<p>For a fixed vertex direction, the boundary \(|PO| = |PV|\) is the perpendicular bisector of \(OV\), so along that direction it sits at distance \(R/2\) from \(O\).</p>
 		<p>Those six bisectors form another regular hexagon centered at O (the blue one in the diagram).</p>
-		<p>Now use scaling with distance to edges. For the large regular hexagon, the center-to-edge distance is <code>(&radic;3/2)R</code>. For the inner hexagon, each edge is a bisector halfway to a vertex, so center-to-edge distance is <code>R/2</code>.</p>
+		<p>Now use scaling with distance to edges. For the large regular hexagon, the center-to-edge distance is \((\sqrt{3}/2)R\). For the inner hexagon, each edge is a bisector halfway to a vertex, so center-to-edge distance is \(R/2\).</p>
 		<p>So the linear scale (inner to outer) is:</p>
-		<p><code>(R/2) / ((&radic;3/2)R) = 1/&radic;3</code>.</p>
+		<p>\[
+			\frac{R/2}{(\sqrt{3}/2)R}=\frac{1}{\sqrt{3}}.
+		\]</p>
 		<p>Area scales as distance squared, so:</p>
-		<p><code>(inner area)/(outer area) = (1/&radic;3)^2 = 1/3</code>.</p>
-		<p><strong>Team Centroid fraction = 1/3.</strong></p>
+		<p>\[
+			\frac{\text{inner area}}{\text{outer area}}=\left(\frac{1}{\sqrt{3}}\right)^2=\frac13.
+		\]</p>
+		<p><strong>Team Centroid fraction \(=1/3\).</strong></p>
 		<h3>Generalization (Regular n-gon)</h3>
-		<p>The same setup works for a regular <code>n</code>-gon with a center shoveler versus shovelers at all <code>n</code> vertices.</p>
-		<p>The center region is again a smaller similar regular <code>n</code>-gon, so area comes from a linear scale factor.</p>
+		<p>The same setup works for a regular \(n\)-gon with a center shoveler versus shovelers at all \(n\) vertices.</p>
+		<p>The center region is again a smaller similar regular \(n\)-gon, so area comes from a linear scale factor.</p>
 		<p>The resulting center fraction is:</p>
-		<p><code>f_n = 2/3</code> for <code>n = 3</code>, and <code>f_n = 1/(4cos^2(&pi;/n))</code> for <code>n &ge; 4</code>.</p>
-		<p>The triangle is special. For <code>n = 3</code>, the three perpendicular-bisector boundaries line up with the three opposite sides, so each boundary actually meets the original triangle boundary instead of forming a strictly interior similar polygon. For <code>n &ge; 4</code>, those boundaries sit strictly inside and enclose an interior similar <code>n</code>-gon, which is why the single scaling formula applies there.</p>
-		<p>Checks: triangle <code>f_3 = 2/3</code>, square <code>f_4 = 1/2</code>, hexagon <code>f_6 = 1/3</code>, and as <code>n &rarr; &infin;</code> (circle boundary limit), <code>f_n &rarr; 1/4</code>.</p>
+		<p>\[
+			f_n=\frac23 \text{ for } n=3,\qquad
+			f_n=\frac{1}{4\cos^2(\pi/n)} \text{ for } n\ge 4.
+		\]</p>
+		<p>The triangle is special. For \(n=3\), the three perpendicular-bisector boundaries line up with the three opposite sides, so each boundary actually meets the original triangle boundary instead of forming a strictly interior similar polygon. For \(n\ge 4\), those boundaries sit strictly inside and enclose an interior similar \(n\)-gon, which is why the single scaling formula applies there.</p>
+		<p>Checks: triangle \(f_3=2/3\), square \(f_4=1/2\), hexagon \(f_6=1/3\), and as \(n\to\infty\) (circle boundary limit), \(f_n\to1/4\).</p>
 		<h4>Derivation Details</h4>
-		<p><strong>Case <code>n = 3</code> (equilateral triangle):</strong> Let the center be <code>O</code> and vertices <code>V1,V2,V3</code>. The inequalities <code>|PO| &lt; |PV_i|</code> become three half-planes bounded by the perpendicular bisectors of <code>OV_i</code>. In an equilateral triangle, each such bisector is parallel to (and exactly halfway to) the opposite side. Their intersection with the original triangle removes three corner triangles, each similar to the whole with side scale <code>1/3</code>, so each has area <code>1/9</code> of the whole. Remaining center area is <code>1 - 3*(1/9) = 2/3</code>.</p>
-		<p><strong>Case <code>n &gt; 3</code>:</strong> Put the regular <code>n</code>-gon on circumradius <code>R</code>. For each vertex <code>V</code>, the boundary <code>|PO| = |PV|</code> is the perpendicular bisector of <code>OV</code>, hence at distance <code>R/2</code> from the center. These <code>n</code> lines form an interior regular <code>n</code>-gon (the center region). The outer polygon has center-to-edge distance <code>R cos(&pi;/n)</code>; the inner one has center-to-edge distance <code>R/2</code>. So linear scale is <code>(R/2)/(R cos(&pi;/n)) = 1/(2cos(&pi;/n))</code>, and area ratio is its square:</p>
-		<p><code>f_n = 1/(4cos^2(&pi;/n))</code> for <code>n &gt; 3</code>.</p>
+		<p><strong>Case \(n=3\) (equilateral triangle):</strong> Let the center be \(O\) and vertices \(V_1,V_2,V_3\). The inequalities \(|PO| < |PV_i|\) become three half-planes bounded by the perpendicular bisectors of \(OV_i\). In an equilateral triangle, each such bisector is parallel to (and exactly halfway to) the opposite side. Their intersection with the original triangle removes three corner triangles, each similar to the whole with side scale \(1/3\), so each has area \(1/9\) of the whole. Remaining center area is \(1-3\cdot(1/9)=2/3\).</p>
+		<p><strong>Case \(n>3\):</strong> Put the regular \(n\)-gon on circumradius \(R\). For each vertex \(V\), the boundary \(|PO| = |PV|\) is the perpendicular bisector of \(OV\), hence at distance \(R/2\) from the center. These \(n\) lines form an interior regular \(n\)-gon (the center region). The outer polygon has center-to-edge distance \(R\cos(\pi/n)\); the inner one has center-to-edge distance \(R/2\). So linear scale is \((R/2)/(R\cos(\pi/n))=1/(2\cos(\pi/n))\), and area ratio is its square:</p>
+		<p>\[
+			f_n=\frac{1}{4\cos^2(\pi/n)} \quad \text{for } n>3.
+		\]</p>
 		<h3>Main Problem Explorer</h3>
 		<p>Choose <code>n</code> to view the regular <code>n</code>-gon. Blue is Team Centroid's region; red is Team Vertex's region.</p>
 		<div class="main-explorer">
@@ -133,7 +142,7 @@
 		<p>What is the expected value of that larger area fraction?</p>
 
 		<h2>Extra Credit Solution</h2>
-		<p>Let t be the distance from the circle center to the bisector line (0 &le; t &le; 1 for a unit disk).</p>
+		<p>Let \(t\) be the distance from the circle center to the bisector line (\(0 \le t \le 1\) for a unit disk).</p>
 		<figure class="fiddler-figure">
 			<svg viewBox="0 0 420 380" aria-label="Circle split by perpendicular bisector, showing t as distance from center to line">
 				<circle cx="210" cy="190" r="140" fill="#dff2ff" stroke="#333" stroke-width="2"></circle>
@@ -154,27 +163,49 @@
 			<figcaption>The dashed line is the perpendicular bisector; <code>t</code> is its distance from the circle center.</figcaption>
 		</figure>
 		<p>To get the larger-side fraction, first compute the smaller circular segment cut off by the line.</p>
-		<p>In a unit disk, let <code>&theta;</code> be the central angle subtending the smaller segment chord. From a right triangle with adjacent side <code>t</code> and hypotenuse <code>1</code>,</p>
-		<p><code>&theta; = 2 arccos(t)</code>.</p>
+		<p>In a unit disk, let \(\theta\) be the central angle subtending the smaller segment chord. From a right triangle with adjacent side \(t\) and hypotenuse \(1\),</p>
+		<p>\[
+			\theta = 2\arccos(t).
+		\]</p>
 		<p>Segment area = sector area minus isosceles-triangle area:</p>
-		<p><code>A_small = (&theta;/2) - (sin &theta;)/2</code>.</p>
-		<p>Using <code>&theta; = 2 arccos(t)</code> and <code>sin(2 arccos t) = 2t&radic;(1 - t^2)</code>,</p>
-		<p><code>A_small = arccos(t) - t&radic;(1 - t^2)</code>.</p>
-		<p>Divide by total disk area <code>&pi;</code> to get the smaller fraction, then subtract from 1:</p>
-		<p><code>L(t) = 1 - (A_small/&pi;) = 1 - (arccos(t) - t&radic;(1 - t^2)) / &pi;</code>.</p>
-		<p>Now connect this to two chosen points. If <code>A</code> and <code>B</code> are the random points (as vectors), the perpendicular bisector is:</p>
-		<p><code>(B - A)&middot;X = (|B|^2 - |A|^2)/2</code>.</p>
+		<p>\[
+			A_{\text{small}}=\frac{\theta}{2}-\frac{\sin\theta}{2}.
+		\]</p>
+		<p>Using \(\theta=2\arccos(t)\) and \(\sin(2\arccos t)=2t\sqrt{1-t^2}\),</p>
+		<p>\[
+			A_{\text{small}}=\arccos(t)-t\sqrt{1-t^2}.
+		\]</p>
+		<p>Divide by total disk area \(\pi\) to get the smaller fraction, then subtract from 1:</p>
+		<p>\[
+			L(t)=1-\frac{A_{\text{small}}}{\pi}
+			=1-\frac{\arccos(t)-t\sqrt{1-t^2}}{\pi}.
+		\]</p>
+		<p>Now connect this to two chosen points. If \(A\) and \(B\) are the random points (as vectors), the perpendicular bisector is:</p>
+		<p>\[
+			(B-A)\cdot X = \frac{|B|^2-|A|^2}{2}.
+		\]</p>
 		<p>So the center-to-line distance is:</p>
-		<p><code>t = ||B|^2 - |A|^2| / (2|B - A|)</code>.</p>
-		<p>(That is just point-to-line distance with normal vector <code>B - A</code>.)</p>
+		<p>\[
+			t=\frac{\bigl||B|^2-|A|^2\bigr|}{2|B-A|}.
+		\]</p>
+		<p>(That is just point-to-line distance with normal vector \(B-A\).)</p>
 		<p>Averaging over two independent uniform random points in the disk gives:</p>
-		<p>Write <code>M = (A + B)/2</code> and <code>D = (B - A)/2</code>, so <code>t = |M&middot;D|/|D|</code>. Conditioning on <code>s = |D|</code>, the midpoint <code>M</code> is uniform on the overlap lens of two unit disks centered at <code>&plusmn;D</code>. Integrating the projection of <code>M</code> onto the <code>D</code>-direction gives:</p>
-		<p>Here <code>s</code> is half the distance between the two random points (<code>|A-B| = 2s</code>). For fixed <code>s</code>, choose coordinates so <code>D</code> points along the x-axis; then <code>x</code> is the x-coordinate of <code>M</code> (equivalently, the signed projection of <code>M</code> onto the <code>D</code>-direction). In these coordinates, <code>t = |x|</code> and the lens half-width is <code>1-s</code>, so <code>x</code> runs from <code>0</code> to <code>1-s</code> by symmetry.</p>
-		<p><code>E[L] = (32/&pi;) &int;<sub>0</sub><sup>1</sup> &int;<sub>0</sub><sup>1-s</sup> s L(x)&radic;(1-(x+s)^2) dx ds</code>, with <code>L(x) = 1 - (arccos(x) - x&radic;(1-x^2)) / &pi;</code>.</p>
+		<p>Write \(M=(A+B)/2\) and \(D=(B-A)/2\), so \(t=|M\cdot D|/|D|\). Conditioning on \(s=|D|\), the midpoint \(M\) is uniform on the overlap lens of two unit disks centered at \(\pm D\). Integrating the projection of \(M\) onto the \(D\)-direction gives:</p>
+		<p>Here \(s\) is half the distance between the two random points (\(|A-B|=2s\)). For fixed \(s\), choose coordinates so \(D\) points along the x-axis; then \(x\) is the x-coordinate of \(M\) (equivalently, the signed projection of \(M\) onto the \(D\)-direction). In these coordinates, \(t=|x|\) and the lens half-width is \(1-s\), so \(x\) runs from \(0\) to \(1-s\) by symmetry.</p>
+		<p>\[
+			E[L]=\frac{32}{\pi}\int_{0}^{1}\int_{0}^{1-s}
+			s\,L(x)\sqrt{1-(x+s)^2}\,dx\,ds,
+		\]
+		with
+		\[
+			L(x)=1-\frac{\arccos(x)-x\sqrt{1-x^2}}{\pi}.
+		\]</p>
 		<p>Evaluating that integral yields:</p>
-		<p><code>E[L] = 1 - 32 / (9&pi;^2)</code>.</p>
+		<p>\[
+			E[L]=1-\frac{32}{9\pi^2}.
+		\]</p>
 		<p>Numerically:</p>
-		<p><strong>E[L] = 1 - 32 / (9&pi;^2) &asymp; 0.6397469</strong>.</p>
+		<p><strong>\(E[L]=1-\frac{32}{9\pi^2}\approx 0.6397469\)</strong>.</p>
 		<p>So the team with the larger assignment gets about <strong>63.97%</strong> of the lot on average.</p>
 		<h3>Interactive Split Explorer</h3>
 		<p>Drag the points, use click-to-place mode, or generate random points. The circle is colored by which point is closer, and the exact larger/smaller fractions are shown.</p>

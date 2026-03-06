@@ -1,13 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<meta charset="utf-8">
-		<title>Moved</title>
-		<meta http-equiv="refresh" content="0; url=/blog/fiddler/2026/02/2026-02-27.html">
-		<link rel="canonical" href="/blog/fiddler/2026/02/2026-02-27.html">
+		<title>This Week's Fiddler - Feb 27, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+
+		<style>
+			.custom-year-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+				gap: 10px;
+				margin: 14px 0;
+			}
+			.custom-month {
+				border: 1px solid #d7d7d7;
+				padding: 8px;
+				background: #fff;
+			}
+			.custom-month p {
+				margin: 0 0 6px;
+			}
+			.custom-month table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 0.88em;
+			}
+			.custom-month th {
+				text-align: center;
+				border-bottom: 1px solid #e2e2e2;
+				padding: 2px;
+			}
+			.custom-month td {
+				text-align: center;
+				padding: 2px;
+			}
+			.custom-month td.blank {
+				color: #bbb;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
 		<script defer src="/mathjax.js"></script>
 	</head>
 	<body>
-		<p>This page moved to <a href="/blog/fiddler/2026/02/2026-02-27.html">/blog/fiddler/2026/02/2026-02-27.html</a>.</p>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+    		</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: Feb 27, 2026</h1>
+		<p><em>Posted on Feb 27, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>In 2026, every day of the week appears as the first day of at least one month.</p>
+		<p>Is 2026 special in this regard? If so, when is the next year where at least one weekday does not appear among month-firsts?</p>
+
+		<h2>Main Solution</h2>
+		<p>2026 is not special. In fact, this happens in every Gregorian year (common or leap): all seven weekdays appear as firsts of the month.</p>
+		<p>Here is the general calculation.</p>
+		<p>Measure each month start as an offset (mod 7) from January 1. For a common year, month lengths mod 7 are 3, 0, 3, 2, 3, 2, 3, 3, 2, 3, 2, so the cumulative month-start offsets are:</p>
+		<p><code>0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5</code>.</p>
+		<p>For a leap year, only February changes (29 days), giving offsets:</p>
+		<p><code>0, 3, 4, 0, 2, 5, 0, 3, 6, 1, 4, 6</code>.</p>
+		<p>Each list contains all residues 0 through 6, so every weekday appears at least once as a month-first.</p>
+		<p>Symmetry point: the actual weekday names depend only on the weekday of January 1. Changing January 1 from (say) Thursday to Monday just adds a constant shift mod 7 to the whole list, which permutes weekday labels but does not remove any weekday.</p>
+		<p>So there is no next Gregorian year where a weekday is missing among month-firsts.</p>
+		<p>For the concrete 2026 calendar, month-first weekdays are:</p>
+		<ul>
+			<li>Jan 1: Thursday</li>
+			<li>Feb 1: Sunday</li>
+			<li>Mar 1: Sunday</li>
+			<li>Apr 1: Wednesday</li>
+			<li>May 1: Friday</li>
+			<li>Jun 1: Monday</li>
+			<li>Jul 1: Wednesday</li>
+			<li>Aug 1: Saturday</li>
+			<li>Sep 1: Tuesday</li>
+			<li>Oct 1: Thursday</li>
+			<li>Nov 1: Sunday</li>
+			<li>Dec 1: Tuesday</li>
+		</ul>
+		<p>All seven weekdays are represented, exactly as the general argument predicts.</p>
+
+		<h2>Extra Credit</h2>
+		<p>Suppose month lengths can be reassigned, with each month between 28 and 31 days, and total year length still 365 or 366 days.</p>
+		<p>The fewest possible weekdays that can appear as firsts of the month is <strong>3</strong>.</p>
+		<p>One valid 365-day example calendar is:</p>
+		<p><code>Jan 30, Feb 31, Mar 30, Apr 30, May 31, Jun 30, Jul 30, Aug 31, Sep 30, Oct 30, Nov 31, Dec 31</code>.</p>
+		<p>Total = 365, and each month is in the allowed range 28 to 31.</p>
+		<p>If Jan 1 is Thursday in this custom calendar, month-first weekdays cycle through only three values. Here is the full year grid:</p>
+		<div class="custom-year-grid">
+			<div class="custom-month">
+				<p><strong>Jan (30 days)</strong></p>
+				<table>
+					<thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+					<tbody>
+						<tr><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td>1</td><td>2</td><td>3</td></tr>
+						<tr><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td></tr>
+						<tr><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td></tr>
+						<tr><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td></tr>
+						<tr><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td class="blank">&nbsp;</td></tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="custom-month">
+				<p><strong>Feb (31 days)</strong></p>
+				<table>
+					<thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+					<tbody>
+						<tr><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td>1</td></tr>
+						<tr><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td></tr>
+						<tr><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td></tr>
+						<tr><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td></tr>
+						<tr><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td></tr>
+						<tr><td>30</td><td>31</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td></tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="custom-month">
+				<p><strong>Mar (30 days)</strong></p>
+				<table>
+					<thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+					<tbody>
+						<tr><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+						<tr><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr>
+						<tr><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td></tr>
+						<tr><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td></tr>
+						<tr><td>27</td><td>28</td><td>29</td><td>30</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td></tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="custom-month">
+				<p><strong>Apr (30 days)</strong></p>
+				<table>
+					<thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+					<tbody>
+						<tr><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td>1</td><td>2</td><td>3</td></tr>
+						<tr><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td></tr>
+						<tr><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td></tr>
+						<tr><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td></tr>
+						<tr><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td class="blank">&nbsp;</td></tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="custom-month">
+				<p><strong>May (31 days)</strong></p>
+				<table>
+					<thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+					<tbody>
+						<tr><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td>1</td></tr>
+						<tr><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td></tr>
+						<tr><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td></tr>
+						<tr><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td></tr>
+						<tr><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td></tr>
+						<tr><td>30</td><td>31</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td></tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="custom-month">
+				<p><strong>Jun (30 days)</strong></p>
+				<table>
+					<thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+					<tbody>
+						<tr><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+						<tr><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr>
+						<tr><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td></tr>
+						<tr><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td></tr>
+						<tr><td>27</td><td>28</td><td>29</td><td>30</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td></tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="custom-month">
+				<p><strong>Jul (30 days)</strong></p>
+				<table>
+					<thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+					<tbody>
+						<tr><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td>1</td><td>2</td><td>3</td></tr>
+						<tr><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td></tr>
+						<tr><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td></tr>
+						<tr><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td></tr>
+						<tr><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td class="blank">&nbsp;</td></tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="custom-month">
+				<p><strong>Aug (31 days)</strong></p>
+				<table>
+					<thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+					<tbody>
+						<tr><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td>1</td></tr>
+						<tr><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td></tr>
+						<tr><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td></tr>
+						<tr><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td></tr>
+						<tr><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td></tr>
+						<tr><td>30</td><td>31</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td></tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="custom-month">
+				<p><strong>Sep (30 days)</strong></p>
+				<table>
+					<thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+					<tbody>
+						<tr><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+						<tr><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr>
+						<tr><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td></tr>
+						<tr><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td></tr>
+						<tr><td>27</td><td>28</td><td>29</td><td>30</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td></tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="custom-month">
+				<p><strong>Oct (30 days)</strong></p>
+				<table>
+					<thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+					<tbody>
+						<tr><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td>1</td><td>2</td><td>3</td></tr>
+						<tr><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td></tr>
+						<tr><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td></tr>
+						<tr><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td></tr>
+						<tr><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td class="blank">&nbsp;</td></tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="custom-month">
+				<p><strong>Nov (31 days)</strong></p>
+				<table>
+					<thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+					<tbody>
+						<tr><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td>1</td></tr>
+						<tr><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td></tr>
+						<tr><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td></tr>
+						<tr><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td></tr>
+						<tr><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td></tr>
+						<tr><td>30</td><td>31</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td></tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="custom-month">
+				<p><strong>Dec (31 days)</strong></p>
+				<table>
+					<thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+					<tbody>
+						<tr><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+						<tr><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr>
+						<tr><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td></tr>
+						<tr><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td></tr>
+						<tr><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td><td class="blank">&nbsp;</td><td class="blank">&nbsp;</td></tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<p>So only Tuesday, Thursday, and Saturday appear.</p>
+		<p>For fun: there are 4 such optimal calendars (ordered 12-month length patterns) achieving this minimum.</p>
+		<p><a href="/blog/fiddler/2026/02/2026-02-27-extra-credit-calendars.html">View the full gallery of all 4 optimal calendars</a></p>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/02/2026-02-20.html">Previous</a> | <a href="/blog/fiddler/2026/03/2026-03-06.html">Next</a></p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
 	</body>
 </html>
