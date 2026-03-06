@@ -28,9 +28,11 @@
 
 		<h2>Solution</h2>
 		<p>Perfect logicians use a common optimal pure strategy.</p>
-		<p>If both choose the far target, they win with probability 0.70<sup>2</sup> = 0.49.</p>
-		<p>If both choose close targets, they must pick the same one of the two indistinguishable close targets (probability 1/2), and then both hit (probability 0.98<sup>2</sup>), so:</p>
-		<p>(1/2) * 0.98<sup>2</sup> = 0.4802.</p>
+		<p>If both choose the far target, they win with probability \(0.70^2=0.49\).</p>
+		<p>If both choose close targets, they must pick the same one of the two indistinguishable close targets (probability \(1/2\)), and then both hit (probability \(0.98^2\)), so:</p>
+		<p>\[
+			\frac12\cdot 0.98^2 = 0.4802.
+		\]</p>
 		<p>Since 0.49 &gt; 0.4802, the optimal fixed strategy is for both to aim at the far target.</p>
 		<p><strong>Answer:</strong> 0.49 (49%).</p>
 
@@ -47,8 +49,10 @@
 		<h2>Extra Credit Solution</h2>
 		<p>Let c be the (rational) hit probability for each close target, and f be the (rational) hit probability for the far target.</p>
 		<p>"It doesn't matter which target they aim for" means the win probability from choosing close equals the win probability from choosing far:</p>
-		<p>(1/2)c<sup>2</sup> = f<sup>2</sup>.</p>
-		<p>So c / f = &radic;2 (for f &gt; 0), which is impossible if both c and f are rational. Therefore the only rational possibility is c = f = 0.</p>
+		<p>\[
+			\frac12 c^2 = f^2.
+		\]</p>
+		<p>So \(\frac{c}{f}=\sqrt{2}\) (for \(f>0\)), which is impossible if both \(c\) and \(f\) are rational. Therefore the only rational possibility is \(c=f=0\).</p>
 		<p><strong>Extra credit answer:</strong> 0.</p>
 
 		<h3>Extra Credit Strategy Sandbox</h3>

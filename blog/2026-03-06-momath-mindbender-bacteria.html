@@ -46,18 +46,18 @@
 		<p>Monthly Mindbenders (February 2026): <a href="https://momath.org/wp-content/uploads/2026/02/2.-Monthly-Mindbenders-February-2026.pdf">MoMath PDF</a>.</p>
 
 		<h2>Problem</h2>
-		<p>A bacterium starts at (0,0). A bacterium at (x,y) may divide (if both target points are empty), disappearing and being replaced by bacteria at (x+1,y) and (x,y+1).</p>
-		<p>Roughly how many divisions are needed before the box with corners (0,0), (0,3), (3,3), (3,0) is clear?</p>
+		<p>A bacterium starts at \((0,0)\). A bacterium at \((x,y)\) may divide (if both target points are empty), disappearing and being replaced by bacteria at \((x+1,y)\) and \((x,y+1)\).</p>
+		<p>Roughly how many divisions are needed before the box with corners \((0,0)\), \((0,3)\), \((3,3)\), \((3,0)\) is clear?</p>
 
 		<h2>Answer</h2>
-		<p><strong>Impossible.</strong> In fact, it is already impossible to clear the smaller box from (0,0) to (2,2).</p>
+		<p><strong>Impossible.</strong> In fact, it is already impossible to clear the smaller box from \((0,0)\) to \((2,2)\).</p>
 		<h2>Small Clearable Cases</h2>
 		<p>If we define the box as \(0 \le x,y \le n\), then:</p>
-		<p><strong>n = 0 is clearable:</strong> one division at (0,0) moves bacteria to (1,0) and (0,1), clearing the box.</p>
+		<p><strong>n = 0 is clearable:</strong> one division at \((0,0)\) moves bacteria to \((1,0)\) and \((0,1)\), clearing the box.</p>
 		<p><strong>n = 1 is also clearable:</strong> there are valid sequences that clear the 2x2 box (for example, one shortest sequence uses 8 divisions).</p>
 		<p>The first impossible case is \(n=2\), which is exactly the 3x3 box used in the invariant proof below.</p>
 		<h2>Interactive Explorer</h2>
-		<p>Click a bacterium to divide it (if legal). A division at (x,y) replaces that bacterium with bacteria at (x+1,y) and (x,y+1), only when both target points are empty.</p>
+		<p>Click a bacterium to divide it (if legal). A division at \((x,y)\) replaces that bacterium with bacteria at \((x+1,y)\) and \((x,y+1)\), only when both target points are empty.</p>
 		<div class="mindbender-play">
 			<canvas id="bacteria-canvas" width="620" height="520" style="width:100%;max-width:620px;height:auto;border:1px solid #ccc;background:#fff;"></canvas>
 			<div class="mindbender-controls">
