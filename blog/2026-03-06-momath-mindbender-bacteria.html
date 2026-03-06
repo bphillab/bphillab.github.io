@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>MoMath Mindbender - Bacteria on a Grid - Mar 6, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<script defer src="/analytics.js"></script>
+		<style>
+			.mindbender-play {
+				margin: 14px 0 20px;
+				max-width: 620px;
+			}
+			.mindbender-controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px 12px;
+				align-items: center;
+				margin-top: 8px;
+			}
+			.mindbender-controls button {
+				padding: 6px 10px;
+				border: 1px solid #b8b8b8;
+				background: #f7f7f7;
+				cursor: pointer;
+			}
+			.mindbender-readout {
+				margin-top: 8px;
+				font-size: 0.96em;
+			}
+		</style>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+    		</ul>
+		</nav>
+
+		<h1>MoMath Mindbender: Bacteria On A Grid</h1>
+		<p><em>Posted on Mar 6, 2026</em></p>
+
+		<h2>Source</h2>
+		<p>Monthly Mindbenders (February 2026): <a href="https://momath.org/wp-content/uploads/2026/02/2.-Monthly-Mindbenders-February-2026.pdf">MoMath PDF</a>.</p>
+
+		<h2>Problem</h2>
+		<p>A bacterium starts at (0,0). A bacterium at (x,y) may divide (if both target points are empty), disappearing and being replaced by bacteria at (x+1,y) and (x,y+1).</p>
+		<p>Roughly how many divisions are needed before the box with corners (0,0), (0,3), (3,3), (3,0) is clear?</p>
+
+		<h2>Answer</h2>
+		<p><strong>Impossible.</strong> In fact, it is already impossible to clear the smaller box from (0,0) to (2,2).</p>
+		<h2>Small Clearable Cases</h2>
+		<p>If we define the box as <code>0 &le; x,y &le; n</code>, then:</p>
+		<p><strong>n = 0 is clearable:</strong> one division at (0,0) moves bacteria to (1,0) and (0,1), clearing the box.</p>
+		<p><strong>n = 1 is also clearable:</strong> there are valid sequences that clear the 2x2 box (for example, one shortest sequence uses 8 divisions).</p>
+		<p>The first impossible case is <code>n = 2</code>, which is exactly the 3x3 box used in the invariant proof below.</p>
+		<h2>Interactive Explorer</h2>
+		<p>Click a bacterium to divide it (if legal). A division at (x,y) replaces that bacterium with bacteria at (x+1,y) and (x,y+1), only when both target points are empty.</p>
+		<div class="mindbender-play">
+			<canvas id="bacteria-canvas" width="620" height="520" style="width:100%;max-width:620px;height:auto;border:1px solid #ccc;background:#fff;"></canvas>
+			<div class="mindbender-controls">
+				<label for="target-n">Target box n (0 <= x,y <= n):</label>
+				<input id="target-n" type="range" min="0" max="4" step="1" value="3">
+				<span id="target-n-value">3</span>
+				<button id="random-division">Random Legal Division</button>
+				<button id="reset-sim">Reset</button>
+			</div>
+			<p id="bacteria-readout" class="mindbender-readout">Loading...</p>
+			<p id="blocked-readout" class="mindbender-readout">Loading...</p>
+		</div>
+
+		<h2>Why It Is Impossible</h2>
+		<p>Use the invariant weight:</p>
+		<p><code>W = sum over occupied (x,y) of 2^(-(x+y))</code>.</p>
+		<p>Initially, only (0,0) is occupied, so <code>W = 1</code>.</p>
+		<p>One division at (x,y) replaces weight <code>2^(-(x+y))</code> by:</p>
+		<p><code>2^(-(x+1+y)) + 2^(-(x+y+1)) = 2 * 2^(-(x+y+1)) = 2^(-(x+y))</code>.</p>
+		<p>So every allowed division preserves <code>W</code>; therefore <code>W</code> is always exactly 1.</p>
+		<p>If the 3x3 box <code>0 &le; x,y &le; 2</code> were clear, every bacterium would lie outside it. The maximum possible outside weight is the sum over all outside lattice points:</p>
+		<p><code>sum_{x,y>=0} 2^(-(x+y)) - sum_{x=0..2,y=0..2} 2^(-(x+y))</code></p>
+		<p><code>= 4 - (1 + 1/2 + 1/4)^2 = 4 - (7/4)^2 = 4 - 49/16 = 15/16 &lt; 1.</code></p>
+		<p>But <code>W</code> must remain 1, contradiction. So the 3x3 box can never be cleared, and therefore the 4x4 box from (0,0) to (3,3) cannot be cleared either.</p>
+
+		<p><strong>More MoMath Mindbenders:</strong> Previous | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+		<script>
+			(function () {
+				var canvas = document.getElementById("bacteria-canvas");
+				var readout = document.getElementById("bacteria-readout");
+				var blockedReadout = document.getElementById("blocked-readout");
+				var nSlider = document.getElementById("target-n");
+				var nValue = document.getElementById("target-n-value");
+				var randomButton = document.getElementById("random-division");
+				var resetButton = document.getElementById("reset-sim");
+
+				if (!canvas || !readout || !blockedReadout || !nSlider || !nValue || !randomButton || !resetButton) {
+					return;
+				}
+
+				var ctx = canvas.getContext("2d");
+				var W = canvas.width;
+				var H = canvas.height;
+				var marginLeft = 60;
+				var marginRight = 20;
+				var marginTop = 20;
+				var marginBottom = 55;
+				var maxCoord = 10;
+				var plotW = W - marginLeft - marginRight;
+				var plotH = H - marginTop - marginBottom;
+				var cell = Math.min(plotW / maxCoord, plotH / maxCoord);
+				var divisions = 0;
+				var occupied;
+
+				function key(x, y) {
+					return x + "," + y;
+				}
+
+				function parseKey(k) {
+					var parts = k.split(",");
+					return { x: parseInt(parts[0], 10), y: parseInt(parts[1], 10) };
+				}
+
+				function has(x, y) {
+					return occupied.has(key(x, y));
+				}
+
+				function canDivide(x, y) {
+					return !has(x + 1, y) && !has(x, y + 1);
+				}
+
+				function reset() {
+					divisions = 0;
+					occupied = new Set([key(0, 0)]);
+					draw();
+				}
+
+				function toCanvas(x, y) {
+					return {
+						x: marginLeft + x * cell,
+						y: H - marginBottom - y * cell
+					};
+				}
+
+				function fromCanvas(px, py) {
+					var gx = (px - marginLeft) / cell;
+					var gy = (H - marginBottom - py) / cell;
+					return { x: Math.round(gx), y: Math.round(gy) };
+				}
+
+				function divideAt(x, y) {
+					if (!has(x, y) || !canDivide(x, y)) {
+						return false;
+					}
+					occupied.delete(key(x, y));
+					occupied.add(key(x + 1, y));
+					occupied.add(key(x, y + 1));
+					divisions += 1;
+					return true;
+				}
+
+				function legalMoves() {
+					var moves = [];
+					occupied.forEach(function (k) {
+						var p = parseKey(k);
+						if (canDivide(p.x, p.y)) {
+							moves.push(p);
+						}
+					});
+					return moves;
+				}
+
+				function blockedBacteria() {
+					var blocked = [];
+					occupied.forEach(function (k) {
+						var p = parseKey(k);
+						if (!canDivide(p.x, p.y)) {
+							blocked.push(p);
+						}
+					});
+					blocked.sort(function (a, b) {
+						if (a.x !== b.x) {
+							return a.x - b.x;
+						}
+						return a.y - b.y;
+					});
+					return blocked;
+				}
+
+				function insideTargetCount(n) {
+					var count = 0;
+					occupied.forEach(function (k) {
+						var p = parseKey(k);
+						if (p.x >= 0 && p.x <= n && p.y >= 0 && p.y <= n) {
+							count += 1;
+						}
+					});
+					return count;
+				}
+
+				function drawGrid(n) {
+					ctx.clearRect(0, 0, W, H);
+					ctx.fillStyle = "#fafafa";
+					ctx.fillRect(0, 0, W, H);
+
+					var p0 = toCanvas(0, 0);
+					var pN = toCanvas(n, n);
+					var boxW = (n + 1) * cell;
+					var boxH = (n + 1) * cell;
+					ctx.fillStyle = "rgba(255, 228, 210, 0.55)";
+					ctx.fillRect(p0.x - cell / 2, pN.y - cell / 2, boxW, boxH);
+
+					ctx.strokeStyle = "#e2e2e2";
+					ctx.lineWidth = 1;
+					var i;
+					for (i = 0; i <= maxCoord; i += 1) {
+						var xv = toCanvas(i, 0).x;
+						var yv = toCanvas(0, i).y;
+						ctx.beginPath();
+						ctx.moveTo(xv, marginTop);
+						ctx.lineTo(xv, H - marginBottom);
+						ctx.stroke();
+						ctx.beginPath();
+						ctx.moveTo(marginLeft, yv);
+						ctx.lineTo(marginLeft + maxCoord * cell, yv);
+						ctx.stroke();
+					}
+
+					ctx.strokeStyle = "#444";
+					ctx.lineWidth = 2;
+					ctx.beginPath();
+					ctx.moveTo(marginLeft, H - marginBottom);
+					ctx.lineTo(marginLeft + maxCoord * cell, H - marginBottom);
+					ctx.stroke();
+					ctx.beginPath();
+					ctx.moveTo(marginLeft, H - marginBottom);
+					ctx.lineTo(marginLeft, marginTop);
+					ctx.stroke();
+
+					ctx.fillStyle = "#444";
+					ctx.font = "12px sans-serif";
+					for (i = 0; i <= maxCoord; i += 1) {
+						var xTick = toCanvas(i, 0).x;
+						var yTick = toCanvas(0, i).y;
+						ctx.fillText(String(i), xTick - 3, H - marginBottom + 16);
+						ctx.fillText(String(i), marginLeft - 16, yTick + 4);
+					}
+
+					ctx.strokeStyle = "#c66";
+					ctx.lineWidth = 2;
+					ctx.strokeRect(p0.x - cell / 2, pN.y - cell / 2, boxW, boxH);
+					ctx.fillStyle = "#a44";
+					ctx.fillText("Target box", p0.x + 6, pN.y + 16);
+				}
+
+				function drawBacteria() {
+					occupied.forEach(function (k) {
+						var p = parseKey(k);
+						if (p.x > maxCoord || p.y > maxCoord) {
+							return;
+						}
+						var c = toCanvas(p.x, p.y);
+						var legal = canDivide(p.x, p.y);
+						ctx.beginPath();
+						ctx.arc(c.x, c.y, 6.5, 0, 2 * Math.PI);
+						ctx.fillStyle = legal ? "#2f87c8" : "#555";
+						ctx.fill();
+						ctx.strokeStyle = "#fff";
+						ctx.lineWidth = 1.3;
+						ctx.stroke();
+					});
+				}
+
+				function updateReadout(n) {
+					var legal = legalMoves().length;
+					var blocked = blockedBacteria();
+					var inside = insideTargetCount(n);
+					var status = inside === 0 ? "cleared" : "not cleared";
+					readout.innerHTML =
+						"<strong>Divisions:</strong> " + divisions +
+						" | <strong>Bacteria shown:</strong> " + occupied.size +
+						" | <strong>Legal moves:</strong> " + legal +
+						" | <strong>Inside target box:</strong> " + inside +
+						" (" + status + ")";
+
+					if (blocked.length === 0) {
+						blockedReadout.innerHTML = "<strong>Cannot-divide bacteria:</strong> none";
+						return;
+					}
+
+					var maxShown = 14;
+					var labels = blocked.slice(0, maxShown).map(function (p) {
+						return "(" + p.x + "," + p.y + ")";
+					});
+					if (blocked.length > maxShown) {
+						labels.push("...");
+					}
+					blockedReadout.innerHTML =
+						"<strong>Cannot-divide bacteria (" + blocked.length + "):</strong> " + labels.join(", ");
+				}
+
+				function draw() {
+					var n = parseInt(nSlider.value, 10);
+					nValue.textContent = String(n);
+					drawGrid(n);
+					drawBacteria();
+					updateReadout(n);
+				}
+
+				canvas.addEventListener("click", function (event) {
+					var rect = canvas.getBoundingClientRect();
+					var px = (event.clientX - rect.left) * (canvas.width / rect.width);
+					var py = (event.clientY - rect.top) * (canvas.height / rect.height);
+					var g = fromCanvas(px, py);
+					if (g.x < 0 || g.y < 0 || g.x > maxCoord || g.y > maxCoord) {
+						return;
+					}
+					divideAt(g.x, g.y);
+					draw();
+				});
+
+				nSlider.addEventListener("input", draw);
+
+				randomButton.addEventListener("click", function () {
+					var moves = legalMoves();
+					if (moves.length === 0) {
+						draw();
+						return;
+					}
+					var m = moves[Math.floor(Math.random() * moves.length)];
+					divideAt(m.x, m.y);
+					draw();
+				});
+
+				resetButton.addEventListener("click", reset);
+				reset();
+			})();
+		</script>
+	</body>
+</html>
