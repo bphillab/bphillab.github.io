@@ -43,6 +43,62 @@
 				margin-top: 8px;
 				font-size: 0.96em;
 			}
+			.ec-sim {
+				margin-top: 14px;
+				padding: 10px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+			}
+			.ec-sim-controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px 10px;
+				align-items: center;
+				margin-top: 8px;
+			}
+			.ec-sim-controls input {
+				width: 96px;
+			}
+			.ec-sim-controls button {
+				padding: 6px 10px;
+				border: 1px solid #bbb;
+				background: #f7f7f7;
+				cursor: pointer;
+			}
+			.ec-sim-output {
+				margin-top: 8px;
+				font-size: 0.96em;
+			}
+			.ec-sim-histogram {
+				margin-top: 10px;
+			}
+			.ec-sim-row {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin: 4px 0;
+				font-size: 0.9em;
+			}
+			.ec-sim-label {
+				width: 70px;
+				color: #555;
+				font-family: "Helvetica", "Arial", "Sans-Serif";
+			}
+			.ec-sim-bar-wrap {
+				flex: 1;
+				height: 16px;
+				background: #f0f0f0;
+			}
+			.ec-sim-bar {
+				height: 100%;
+				background: #2d6ea3;
+			}
+			.ec-sim-value {
+				width: 100px;
+				text-align: right;
+				color: #555;
+				font-family: "Helvetica", "Arial", "Sans-Serif";
+			}
 			.main-explorer {
 				margin: 14px 0 22px;
 				max-width: 560px;
@@ -217,6 +273,17 @@
 				<button id="ec-random">Random Points</button>
 			</div>
 			<p id="ec-readout" class="ec-readout">Loading explorer...</p>
+			<div class="ec-sim">
+				<strong>Extra Credit Simulation</strong>
+				<p>Run a Monte Carlo estimate of the expected larger-area fraction \(E[L]\).</p>
+				<div class="ec-sim-controls">
+					<label for="ec-sim-trials">Trials:</label>
+					<input id="ec-sim-trials" type="number" min="100" step="100" value="20000">
+					<button id="ec-run-sim">Run Simulation</button>
+				</div>
+				<p id="ec-sim-output" class="ec-sim-output">Result will appear here.</p>
+				<div id="ec-sim-histogram" class="ec-sim-histogram"></div>
+			</div>
 		</div>
 
 		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/02/2026-02-27.html">Previous</a> | Next</p>
@@ -391,6 +458,10 @@
 				var setBButton = document.getElementById("ec-set-b");
 				var randomButton = document.getElementById("ec-random");
 				var readout = document.getElementById("ec-readout");
+				var simTrialsInput = document.getElementById("ec-sim-trials");
+				var simButton = document.getElementById("ec-run-sim");
+				var simOutput = document.getElementById("ec-sim-output");
+				var simHistogram = document.getElementById("ec-sim-histogram");
 
 				function clampToDisk(p) {
 					var r = Math.hypot(p.x, p.y);
@@ -447,6 +518,92 @@
 				function smallerFractionFromT(t) {
 					var clamped = Math.max(0, Math.min(1, t));
 					return (Math.acos(clamped) - clamped * Math.sqrt(1 - clamped * clamped)) / Math.PI;
+				}
+
+				function largerFractionForPoints(a, b) {
+					var nx = b.x - a.x;
+					var ny = b.y - a.y;
+					var norm = Math.hypot(nx, ny);
+					if (norm < 1e-12) {
+						return 0.5;
+					}
+					var c = (b.x * b.x + b.y * b.y - a.x * a.x - a.y * a.y) / 2;
+					var t = Math.abs(c) / norm;
+					t = Math.max(0, Math.min(1, t));
+					return 1 - smallerFractionFromT(t);
+				}
+
+				function runSimulation() {
+					var trials = parseInt(simTrialsInput.value, 10);
+					if (!trials || trials < 100) {
+						simOutput.textContent = "Please use at least 100 trials.";
+						simHistogram.textContent = "";
+						return;
+					}
+
+					var sum = 0;
+					var bins = new Array(10).fill(0);
+					var i;
+					for (i = 0; i < trials; i += 1) {
+						var a = randomPointInDisk();
+						var b = randomPointInDisk();
+						while (squaredDistance(a, b) < 1e-12) {
+							b = randomPointInDisk();
+						}
+						var large = largerFractionForPoints(a, b);
+						sum += large;
+						var bin = Math.min(9, Math.floor((large - 0.5) / 0.05));
+						if (bin >= 0) {
+							bins[bin] += 1;
+						}
+					}
+
+					var estimate = sum / trials;
+					var exact = 1 - 32 / (9 * Math.PI * Math.PI);
+					simOutput.innerHTML =
+						"<strong>Estimated E[L]:</strong> " + estimate.toFixed(6) +
+						" | <strong>Exact:</strong> " + exact.toFixed(6) +
+						" | <strong>Error:</strong> " + Math.abs(estimate - exact).toFixed(6);
+					renderSimulationHistogram(bins, trials);
+				}
+
+				function renderSimulationHistogram(bins, total) {
+					simHistogram.textContent = "";
+					var maxCount = 0;
+					var i;
+					for (i = 0; i < bins.length; i += 1) {
+						if (bins[i] > maxCount) {
+							maxCount = bins[i];
+						}
+					}
+
+					for (i = 0; i < bins.length; i += 1) {
+						var lo = 0.5 + 0.05 * i;
+						var hi = lo + 0.05;
+						var row = document.createElement("div");
+						row.className = "ec-sim-row";
+
+						var label = document.createElement("div");
+						label.className = "ec-sim-label";
+						label.textContent = lo.toFixed(2) + "-" + hi.toFixed(2);
+
+						var wrap = document.createElement("div");
+						wrap.className = "ec-sim-bar-wrap";
+
+						var bar = document.createElement("div");
+						bar.className = "ec-sim-bar";
+						bar.style.width = maxCount ? (100 * bins[i] / maxCount).toFixed(2) + "%" : "0%";
+						wrap.appendChild(bar);
+
+						var value = document.createElement("div");
+						value.className = "ec-sim-value";
+						value.textContent = bins[i] + " (" + (100 * bins[i] / total).toFixed(1) + "%)";
+
+						row.appendChild(label);
+						row.appendChild(wrap);
+						row.appendChild(value);
+						simHistogram.appendChild(row);
+					}
 				}
 
 				function draw() {
@@ -671,6 +828,7 @@
 					}
 					draw();
 				});
+				simButton.addEventListener("click", runSimulation);
 
 				setButtonStates();
 				draw();
