@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Olympus Quest - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<script defer src="/analytics.js"></script>
+		<style>
+			.game-wrap {
+				display: grid;
+				gap: 16px;
+				grid-template-columns: minmax(260px, 360px) minmax(260px, 1fr);
+				align-items: start;
+			}
+			.game-card {
+				background: rgba(255, 255, 255, 0.75);
+				border: 1px solid var(--edge);
+				padding: 14px;
+			}
+			#lake {
+				width: 100%;
+				height: auto;
+				border: 1px solid var(--edge);
+				background: linear-gradient(180deg, #e5f3ff 0%, #d7ebff 100%);
+			}
+			.legend {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 8px 12px;
+				margin-top: 8px;
+				font-size: 0.95rem;
+			}
+			.legend strong {
+				color: var(--accent-strong);
+			}
+			.status {
+				margin-top: 10px;
+				font-weight: 700;
+				color: var(--accent-strong);
+			}
+			.controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+				margin-top: 10px;
+			}
+			@media (max-width: 860px) {
+				.game-wrap {
+					grid-template-columns: 1fr;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        	<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>Olympus Quest</h1>
+		<p>Collect 3 tridents, dodge the sea monster, and reach Camp Half-Blood.</p>
+
+		<div class="game-wrap">
+			<section class="game-card">
+				<h2>How To Play</h2>
+				<div class="legend">
+					<div><strong>Arrow keys</strong></div>
+					<div>Move Percy</div>
+					<div><strong>Goal</strong></div>
+					<div>Grab 3 tridents, then reach camp</div>
+				</div>
+				<div class="controls">
+					<button type="button" id="reset">Reset</button>
+				</div>
+				<p class="status" id="status">Find the tridents!</p>
+				<p><strong>Tridents:</strong> <span id="tridents">0</span>/3</p>
+			</section>
+			<canvas id="lake" width="720" height="420" aria-label="Olympus Quest game board"></canvas>
+		</div>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+		<script>
+			const canvas = document.getElementById("lake");
+			const ctx = canvas.getContext("2d");
+			const statusEl = document.getElementById("status");
+			const tridentsEl = document.getElementById("tridents");
+			const resetBtn = document.getElementById("reset");
+
+			const tile = 60;
+			const cols = 12;
+			const rows = 7;
+			const camp = { x: 10, y: 1 };
+
+			const player = { x: 1, y: 5 };
+			const monster = { x: 6, y: 3, dir: 1 };
+			const tridents = [
+				{ x: 3, y: 1, found: false },
+				{ x: 5, y: 5, found: false },
+				{ x: 8, y: 2, found: false }
+			];
+			let collected = 0;
+			let pendingReset = false;
+			let monsterCooldown = 0;
+
+			const resetGame = () => {
+				player.x = 1;
+				player.y = 5;
+				monster.x = 6;
+				monster.y = 3;
+				monster.dir = 1;
+				tridents.forEach((t) => { t.found = false; });
+				collected = 0;
+				statusEl.textContent = "Find the tridents!";
+				tridentsEl.textContent = "0";
+				pendingReset = false;
+				monsterCooldown = 0;
+			};
+
+			const drawBoard = () => {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.fillStyle = "#d9ecff";
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				ctx.fillStyle = "#f1e0c2";
+				ctx.fillRect(camp.x * tile, camp.y * tile, tile, tile);
+				ctx.fillStyle = "#8b5a2b";
+				ctx.fillText("Camp", camp.x * tile + 8, camp.y * tile + 34);
+
+				tridents.forEach((t) => {
+					if (!t.found) {
+						ctx.fillStyle = "#4c8fd6";
+						ctx.beginPath();
+						ctx.moveTo(t.x * tile + tile / 2, t.y * tile + 8);
+						ctx.lineTo(t.x * tile + 12, t.y * tile + tile - 10);
+						ctx.lineTo(t.x * tile + tile - 12, t.y * tile + tile - 10);
+						ctx.closePath();
+						ctx.fill();
+					}
+				});
+
+				ctx.fillStyle = "#2f6b4b";
+				ctx.beginPath();
+				ctx.arc(monster.x * tile + tile / 2, monster.y * tile + tile / 2, 20, 0, Math.PI * 2);
+				ctx.fill();
+
+				ctx.fillStyle = "#1f2c36";
+				ctx.beginPath();
+				ctx.arc(player.x * tile + tile / 2, player.y * tile + tile / 2, 16, 0, Math.PI * 2);
+				ctx.fill();
+			};
+
+			const moveMonster = () => {
+				if (monsterCooldown > 0) {
+					monsterCooldown -= 1;
+					return;
+				}
+				monsterCooldown = 1;
+				const dx = Math.sign(player.x - monster.x);
+				const dy = Math.sign(player.y - monster.y);
+				if (Math.random() < 0.5 && dx !== 0) {
+					monster.x += dx;
+				} else if (dy !== 0) {
+					monster.y += dy;
+				}
+				monster.x = Math.max(0, Math.min(cols - 1, monster.x));
+				monster.y = Math.max(0, Math.min(rows - 1, monster.y));
+			};
+
+			const checkCollisions = () => {
+				if (player.x === monster.x && player.y === monster.y) {
+					if (!pendingReset) {
+						pendingReset = true;
+						statusEl.textContent = "Sea monster got you! Try again.";
+						setTimeout(() => {
+							resetGame();
+							drawBoard();
+						}, 700);
+					}
+					return;
+				}
+				tridents.forEach((t) => {
+					if (!t.found && player.x === t.x && player.y === t.y) {
+						t.found = true;
+						collected += 1;
+						tridentsEl.textContent = String(collected);
+						statusEl.textContent = "Trident collected!";
+					}
+				});
+				if (collected === 3 && player.x === camp.x && player.y === camp.y) {
+					statusEl.textContent = "Quest complete! Welcome to camp.";
+				}
+			};
+
+			const movePlayer = (dx, dy) => {
+				const nextX = Math.max(0, Math.min(cols - 1, player.x + dx));
+				const nextY = Math.max(0, Math.min(rows - 1, player.y + dy));
+				player.x = nextX;
+				player.y = nextY;
+				moveMonster();
+				checkCollisions();
+				drawBoard();
+			};
+
+			window.addEventListener("keydown", (event) => {
+				if (event.key === "ArrowUp") {
+					movePlayer(0, -1);
+				} else if (event.key === "ArrowDown") {
+					movePlayer(0, 1);
+				} else if (event.key === "ArrowLeft") {
+					movePlayer(-1, 0);
+				} else if (event.key === "ArrowRight") {
+					movePlayer(1, 0);
+				}
+			});
+
+			resetBtn.addEventListener("click", () => {
+				resetGame();
+				drawBoard();
+			});
+
+			resetGame();
+			drawBoard();
+		</script>
+	</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Pass &amp; Score - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<script defer src="/analytics.js"></script>
+		<style>
+			.game-wrap {
+				display: grid;
+				gap: 16px;
+				grid-template-columns: minmax(260px, 360px) minmax(260px, 1fr);
+				align-items: start;
+			}
+			.game-card {
+				background: rgba(255, 255, 255, 0.75);
+				border: 1px solid var(--edge);
+				padding: 14px;
+			}
+			#court {
+				width: 100%;
+				height: auto;
+				border: 1px solid var(--edge);
+				background: linear-gradient(180deg, #fff6e6 0%, #f7e1c5 100%);
+			}
+			.legend {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 8px 12px;
+				margin-top: 8px;
+				font-size: 0.95rem;
+			}
+			.legend strong {
+				color: var(--accent-strong);
+			}
+			.status {
+				margin-top: 10px;
+				font-weight: 700;
+				color: var(--accent-strong);
+			}
+			.controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+				margin-top: 10px;
+			}
+			@media (max-width: 860px) {
+				.game-wrap {
+					grid-template-columns: 1fr;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        	<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>Pass &amp; Score</h1>
+		<p>Make at least 3 passes, then shoot. Watch out for the defender.</p>
+
+		<div class="game-wrap">
+			<section class="game-card">
+				<h2>How To Play</h2>
+				<div class="legend">
+					<div><strong>Pass</strong></div>
+					<div>Click a player button</div>
+					<div><strong>Shoot</strong></div>
+					<div>After 3 passes</div>
+					<div><strong>Goal</strong></div>
+					<div>Score from the right lane</div>
+				</div>
+				<div class="controls">
+					<button type="button" id="pass-left">Pass Left</button>
+					<button type="button" id="pass-mid">Pass Center</button>
+					<button type="button" id="pass-right">Pass Right</button>
+					<button type="button" id="shoot">Shoot</button>
+					<button type="button" id="reset">Reset</button>
+				</div>
+				<p class="status" id="status">Get the ball moving!</p>
+				<p><strong>Passes:</strong> <span id="passes">0</span></p>
+				<p><strong>Score:</strong> <span id="score">0</span></p>
+			</section>
+			<canvas id="court" width="720" height="420" aria-label="Pass and Score basketball court"></canvas>
+		</div>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+		<script>
+			const canvas = document.getElementById("court");
+			const ctx = canvas.getContext("2d");
+			const statusEl = document.getElementById("status");
+			const passesEl = document.getElementById("passes");
+			const scoreEl = document.getElementById("score");
+
+			const passLeftBtn = document.getElementById("pass-left");
+			const passMidBtn = document.getElementById("pass-mid");
+			const passRightBtn = document.getElementById("pass-right");
+			const shootBtn = document.getElementById("shoot");
+			const resetBtn = document.getElementById("reset");
+
+			const lanes = [120, 210, 300];
+			const players = [
+				{ id: 0, x: 140, y: lanes[0], dir: 1, color: "#2b5d87" },
+				{ id: 1, x: 200, y: lanes[1], dir: -1, color: "#2f7f4f" },
+				{ id: 2, x: 240, y: lanes[2], dir: 1, color: "#8b3c3c" }
+			];
+			const defender = { x: 380, y: 200, dirX: 1, dirY: 1 };
+			const hoop = { x: 620, y: lanes[2] };
+
+			let ball = { x: players[0].x, y: players[0].y, owner: 0, inFlight: false, tx: 0, ty: 0, t: 0 };
+			let passes = 0;
+			let score = 0;
+
+			const resetGame = () => {
+				players[0].x = 140;
+				players[1].x = 200;
+				players[2].x = 240;
+				defender.x = 380;
+				defender.y = 200;
+				ball = { x: players[0].x, y: players[0].y, owner: 0, inFlight: false, tx: 0, ty: 0, t: 0 };
+				passes = 0;
+				statusEl.textContent = "Get the ball moving!";
+				updateHUD();
+			};
+
+			const updateHUD = () => {
+				passesEl.textContent = passes;
+				scoreEl.textContent = score;
+				shootBtn.disabled = passes < 3 || ball.owner !== 2 || ball.inFlight;
+			};
+
+			const distance = (ax, ay, bx, by) => Math.hypot(ax - bx, ay - by);
+
+			const tryPass = (targetId) => {
+				if (ball.inFlight || ball.owner === targetId) {
+					return;
+				}
+				const target = players[targetId];
+				if (distance(defender.x, defender.y, target.x, target.y) < 48) {
+					statusEl.textContent = "Intercepted! Defender took it.";
+					passes = 0;
+					ball.owner = 0;
+					ball.x = players[0].x;
+					ball.y = players[0].y;
+					updateHUD();
+					return;
+				}
+				ball.inFlight = true;
+				ball.tx = target.x;
+				ball.ty = target.y;
+				ball.t = 0;
+				ball.nextOwner = targetId;
+				statusEl.textContent = "Nice pass!";
+			};
+
+			const shoot = () => {
+				if (passes < 3 || ball.inFlight || ball.owner !== 2) {
+					return;
+				}
+				const shooter = players[2];
+				const goodSpot = shooter.x > 470 && distance(shooter.x, shooter.y, hoop.x, hoop.y) < 120;
+				if (goodSpot) {
+					score += 1;
+					statusEl.textContent = "Swish! Great shot.";
+				} else {
+					statusEl.textContent = "Missed. Try passing and moving.";
+				}
+				passes = 0;
+				ball.owner = 0;
+				ball.x = players[0].x;
+				ball.y = players[0].y;
+				updateHUD();
+			};
+
+			const updatePlayers = () => {
+				players.forEach((player, index) => {
+					const speed = 0.5 + index * 0.08;
+					player.x += player.dir * speed;
+				if (player.x > 540) {
+					player.dir = -1;
+				}
+					if (player.x < 80) {
+						player.dir = 1;
+					}
+				});
+			};
+
+			const updateDefender = () => {
+				defender.x += defender.dirX * 1.2;
+				defender.y += defender.dirY * 0.8;
+				if (defender.x > 520 || defender.x < 200) {
+					defender.dirX *= -1;
+				}
+				if (defender.y > 320 || defender.y < 120) {
+					defender.dirY *= -1;
+				}
+			};
+
+			const updateBall = () => {
+				if (ball.inFlight) {
+					ball.t += 0.04;
+					const progress = Math.min(1, ball.t);
+					ball.x = ball.x + (ball.tx - ball.x) * progress;
+					ball.y = ball.y + (ball.ty - ball.y) * progress;
+					if (progress >= 1) {
+						ball.inFlight = false;
+						ball.owner = ball.nextOwner;
+						ball.x = players[ball.owner].x;
+						ball.y = players[ball.owner].y;
+						passes += 1;
+						updateHUD();
+					}
+				} else {
+					ball.x = players[ball.owner].x;
+					ball.y = players[ball.owner].y;
+				}
+			};
+
+			const drawCourt = () => {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.fillStyle = "#f4d4aa";
+				ctx.fillRect(40, 80, 640, 280);
+
+				ctx.strokeStyle = "#b56a2b";
+				ctx.lineWidth = 3;
+				ctx.strokeRect(40, 80, 640, 280);
+
+				ctx.fillStyle = "#b56a2b";
+				ctx.fillRect(610, 160, 30, 120);
+				ctx.strokeStyle = "#7c3f0f";
+				ctx.beginPath();
+				ctx.arc(640, lanes[2], 24, 0, Math.PI * 2);
+				ctx.stroke();
+
+				ctx.strokeStyle = "rgba(43, 93, 135, 0.3)";
+				lanes.forEach((lane) => {
+					ctx.beginPath();
+					ctx.moveTo(60, lane);
+					ctx.lineTo(660, lane);
+					ctx.stroke();
+				});
+			};
+
+			const drawPlayers = () => {
+				players.forEach((player, index) => {
+					ctx.fillStyle = player.color;
+					ctx.beginPath();
+					ctx.arc(player.x, player.y, 14, 0, Math.PI * 2);
+					ctx.fill();
+					ctx.fillStyle = "#f7e0c2";
+					ctx.beginPath();
+					ctx.arc(player.x, player.y - 18, 8, 0, Math.PI * 2);
+					ctx.fill();
+					ctx.fillStyle = "#1f2c36";
+					ctx.fillText(index === 0 ? "L" : index === 1 ? "C" : "R", player.x - 4, player.y + 4);
+				});
+			};
+
+			const drawDefender = () => {
+				ctx.fillStyle = "#3a3a3a";
+				ctx.beginPath();
+				ctx.arc(defender.x, defender.y, 16, 0, Math.PI * 2);
+				ctx.fill();
+				ctx.fillStyle = "#ddd";
+				ctx.beginPath();
+				ctx.arc(defender.x, defender.y - 18, 8, 0, Math.PI * 2);
+				ctx.fill();
+			};
+
+			const drawBall = () => {
+				ctx.fillStyle = "#d7692b";
+				ctx.beginPath();
+				ctx.arc(ball.x, ball.y - 12, 6, 0, Math.PI * 2);
+				ctx.fill();
+			};
+
+			const loop = () => {
+				updatePlayers();
+				updateDefender();
+				updateBall();
+				drawCourt();
+				drawPlayers();
+				drawDefender();
+				drawBall();
+				requestAnimationFrame(loop);
+			};
+
+			passLeftBtn.addEventListener("click", () => tryPass(0));
+			passMidBtn.addEventListener("click", () => tryPass(1));
+			passRightBtn.addEventListener("click", () => tryPass(2));
+			shootBtn.addEventListener("click", shoot);
+			resetBtn.addEventListener("click", resetGame);
+
+			resetGame();
+			updateHUD();
+			loop();
+		</script>
+	</body>
+</html>

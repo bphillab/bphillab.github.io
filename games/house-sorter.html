@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>House Sorter - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<script defer src="/analytics.js"></script>
+		<style>
+			.game-wrap {
+				display: grid;
+				gap: 16px;
+				grid-template-columns: minmax(260px, 360px) minmax(260px, 1fr);
+				align-items: start;
+			}
+			.game-card {
+				background: rgba(255, 255, 255, 0.75);
+				border: 1px solid var(--edge);
+				padding: 14px;
+			}
+			#castle {
+				width: 100%;
+				height: auto;
+				border: 1px solid var(--edge);
+				background: linear-gradient(180deg, #f9f2e6 0%, #f3e4cf 100%);
+			}
+			.legend {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 8px 12px;
+				margin-top: 8px;
+				font-size: 0.95rem;
+			}
+			.legend strong {
+				color: var(--accent-strong);
+			}
+			.status {
+				margin-top: 10px;
+				font-weight: 700;
+				color: var(--accent-strong);
+			}
+			.controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+				margin-top: 10px;
+			}
+			@media (max-width: 860px) {
+				.game-wrap {
+					grid-template-columns: 1fr;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        	<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>House Sorter</h1>
+		<p>Match the magical item to the correct house. Get a streak to win.</p>
+
+		<div class="game-wrap">
+			<section class="game-card">
+				<h2>How To Play</h2>
+				<div class="legend">
+					<div><strong>Click a house</strong></div>
+					<div>Choose where the item belongs</div>
+					<div><strong>Streak</strong></div>
+					<div>Reach 5 to win</div>
+				</div>
+				<div class="controls">
+					<button type="button" id="gryff">Gryffindor</button>
+					<button type="button" id="huff">Hufflepuff</button>
+					<button type="button" id="raven">Ravenclaw</button>
+					<button type="button" id="slyth">Slytherin</button>
+					<button type="button" id="reset">Reset</button>
+				</div>
+				<p class="status" id="status">Choose a house.</p>
+				<p><strong>Streak:</strong> <span id="streak">0</span></p>
+				<p><strong>Best:</strong> <span id="best">0</span></p>
+			</section>
+			<canvas id="castle" width="720" height="420" aria-label="House Sorter game board"></canvas>
+		</div>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+		<script>
+			const canvas = document.getElementById("castle");
+			const ctx = canvas.getContext("2d");
+			const statusEl = document.getElementById("status");
+			const streakEl = document.getElementById("streak");
+			const bestEl = document.getElementById("best");
+
+			const buttons = {
+				Gryffindor: document.getElementById("gryff"),
+				Hufflepuff: document.getElementById("huff"),
+				Ravenclaw: document.getElementById("raven"),
+				Slytherin: document.getElementById("slyth")
+			};
+			const resetBtn = document.getElementById("reset");
+
+			const items = [
+				{ name: "Bravery badge", house: "Gryffindor" },
+				{ name: "Lion scarf", house: "Gryffindor" },
+				{ name: "Fairness medal", house: "Hufflepuff" },
+				{ name: "Honey cake", house: "Hufflepuff" },
+				{ name: "Logic quill", house: "Ravenclaw" },
+				{ name: "Star map", house: "Ravenclaw" },
+				{ name: "Clever charm", house: "Slytherin" },
+				{ name: "Silver serpent", house: "Slytherin" }
+			];
+
+			let current = items[0];
+			let streak = 0;
+			let best = 0;
+
+			const pickItem = () => {
+				current = items[Math.floor(Math.random() * items.length)];
+				statusEl.textContent = `Where does the ${current.name} belong?`;
+			};
+
+			const updateScore = () => {
+				streakEl.textContent = streak;
+				bestEl.textContent = best;
+			};
+
+			const drawBoard = () => {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.fillStyle = "#f6efe4";
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				const houses = [
+					{ name: "Gryffindor", x: 80, y: 110, color: "#9b2d2d" },
+					{ name: "Hufflepuff", x: 400, y: 110, color: "#b08b1d" },
+					{ name: "Ravenclaw", x: 80, y: 260, color: "#2f5a8c" },
+					{ name: "Slytherin", x: 400, y: 260, color: "#2f6b4b" }
+				];
+
+				houses.forEach((house) => {
+					ctx.fillStyle = house.color;
+					ctx.fillRect(house.x, house.y, 240, 110);
+					ctx.fillStyle = "#f8f5e8";
+					ctx.font = "20px 'IBM Plex Mono', monospace";
+					ctx.fillText(house.name, house.x + 16, house.y + 60);
+				});
+
+				ctx.fillStyle = "#1f2c36";
+				ctx.fillRect(260, 30, 200, 50);
+				ctx.fillStyle = "#f8f5e8";
+				ctx.fillText("Sorting Table", 274, 62);
+
+				ctx.fillStyle = "#1f2c36";
+				ctx.font = "18px 'IBM Plex Mono', monospace";
+				ctx.fillText(current.name, 260, 95);
+			};
+
+			const handleGuess = (house) => {
+				if (house === current.house) {
+					streak += 1;
+					best = Math.max(best, streak);
+					statusEl.textContent = "Correct! Keep going.";
+				} else {
+					streak = 0;
+					statusEl.textContent = `Oops! That was ${current.house}.`;
+				}
+				updateScore();
+				if (streak >= 5) {
+					statusEl.textContent = "You earned a streak of 5! House champ!";
+				}
+				pickItem();
+				drawBoard();
+			};
+
+			Object.keys(buttons).forEach((house) => {
+				buttons[house].addEventListener("click", () => handleGuess(house));
+			});
+			resetBtn.addEventListener("click", () => {
+				streak = 0;
+				best = 0;
+				updateScore();
+				pickItem();
+				drawBoard();
+			});
+
+			updateScore();
+			pickItem();
+			drawBoard();
+		</script>
+	</body>
+</html>

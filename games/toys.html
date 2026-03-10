@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Math Toys - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+		<style>
+			.toy-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+				gap: 18px;
+				margin: 18px 0 28px;
+			}
+			.toy-card {
+				background: rgba(255, 255, 255, 0.7);
+				border: 1px solid var(--edge);
+				padding: 14px;
+				box-shadow: 0 2px 0 rgba(31, 44, 54, 0.08);
+			}
+			.toy-card h3 {
+				margin-top: 0;
+			}
+			.toy-row {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px 12px;
+				align-items: center;
+				margin: 8px 0;
+			}
+			.toy-buttons {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 6px;
+				margin: 8px 0;
+			}
+			.toy-buttons button {
+				min-width: 38px;
+			}
+			.toy-status {
+				margin: 8px 0 0;
+				font-weight: 700;
+				color: var(--accent-strong);
+			}
+			.toy-progress {
+				width: 100%;
+				height: 12px;
+				background: #f0f4f8;
+				border: 1px solid var(--edge);
+				position: relative;
+			}
+			.toy-progress span {
+				position: absolute;
+				left: 0;
+				top: 0;
+				height: 100%;
+				background: var(--accent);
+			}
+			#sym-canvas {
+				width: 100%;
+				height: auto;
+			}
+		</style>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        			<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        			<li><a href="/cv">CV</a></li>
+        			<li><a href="/blog">Blog</a></li>
+					<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>Math Toys (Ages ~6-8)</h1>
+		<p>Quick number games, skip-counting, and symmetry doodles.</p>
+
+		<div class="toy-grid">
+			<section class="toy-card" id="make-target">
+				<h3>Make the Target</h3>
+				<p>Pick numbers that add up to the target.</p>
+				<div class="toy-row">
+					<strong>Target:</strong> <span id="mt-target">10</span>
+					<strong>Sum:</strong> <span id="mt-sum">0</span>
+				</div>
+				<div class="toy-buttons" id="mt-buttons"></div>
+				<div class="toy-row">
+					<button type="button" id="mt-reset">Reset</button>
+					<button type="button" id="mt-new">New Target</button>
+				</div>
+				<p class="toy-status" id="mt-status">Start adding!</p>
+			</section>
+
+			<section class="toy-card" id="skip-rocket">
+				<h3>Skip-Count Rocket</h3>
+				<p>Count by 2s, 3s, 5s, or 10s. Can you reach 100?</p>
+				<div class="toy-row">
+					<label for="sr-step"><strong>Step:</strong></label>
+					<select id="sr-step">
+						<option value="2">2</option>
+						<option value="3">3</option>
+						<option value="5">5</option>
+						<option value="10">10</option>
+					</select>
+					<button type="button" id="sr-next">Next</button>
+					<button type="button" id="sr-reset">Reset</button>
+				</div>
+				<p><strong>Number:</strong> <span id="sr-number">0</span></p>
+				<div class="toy-progress" aria-hidden="true"><span id="sr-bar" style="width: 0%"></span></div>
+				<p class="toy-status" id="sr-status">Blast off!</p>
+			</section>
+
+			<section class="toy-card" id="symmetry-doodle">
+				<h3>Symmetry Doodle</h3>
+				<p>Draw on the left. The right side mirrors your line.</p>
+				<canvas id="sym-canvas" width="520" height="260"></canvas>
+				<div class="toy-row">
+					<button type="button" id="sym-clear">Clear</button>
+					<label><input type="checkbox" id="sym-mirror" checked> Mirror</label>
+				</div>
+				<p class="toy-status">Try to make a butterfly or a spaceship.</p>
+			</section>
+		</div>
+
+		<footer>
+    		<ul>
+        			<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        			<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+		<script>
+			const mtTargetEl = document.getElementById("mt-target");
+			const mtSumEl = document.getElementById("mt-sum");
+			const mtStatusEl = document.getElementById("mt-status");
+			const mtButtonsEl = document.getElementById("mt-buttons");
+			let mtTarget = 10;
+			let mtSum = 0;
+
+			const updateMakeTarget = () => {
+				mtTargetEl.textContent = mtTarget;
+				mtSumEl.textContent = mtSum;
+				if (mtSum === mtTarget) {
+					mtStatusEl.textContent = "Nice! You hit the target.";
+				} else if (mtSum > mtTarget) {
+					mtStatusEl.textContent = "Too high. Try again.";
+				} else {
+					mtStatusEl.textContent = "Keep going!";
+				}
+			};
+
+			const resetMakeTarget = () => {
+				mtSum = 0;
+				updateMakeTarget();
+			};
+
+			const newMakeTarget = () => {
+				mtTarget = 10 + Math.floor(Math.random() * 11);
+				mtSum = 0;
+				updateMakeTarget();
+			};
+
+			for (let i = 1; i <= 10; i += 1) {
+				const btn = document.createElement("button");
+				btn.type = "button";
+				btn.textContent = String(i);
+				btn.addEventListener("click", () => {
+					mtSum += i;
+					updateMakeTarget();
+				});
+				mtButtonsEl.appendChild(btn);
+			}
+
+			document.getElementById("mt-reset").addEventListener("click", resetMakeTarget);
+			document.getElementById("mt-new").addEventListener("click", newMakeTarget);
+			updateMakeTarget();
+
+			const srNumberEl = document.getElementById("sr-number");
+			const srStepEl = document.getElementById("sr-step");
+			const srStatusEl = document.getElementById("sr-status");
+			const srBarEl = document.getElementById("sr-bar");
+			let srNumber = 0;
+
+			const updateSkipRocket = () => {
+				srNumberEl.textContent = srNumber;
+				const progress = Math.min(100, Math.round((srNumber / 100) * 100));
+				srBarEl.style.width = `${progress}%`;
+				if (srNumber === 100) {
+					srStatusEl.textContent = "You made it to 100!";
+				} else {
+					srStatusEl.textContent = "Keep counting!";
+				}
+			};
+
+			document.getElementById("sr-next").addEventListener("click", () => {
+				const step = Number(srStepEl.value);
+				srNumber = Math.min(100, srNumber + step);
+				updateSkipRocket();
+			});
+
+			document.getElementById("sr-reset").addEventListener("click", () => {
+				srNumber = 0;
+				updateSkipRocket();
+			});
+
+			updateSkipRocket();
+
+			const canvas = document.getElementById("sym-canvas");
+			const ctx = canvas.getContext("2d");
+			const mirrorBox = document.getElementById("sym-mirror");
+			let drawing = false;
+			let last = null;
+
+			const drawLine = (from, to) => {
+				ctx.beginPath();
+				ctx.moveTo(from.x, from.y);
+				ctx.lineTo(to.x, to.y);
+				ctx.stroke();
+			};
+
+			const getPoint = (event) => {
+				const rect = canvas.getBoundingClientRect();
+				return {
+					x: event.clientX - rect.left,
+					y: event.clientY - rect.top
+				};
+			};
+
+			const clearCanvas = () => {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.strokeStyle = "#1f2c36";
+				ctx.lineWidth = 2;
+				ctx.lineCap = "round";
+				ctx.setLineDash([4, 4]);
+				ctx.beginPath();
+				ctx.moveTo(canvas.width / 2, 10);
+				ctx.lineTo(canvas.width / 2, canvas.height - 10);
+				ctx.stroke();
+				ctx.setLineDash([]);
+			};
+
+			canvas.addEventListener("mousedown", (event) => {
+				drawing = true;
+				last = getPoint(event);
+			});
+
+			canvas.addEventListener("mousemove", (event) => {
+				if (!drawing) {
+					return;
+				}
+				const point = getPoint(event);
+				drawLine(last, point);
+				if (mirrorBox.checked) {
+					const mirrorFrom = { x: canvas.width - last.x, y: last.y };
+					const mirrorTo = { x: canvas.width - point.x, y: point.y };
+					drawLine(mirrorFrom, mirrorTo);
+				}
+				last = point;
+			});
+
+			["mouseup", "mouseleave"].forEach((eventName) => {
+				canvas.addEventListener(eventName, () => {
+					drawing = false;
+					last = null;
+				});
+			});
+
+			document.getElementById("sym-clear").addEventListener("click", clearCanvas);
+			clearCanvas();
+		</script>
+	</body>
+</html>

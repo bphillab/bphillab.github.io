@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Brick Quest: Portal Run - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<script defer src="/analytics.js"></script>
+		<style>
+			.game-wrap {
+				display: grid;
+				gap: 16px;
+				grid-template-columns: minmax(260px, 360px) minmax(260px, 1fr);
+				align-items: start;
+			}
+			.game-card {
+				background: rgba(255, 255, 255, 0.75);
+				border: 1px solid var(--edge);
+				padding: 14px;
+			}
+			#game {
+				width: 100%;
+				height: auto;
+				border: 1px solid var(--edge);
+				background: linear-gradient(180deg, #e8f3ff 0%, #f9fbff 55%, #f6efe3 100%);
+			}
+			.legend {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 8px 12px;
+				margin-top: 8px;
+				font-size: 0.95rem;
+			}
+			.legend strong {
+				color: var(--accent-strong);
+			}
+			.status {
+				margin-top: 10px;
+				font-weight: 700;
+				color: var(--accent-strong);
+			}
+			.controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+				margin-top: 10px;
+			}
+			@media (max-width: 860px) {
+				.game-wrap {
+					grid-template-columns: 1fr;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        	<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>Brick Quest: Portal Run</h1>
+		<p>Build towers, grab the gem, and leap into the portal. Three zones, lots of hops.</p>
+
+		<div class="game-wrap">
+			<section class="game-card">
+				<h2>How To Play</h2>
+				<p>You are the tiny ninja. Build blocks to reach the gem, then touch the portal to win.</p>
+				<div class="legend">
+					<div><strong>Arrow keys</strong></div>
+					<div>Move</div>
+					<div><strong>Space</strong></div>
+					<div>Jump</div>
+					<div><strong>B</strong></div>
+					<div>Place block</div>
+					<div><strong>C</strong></div>
+					<div>Clear block</div>
+				</div>
+				<div class="controls">
+					<button type="button" id="reset">Reset</button>
+					<button type="button" id="hint">Show Hint</button>
+				</div>
+				<p class="status" id="status">Find the gem!</p>
+			</section>
+			<canvas id="game" width="720" height="420" aria-label="Brick Quest game board"></canvas>
+		</div>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+		<script>
+			const canvas = document.getElementById("game");
+			const ctx = canvas.getContext("2d");
+			const statusEl = document.getElementById("status");
+			const resetBtn = document.getElementById("reset");
+			const hintBtn = document.getElementById("hint");
+
+			const tile = 30;
+			const cols = Math.floor(canvas.width / tile);
+			const rows = Math.floor(canvas.height / tile);
+			const groundY = rows - 2;
+			const maxBlocks = 6;
+
+			const zones = [
+				{ start: 0, end: 8, theme: "#f6efe3", label: "Brickyard" },
+				{ start: 9, end: 15, theme: "#e9f3ff", label: "Sky Bridge" },
+				{ start: 16, end: cols - 1, theme: "#efe7ff", label: "Portal Cliff" }
+			];
+
+			const player = {
+				x: 2,
+				y: groundY - 1,
+				vx: 0,
+				vy: 0,
+				w: 0.7,
+				h: 0.9,
+				onGround: false,
+				hasGem: false
+			};
+
+			const blocks = [];
+			const portals = [{ x: cols - 3, y: groundY - 2 }];
+			const gem = { x: 12, y: groundY - 4, collected: false };
+			let showHint = false;
+
+			const keyState = {};
+
+			const resetGame = () => {
+				player.x = 2;
+				player.y = groundY - 1;
+				player.vx = 0;
+				player.vy = 0;
+				player.onGround = false;
+				player.hasGem = false;
+				gem.collected = false;
+				blocks.length = 0;
+				showHint = false;
+				statusEl.textContent = "Find the gem!";
+			};
+
+			const addBlock = () => {
+				if (blocks.length >= maxBlocks) {
+					statusEl.textContent = "Max blocks reached.";
+					return;
+				}
+				const target = { x: Math.round(player.x), y: Math.round(player.y + 1) };
+				if (target.y >= groundY) {
+					return;
+				}
+				if (blocks.some((b) => b.x === target.x && b.y === target.y)) {
+					return;
+				}
+				blocks.push(target);
+			};
+
+			const clearBlock = () => {
+				const target = { x: Math.round(player.x), y: Math.round(player.y + 1) };
+				const index = blocks.findIndex((b) => b.x === target.x && b.y === target.y);
+				if (index >= 0) {
+					blocks.splice(index, 1);
+				}
+			};
+
+			const solidAt = (x, y) => {
+				if (y >= groundY) {
+					return true;
+				}
+				return blocks.some((b) => b.x === x && b.y === y);
+			};
+
+			const updatePlayer = () => {
+				player.vx = 0;
+				if (keyState["ArrowLeft"]) {
+					player.vx = -0.12;
+				}
+				if (keyState["ArrowRight"]) {
+					player.vx = 0.12;
+				}
+				if (keyState["Space"] && player.onGround) {
+					player.vy = -0.32;
+					player.onGround = false;
+				}
+				player.vy += 0.018;
+
+				let nextX = player.x + player.vx;
+				nextX = Math.max(0.5, Math.min(cols - 1.5, nextX));
+				player.x = nextX;
+
+				let nextY = player.y + player.vy;
+				if (player.vy >= 0) {
+					const footY = Math.floor(nextY + player.h);
+					const footX = Math.round(player.x);
+					if (solidAt(footX, footY)) {
+						player.y = footY - player.h;
+						player.vy = 0;
+						player.onGround = true;
+					} else {
+						player.y = nextY;
+						player.onGround = false;
+					}
+				} else {
+					player.y = nextY;
+				}
+
+				player.y = Math.min(player.y, groundY - player.h);
+			};
+
+			const checkCollect = () => {
+				if (!gem.collected) {
+					const dx = Math.abs(player.x - gem.x);
+					const dy = Math.abs(player.y - gem.y);
+					if (dx < 0.6 && dy < 0.6) {
+						gem.collected = true;
+						player.hasGem = true;
+						statusEl.textContent = "Gem found! Head to the portal.";
+					}
+				}
+				if (player.hasGem) {
+					const portal = portals[0];
+					const dx = Math.abs(player.x - portal.x);
+					const dy = Math.abs(player.y - portal.y);
+					if (dx < 0.8 && dy < 0.8) {
+						statusEl.textContent = "Portal open! You win!";
+					}
+				}
+			};
+
+			const drawScene = () => {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				zones.forEach((zone) => {
+					ctx.fillStyle = zone.theme;
+					ctx.fillRect(zone.start * tile, 0, (zone.end - zone.start + 1) * tile, canvas.height);
+					ctx.fillStyle = "rgba(31, 44, 54, 0.18)";
+					ctx.fillText(zone.label, zone.start * tile + 10, 20);
+				});
+
+				ctx.fillStyle = "#c9b89c";
+				ctx.fillRect(0, groundY * tile, canvas.width, tile * 2);
+
+				blocks.forEach((block) => {
+					ctx.fillStyle = "#d98a4e";
+					ctx.fillRect(block.x * tile, block.y * tile, tile, tile);
+					ctx.strokeStyle = "#9b5a2f";
+					ctx.strokeRect(block.x * tile, block.y * tile, tile, tile);
+				});
+
+				if (!gem.collected) {
+					ctx.fillStyle = "#4fb3ff";
+					ctx.beginPath();
+					ctx.moveTo(gem.x * tile + tile / 2, gem.y * tile + 4);
+					ctx.lineTo(gem.x * tile + 4, gem.y * tile + tile / 2);
+					ctx.lineTo(gem.x * tile + tile / 2, gem.y * tile + tile - 4);
+					ctx.lineTo(gem.x * tile + tile - 4, gem.y * tile + tile / 2);
+					ctx.closePath();
+					ctx.fill();
+				}
+
+				portals.forEach((portal) => {
+					ctx.strokeStyle = "#6b42c7";
+					ctx.lineWidth = 4;
+					ctx.beginPath();
+					ctx.arc(portal.x * tile + tile / 2, portal.y * tile + tile / 2, tile / 2 + 3, 0, Math.PI * 2);
+					ctx.stroke();
+					ctx.lineWidth = 1;
+				});
+
+				ctx.fillStyle = "#1f2c36";
+				ctx.fillRect(player.x * tile, player.y * tile, player.w * tile, player.h * tile);
+				ctx.fillStyle = "#f2d5b4";
+				ctx.fillRect(player.x * tile + 4, player.y * tile + 4, 8, 8);
+
+				if (showHint) {
+					ctx.strokeStyle = "#3a6ea5";
+					ctx.setLineDash([6, 4]);
+					ctx.beginPath();
+					ctx.moveTo(4 * tile, (groundY - 1) * tile);
+					ctx.lineTo(8 * tile, (groundY - 4) * tile);
+					ctx.lineTo(12 * tile, (groundY - 4) * tile);
+					ctx.stroke();
+					ctx.setLineDash([]);
+				}
+			};
+
+			const loop = () => {
+				updatePlayer();
+				checkCollect();
+				drawScene();
+				requestAnimationFrame(loop);
+			};
+
+			window.addEventListener("keydown", (event) => {
+				if (event.code === "Space") {
+					keyState["Space"] = true;
+					event.preventDefault();
+				}
+				keyState[event.key] = true;
+				if (event.key === "b" || event.key === "B") {
+					addBlock();
+				}
+				if (event.key === "c" || event.key === "C") {
+					clearBlock();
+				}
+			});
+
+			window.addEventListener("keyup", (event) => {
+				if (event.code === "Space") {
+					keyState["Space"] = false;
+				}
+				keyState[event.key] = false;
+			});
+
+			resetBtn.addEventListener("click", resetGame);
+			hintBtn.addEventListener("click", () => {
+				showHint = !showHint;
+				hintBtn.textContent = showHint ? "Hide Hint" : "Show Hint";
+			});
+
+			resetGame();
+			loop();
+		</script>
+	</body>
+</html>
