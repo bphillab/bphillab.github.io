@@ -72,7 +72,6 @@
 		<p>Pick two such points independently. What is the expected distance between them?</p>
 
 		<h2>Main Solution</h2>
-		<p>Here is the clean way to model a random Cantor point without heavy base-3 notation.</p>
 		<p>At each step you flip a fair coin: heads means "keep the left third," tails means "keep the right third." If you do this forever, you land on a single point \(X\) in the Cantor set.</p>
 		<p>That description is enough to write a simple self-similarity rule:</p>
 		<p>\[
@@ -97,7 +96,7 @@
 		\]</p>
 
 		<h3>Generalization: Middle-(1-2a) Cantor Set</h3>
-		<p>Instead of removing the middle third, keep two intervals of length \(a\): \([0,a]\) and \([1-a,1]\), with \(0<a<1/2\).</p>
+		<p>Instead of removing the middle third, keep two intervals of length \(a\): \( [0,a] \) and \( [1-a,1] \), with \(0 &lt; a &lt; 1/2\).</p>
 		<p>The same coin-flip construction gives</p>
 		<p>\[
 			X=\begin{cases}
