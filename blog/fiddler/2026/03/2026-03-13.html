@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - Mar 13, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.mc-section {
+				margin: 18px 0 10px;
+			}
+			.mc-controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px 14px;
+				align-items: center;
+				margin: 8px 0 10px;
+			}
+			.mc-controls label {
+				font-size: 0.95em;
+			}
+			.mc-controls input {
+				width: 96px;
+			}
+			.mc-controls button {
+				padding: 6px 10px;
+				border: 1px solid #bbb;
+				background: #f7f7f7;
+				cursor: pointer;
+			}
+			.mc-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+				gap: 16px;
+				margin-top: 8px;
+			}
+			.mc-panel {
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				padding: 10px;
+			}
+			.mc-panel canvas {
+				width: 100%;
+				max-width: 520px;
+				height: auto;
+				border: 1px solid #d6d6d6;
+				background: #ffffff;
+			}
+			.mc-readout {
+				margin-top: 8px;
+				font-size: 0.95em;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: Mar 13, 2026</h1>
+		<p><em>Posted on Mar 13, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>Build the Cantor set by repeatedly removing the middle third of every remaining interval.</p>
+		<p>Choose a random point in the Cantor set by independently picking left or right at every stage, each with probability 1/2.</p>
+		<p>Pick two such points independently. What is the expected distance between them?</p>
+
+		<h2>Main Solution</h2>
+		<p>Here is the clean way to model a random Cantor point without heavy base-3 notation.</p>
+		<p>At each step you flip a fair coin: heads means "keep the left third," tails means "keep the right third." If you do this forever, you land on a single point \(X\) in the Cantor set.</p>
+		<p>That description is enough to write a simple self-similarity rule:</p>
+		<p>\[
+			X=\begin{cases}
+			\frac13 X_1 & (\text{left third})\\
+			\frac23+\frac13 X_1 & (\text{right third})
+			\end{cases}
+		\]</p>
+		<p>where \(X_1\) is an independent copy of \(X\). It just says: once you pick left or right, the rest of the process looks like a scaled copy of the original.</p>
+		<p>Now pick two independent Cantor points \(X\) and \(Y\), and let \(D=|X-Y|\). We condition on the first coin flips.</p>
+		<ul>
+			<li>With probability \(1/2\), both points choose the same third. Then \(D=(1/3)|X_1-Y_1|\), so \(\mathbb{E}[D\mid\text{same}]=(1/3)\mathbb{E}[D]\).</li>
+			<li>With probability \(1/2\), the points choose opposite thirds. Then one is in \([0,1/3]\) and the other in \([2/3,1]\), so the distance is always positive and equals \(\frac23+\frac13(Y_1-X_1)\). Taking expectations gives \(\mathbb{E}[D\mid\text{opposite}]=2/3\).</li>
+		</ul>
+		<p>Therefore</p>
+		<p>\[
+			\mathbb{E}[D]=\frac12\cdot\frac13\mathbb{E}[D]+\frac12\cdot\frac23.
+		\]</p>
+		<p>Solving gives</p>
+		<p>\[
+			\mathbb{E}[|X-Y|]=\frac{2}{5}=0.4.
+		\]</p>
+
+		<h3>Generalization: Middle-(1-2a) Cantor Set</h3>
+		<p>Instead of removing the middle third, keep two intervals of length \(a\): \([0,a]\) and \([1-a,1]\), with \(0<a<1/2\).</p>
+		<p>The same coin-flip construction gives</p>
+		<p>\[
+			X=\begin{cases}
+			aX_1 & (\text{left})\\
+			(1-a)+aX_1 & (\text{right})
+			\end{cases}
+		\]</p>
+		<p>and the expected distance between two independent points becomes</p>
+		<p>\[
+			\mathbb{E}[|X-Y|]=\frac{1-a}{2-a}.
+		\]</p>
+		<p>Plugging in \(a=1/3\) recovers \(2/5\).</p>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>Now pick three independent Cantor points \(X,Y,Z\). What is the probability they can be the side lengths of a triangle?</p>
+		<p>Because ties happen with probability 0, we can write</p>
+		<p>\[
+			\mathbb{P}(\text{triangle})=1-3\,\mathbb{P}(X\ge Y+Z).
+		\]</p>
+		<p>Let \(p=\mathbb{P}(X\ge Y+Z)\). We again condition on the first coin flips. Write</p>
+		<p>\[
+			X=\frac23 B+\frac13 X_1,\quad
+			Y=\frac23 C+\frac13 Y_1,\quad
+			Z=\frac23 D+\frac13 Z_1,
+		\]</p>
+		<p>where \(B,C,D\in\{0,1\}\) are the first left/right choices and \(X_1,Y_1,Z_1\) are independent copies of \(X\). Multiply by 3 to get</p>
+		<p>\[
+			2B+X_1\ge 2C+Y_1+2D+Z_1.
+		\]</p>
+		<p>There are eight equally likely cases for \((B,C,D)\):</p>
+		<ul>
+			<li>\((0,0,0)\): inequality becomes \(X_1\ge Y_1+Z_1\), which has probability \(p\).</li>
+			<li>\((1,0,0)\): inequality is always true (left side is at least 2, right side is at most 2), so probability 1.</li>
+			<li>\((1,1,0)\) or \((1,0,1)\): inequality becomes \(X_1\ge Y_1+Z_1\), probability \(p\).</li>
+			<li>All remaining cases are impossible, probability 0.</li>
+		</ul>
+		<p>Thus</p>
+		<p>\[
+			p=\frac18\cdot 1+\frac38\cdot p,
+		\]</p>
+		<p>so \(p=1/5\). Therefore</p>
+		<p>\[
+			\mathbb{P}(\text{triangle})=1-3\cdot\frac15=\frac25=0.4.
+		\]</p>
+
+		<h2>Monte Carlo Check</h2>
+		<p>These distributions are easy to simulate by truncating the coin-flip process to a finite depth.</p>
+		<p>The first histogram shows distances \(|X-Y|\). The second shows the triangle slack \(S=(\text{sum of two smaller})-(\text{largest})\), so triangles correspond to \(S>0\).</p>
+		<div class="mc-section">
+			<div class="mc-controls">
+				<label for="mc-samples">Samples:</label>
+				<input id="mc-samples" type="number" min="100" step="100" value="20000">
+				<label for="mc-depth">Depth:</label>
+				<input id="mc-depth" type="number" min="4" max="18" step="1" value="12">
+				<button id="mc-run">Run simulation</button>
+			</div>
+			<div class="mc-grid">
+				<div class="mc-panel">
+					<canvas id="mc-distance-canvas" width="520" height="180" aria-label="Histogram of Cantor distances"></canvas>
+					<div class="mc-readout" id="mc-distance-readout">Distance mean: --</div>
+				</div>
+				<div class="mc-panel">
+					<canvas id="mc-triangle-canvas" width="520" height="180" aria-label="Histogram of triangle slack"></canvas>
+					<div class="mc-readout" id="mc-triangle-readout">Triangle probability: --</div>
+				</div>
+			</div>
+		</div>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+		<script>
+			function randomCantorPoint(depth, a) {
+				let x = 0;
+				let scale = 1;
+				for (let i = 0; i < depth; i += 1) {
+					if (Math.random() < 0.5) {
+						// left interval
+					} else {
+						x += (1 - a) * scale;
+					}
+					scale *= a;
+				}
+				return x;
+			}
+
+			function drawHistogram(canvas, counts, color) {
+				const ctx = canvas.getContext("2d");
+				const w = canvas.width;
+				const h = canvas.height;
+				const plotBottom = h - 24;
+				ctx.clearRect(0, 0, w, h);
+				ctx.fillStyle = "#ffffff";
+				ctx.fillRect(0, 0, w, h);
+				const max = Math.max(...counts, 1);
+				const binWidth = w / counts.length;
+				ctx.fillStyle = color;
+				for (let i = 0; i < counts.length; i += 1) {
+					const barHeight = (counts[i] / max) * (plotBottom - 8);
+					const x = i * binWidth;
+					ctx.fillRect(x, plotBottom - barHeight, binWidth - 1, barHeight);
+				}
+				ctx.strokeStyle = "#d0d0d0";
+				ctx.strokeRect(0.5, 0.5, w - 1, plotBottom - 0.5);
+			}
+
+			function drawXAxisLabels(canvas, labels) {
+				const ctx = canvas.getContext("2d");
+				const w = canvas.width;
+				const h = canvas.height;
+				ctx.fillStyle = "#555";
+				ctx.font = "12px Helvetica, Arial, Sans-Serif";
+				ctx.textAlign = "center";
+				ctx.textBaseline = "top";
+				for (let i = 0; i < labels.length; i += 1) {
+					const x = (i / (labels.length - 1)) * w;
+					ctx.fillText(labels[i], x, h - 18);
+				}
+			}
+
+			function drawZeroSlackMarker(canvas, color) {
+				const ctx = canvas.getContext("2d");
+				const w = canvas.width;
+				const h = canvas.height;
+				const x = w / 2;
+				const plotBottom = h - 24;
+				ctx.strokeStyle = color;
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(x, 8);
+				ctx.lineTo(x, plotBottom - 6);
+				ctx.stroke();
+				ctx.fillStyle = color;
+				ctx.font = "12px Helvetica, Arial, Sans-Serif";
+				ctx.textAlign = "left";
+				ctx.fillText("s = 0", Math.min(x + 6, w - 30), 16);
+			}
+
+			function runMonteCarlo() {
+				const samples = Math.max(100, parseInt(document.getElementById("mc-samples").value, 10) || 20000);
+				const depth = Math.max(4, parseInt(document.getElementById("mc-depth").value, 10) || 12);
+				const a = 1 / 3;
+				const distanceBins = 40;
+				const slackBins = 40;
+				const distanceCounts = Array(distanceBins).fill(0);
+				const slackCounts = Array(slackBins).fill(0);
+				let distanceSum = 0;
+				let triangleCount = 0;
+
+				for (let i = 0; i < samples; i += 1) {
+					const x1 = randomCantorPoint(depth, a);
+					const y1 = randomCantorPoint(depth, a);
+					const d = Math.abs(x1 - y1);
+					distanceSum += d;
+					const dIndex = Math.min(distanceBins - 1, Math.floor(d * distanceBins));
+					distanceCounts[dIndex] += 1;
+
+					const x2 = randomCantorPoint(depth, a);
+					const y2 = randomCantorPoint(depth, a);
+					const z2 = randomCantorPoint(depth, a);
+					const arr = [x2, y2, z2].sort((m, n) => m - n);
+					const slack = (arr[0] + arr[1]) - arr[2];
+					if (slack > 0) {
+						triangleCount += 1;
+					}
+					const slackClamped = Math.max(-1, Math.min(1, slack));
+					const sIndex = Math.min(slackBins - 1, Math.floor(((slackClamped + 1) / 2) * slackBins));
+					slackCounts[sIndex] += 1;
+				}
+
+				const distanceCanvas = document.getElementById("mc-distance-canvas");
+				drawHistogram(distanceCanvas, distanceCounts, "#2d6ea3");
+				drawXAxisLabels(distanceCanvas, ["0", "0.25", "0.5", "0.75", "1"]);
+				const triangleCanvas = document.getElementById("mc-triangle-canvas");
+				drawHistogram(triangleCanvas, slackCounts, "#a33b3b");
+				drawXAxisLabels(triangleCanvas, ["-1", "-0.5", "0", "0.5", "1"]);
+				drawZeroSlackMarker(triangleCanvas, "#7a1f1f");
+
+				const distanceMean = distanceSum / samples;
+				const triangleProb = triangleCount / samples;
+				document.getElementById("mc-distance-readout").textContent = "Distance mean: " + distanceMean.toFixed(4);
+				document.getElementById("mc-triangle-readout").textContent = "Triangle probability: " + triangleProb.toFixed(4) + "  (slack > 0)";
+			}
+
+			document.getElementById("mc-run").addEventListener("click", runMonteCarlo);
+			runMonteCarlo();
+		</script>
+	</body>
+</html>
