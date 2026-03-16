@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>MoMath Mindbender - Disjoint Subset Sums - Mar 16, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<script defer src="/analytics.js"></script>
+		<style>
+			.mindbender-sampler {
+				margin: 14px 0 20px;
+				max-width: 680px;
+			}
+			.mindbender-controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px 12px;
+				align-items: center;
+				margin: 10px 0;
+			}
+			.mindbender-controls button {
+				padding: 6px 10px;
+				border: 1px solid #b8b8b8;
+				background: #f7f7f7;
+				cursor: pointer;
+			}
+			.mindbender-input {
+				width: min(100%, 520px);
+				padding: 6px 8px;
+				border: 1px solid #b8b8b8;
+			}
+			.mindbender-output {
+				padding: 10px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				font-size: 0.96em;
+			}
+			.mindbender-output p {
+				margin: 6px 0;
+			}
+			.mindbender-badge {
+				display: inline-block;
+				padding: 2px 6px;
+				border-radius: 6px;
+				background: #e6eef7;
+				border: 1px solid #9bb6cf;
+				font-size: 0.9em;
+			}
+		</style>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>MoMath Mindbender: Disjoint Subset Sums</h1>
+		<p><em>Posted on Mar 16, 2026</em></p>
+
+		<h2>Source</h2>
+		<p>Monthly Mindbenders (March 2026). Based on a problem from the 1972 International Mathematical Olympiad.</p>
+
+		<h2>Problem</h2>
+		<p>You challenge your bestie to the following game. She chooses 10 distinct integers between 1 and 100; you try to find two disjoint, nonempty subsets of her 10 numbers that have the same sum.</p>
+		<p>With best play, who will win?</p>
+
+		<h2>Answer</h2>
+		<p><strong>You will win.</strong> No matter which 10 distinct integers she picks, two disjoint nonempty subsets with equal sum are guaranteed to exist.</p>
+
+		<h2>Why</h2>
+		<p>There are 10 numbers, so there are 
+		\(2^{10}=1024\) subsets in total. Every subset has a sum between 0 and the sum of the 10 largest possible choices:</p>
+		<p>\[
+		100+99+\cdots+91=955.
+		\]</p>
+		<p>So the possible subset sums are in \(\{0,1,2,\dots,955\}\), which gives only 956 values. Since 1024 subsets exceed 956 sums, two different subsets must share the same sum.</p>
+		<p>If two different subsets have the same sum, their symmetric difference splits into two disjoint nonempty subsets with equal sum. Therefore you can always win.</p>
+
+		<h2>Random Generator</h2>
+		<p>Click to generate 10 distinct integers or enter your own. The generator will find disjoint subsets with equal sum.</p>
+		<div class="mindbender-sampler">
+			<div class="mindbender-controls">
+				<button id="mindbender-generate">Generate Random Set</button>
+				<button id="mindbender-run">Use Manual Numbers</button>
+				<span class="mindbender-badge" id="mindbender-status">Ready</span>
+			</div>
+			<div class="mindbender-controls">
+				<label for="mindbender-manual">Manual numbers (10 distinct integers 1-100, comma-separated):</label>
+				<input id="mindbender-manual" class="mindbender-input" type="text" placeholder="e.g., 3, 7, 12, 25, 31, 46, 58, 63, 79, 90">
+			</div>
+			<div class="mindbender-output">
+				<p><strong>Numbers:</strong> <span id="mindbender-numbers">—</span></p>
+				<p><strong>Subset A:</strong> <span id="mindbender-subset-a">—</span></p>
+				<p><strong>Subset B:</strong> <span id="mindbender-subset-b">—</span></p>
+				<p><strong>Common Sum:</strong> <span id="mindbender-sum">—</span></p>
+			</div>
+		</div>
+
+		<p><strong>More MoMath Mindbenders:</strong> <a href="/blog/momath/2026/03/2026-03-06-bacteria.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+		<script>
+			(function () {
+				var button = document.getElementById("mindbender-generate");
+				var runButton = document.getElementById("mindbender-run");
+				var status = document.getElementById("mindbender-status");
+				var manualInput = document.getElementById("mindbender-manual");
+				var numbersEl = document.getElementById("mindbender-numbers");
+				var subsetAEl = document.getElementById("mindbender-subset-a");
+				var subsetBEl = document.getElementById("mindbender-subset-b");
+				var sumEl = document.getElementById("mindbender-sum");
+
+				if (!button || !runButton || !status || !manualInput || !numbersEl || !subsetAEl || !subsetBEl || !sumEl) {
+					return;
+				}
+
+				function randomDistinctIntegers(count, min, max) {
+					var set = new Set();
+					while (set.size < count) {
+						var v = Math.floor(Math.random() * (max - min + 1)) + min;
+						set.add(v);
+					}
+					return Array.from(set).sort(function (a, b) { return a - b; });
+				}
+
+				function maskToSubset(arr, mask) {
+					var out = [];
+					for (var i = 0; i < arr.length; i += 1) {
+						if (mask & (1 << i)) {
+							out.push(arr[i]);
+						}
+					}
+					return out;
+				}
+
+				function findDisjointEqualSum(arr) {
+					var n = arr.length;
+					var totalMasks = 1 << n;
+					var sums = [];
+					for (var m = 1; m < totalMasks; m += 1) {
+						var sum = 0;
+						for (var i = 0; i < n; i += 1) {
+							if (m & (1 << i)) {
+								sum += arr[i];
+							}
+						}
+						if (!sums[sum]) {
+							sums[sum] = [m];
+							continue;
+						}
+						for (var j = 0; j < sums[sum].length; j += 1) {
+							var other = sums[sum][j];
+							if ((other & m) === 0) {
+								return { sum: sum, a: other, b: m };
+							}
+						}
+						sums[sum].push(m);
+					}
+					return null;
+				}
+
+				function parseManualNumbers(value) {
+					var raw = value.split(/[^0-9]+/).filter(function (part) { return part.length > 0; });
+					var nums = raw.map(function (part) { return parseInt(part, 10); });
+					if (nums.length !== 10) {
+						return { ok: false, message: "Enter exactly 10 integers." };
+					}
+					for (var i = 0; i < nums.length; i += 1) {
+						if (!Number.isFinite(nums[i]) || nums[i] < 1 || nums[i] > 100) {
+							return { ok: false, message: "All numbers must be integers from 1 to 100." };
+						}
+					}
+					var set = new Set(nums);
+					if (set.size !== 10) {
+						return { ok: false, message: "Numbers must be distinct." };
+					}
+					var sorted = Array.from(set).sort(function (a, b) { return a - b; });
+					return { ok: true, numbers: sorted };
+				}
+
+				function updateFromNumbers(numbers) {
+					var result = findDisjointEqualSum(numbers);
+					if (!result) {
+						status.textContent = "No match found (unexpected)";
+						numbersEl.textContent = numbers.join(", ");
+						subsetAEl.textContent = "—";
+						subsetBEl.textContent = "—";
+						sumEl.textContent = "—";
+						return;
+					}
+					var subsetA = maskToSubset(numbers, result.a);
+					var subsetB = maskToSubset(numbers, result.b);
+					status.textContent = "Match found";
+					numbersEl.textContent = numbers.join(", ");
+					subsetAEl.textContent = subsetA.join(", ");
+					subsetBEl.textContent = subsetB.join(", ");
+					sumEl.textContent = result.sum;
+				}
+
+				function renderRandom() {
+					updateFromNumbers(randomDistinctIntegers(10, 1, 100));
+				}
+
+				function renderManual() {
+					var parsed = parseManualNumbers(manualInput.value);
+					if (!parsed.ok) {
+						status.textContent = parsed.message;
+						return;
+					}
+					updateFromNumbers(parsed.numbers);
+				}
+
+				button.addEventListener("click", renderRandom);
+				runButton.addEventListener("click", renderManual);
+				manualInput.addEventListener("keydown", function (event) {
+					if (event.key === "Enter") {
+						renderManual();
+					}
+				});
+				renderRandom();
+			})();
+		</script>
+	</body>
+</html>
