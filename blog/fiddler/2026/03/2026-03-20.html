@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - Mar 20, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.fiddler-figure {
+				margin: 18px 0;
+			}
+			.fiddler-figure svg {
+				width: 100%;
+				max-width: 520px;
+				height: auto;
+				border: 1px solid #d6d6d6;
+				background: #ffffff;
+			}
+			.fiddler-figure figcaption {
+				font-size: 0.95em;
+				color: #555;
+				margin-top: 6px;
+			}
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+			}
+			.extra-interactive {
+				margin: 16px 0 22px;
+				max-width: 560px;
+			}
+			.extra-interactive canvas {
+				width: 100%;
+				max-width: 520px;
+				height: auto;
+				border: 1px solid #d6d6d6;
+				background: #ffffff;
+			}
+			.extra-controls {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				flex-wrap: wrap;
+				margin: 8px 0 6px;
+			}
+			.extra-controls input {
+				width: 180px;
+			}
+			.extra-readout {
+				font-size: 0.95em;
+				color: #444;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: Mar 20, 2026</h1>
+		<p><em>Posted on Mar 20, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>I have a loop of string whose total length is 10. I place it around a unit disk (radius 1) and pull a point on the string away from the disk until the string is taut.</p>
+		<p>I drag this point around the disk in all directions, always keeping the string taut, tracing out a loop. What is the area inside this resulting loop?</p>
+
+		<h2>Main Solution</h2>
+		<p>Let \(P\) be the pulled point and \(O\) the center of the disk. The string is tangent at two points and wraps around the far side of the circle.</p>
+		<p>Let \(d=|OP|\). If the angle between \(OP\) and the radius to a tangency point is \(\alpha\), then</p>
+		<ul>
+			<li>tangent length \(= \sqrt{d^2-1}=\tan\alpha\),</li>
+			<li>wrapped arc length \(=2\pi-2\alpha\).</li>
+		</ul>
+		<p>So the total length condition is</p>
+		<p>\[
+			10=2\tan\alpha+2\pi-2\alpha
+			\quad\Longrightarrow\quad
+			\tan\alpha-\alpha=5-\pi.
+		\]</p>
+		<p>This gives \(\alpha\approx1.260529\) radians, so</p>
+		<p>\[
+			d=\sec\alpha\approx 3.2753267.
+		\]</p>
+		<p>The dragged point stays at distance \(d\) from \(O\), so the traced loop is a circle of radius \(d\).</p>
+		<figure class="fiddler-figure">
+			<svg viewBox="0 0 420 320" aria-label="Geometry for the main problem with alpha and tangent length">
+				<circle cx="200" cy="160" r="70" fill="#e7f4ff" stroke="#333" stroke-width="2"></circle>
+				<circle cx="200" cy="160" r="4" fill="#111"></circle>
+				<circle cx="340" cy="160" r="5" fill="#a33"></circle>
+				<line x1="200" y1="160" x2="340" y2="160" stroke="#666" stroke-width="1.5" stroke-dasharray="5 4"></line>
+				<line x1="200" y1="160" x2="230.6" y2="97.0" stroke="#666" stroke-width="1.5"></line>
+				<line x1="340" y1="160" x2="230.6" y2="97.0" stroke="#444" stroke-width="2"></line>
+				<line x1="340" y1="160" x2="230.6" y2="223.0" stroke="#444" stroke-width="2"></line>
+				<path d="M230.6,97.0 A70,70 0 1 0 230.6,223.0" fill="none" stroke="#2d6ea3" stroke-width="3"></path>
+				<path d="M225,160 A25,25 0 0 0 210.8,137.5" fill="none" stroke="#888" stroke-width="2"></path>
+				<text x="206" y="150" font-size="13" fill="#111">O</text>
+				<text x="348" y="152" font-size="13" fill="#a33">P</text>
+				<text x="218" y="136" font-size="13" fill="#444">\(\alpha\)</text>
+				<text x="265" y="110" font-size="12" fill="#2d6ea3">far arc</text>
+				<text x="270" y="176" font-size="12" fill="#444">\(\sqrt{d^2-1}\)</text>
+				<text x="268" y="150" font-size="12" fill="#666">\(d\)</text>
+			</svg>
+			<figcaption>\(\alpha\) is the angle to a tangency point; tangent length \(\sqrt{d^2-1}=\tan\alpha\), far arc \(2\pi-2\alpha\).</figcaption>
+		</figure>
+		<div class="callout">
+			<p><strong>Area:</strong></p>
+			<p>\[
+				A=\pi d^2=\pi\sec^2\alpha\approx 33.7022675.
+			\]</p>
+		</div>
+		<figure class="fiddler-figure">
+			<svg viewBox="0 0 420 320" aria-label="Unit disk with tangents and pulled point">
+				<circle cx="160" cy="160" r="70" fill="#e7f4ff" stroke="#333" stroke-width="2"></circle>
+				<circle cx="160" cy="160" r="4" fill="#111"></circle>
+				<circle cx="320" cy="160" r="5" fill="#a33"></circle>
+				<line x1="320" y1="160" x2="190.6" y2="97.0" stroke="#444" stroke-width="2"></line>
+				<line x1="320" y1="160" x2="190.6" y2="223.0" stroke="#444" stroke-width="2"></line>
+				<path d="M190.6,97.0 A70,70 0 1 0 190.6,223.0" fill="none" stroke="#2d6ea3" stroke-width="3"></path>
+				<text x="168" y="150" font-size="14" fill="#111">O</text>
+				<text x="328" y="152" font-size="14" fill="#a33">P</text>
+			</svg>
+			<figcaption>The string follows two tangents and the far arc of the circle.</figcaption>
+		</figure>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>Now I have a loop of string whose total length is 14, and I place it around two adjacent unit disks. I pull a point on the string away from the disks until the string is taut, and I drag this point around the disks in all directions, keeping the string taut.</p>
+		<p>What is the area inside the resulting loop?</p>
+		<figure class="fiddler-figure">
+			<svg viewBox="-12 -40 544 360" aria-label="Two unit disks and schematic traced loop">
+				<path d="M 431.0,120.0 L 430.9,114.6 L 430.6,109.3 L 430.0,103.9 L 429.3,98.6 L 428.3,93.3 L 427.1,88.1 L 425.7,83.0 L 424.1,77.9 L 422.3,72.9 L 420.3,67.9 L 418.3,63.0 L 416.0,58.2 L 413.6,53.5 L 411.1,48.9 L 408.4,44.4 L 405.6,40.0 L 402.7,35.6 L 399.6,31.4 L 396.4,27.3 L 393.1,23.3 L 389.7,19.4 L 386.1,15.7 L 382.5,12.0 L 378.8,8.5 L 374.9,5.1 L 371.0,1.8 L 367.0,-1.4 L 362.9,-4.4 L 358.7,-7.3 L 354.5,-10.1 L 350.2,-12.7 L 345.8,-15.2 L 341.4,-17.6 L 336.9,-19.8 L 332.3,-21.9 L 327.7,-23.9 L 323.1,-25.7 L 318.4,-27.4 L 313.6,-29.0 L 308.9,-30.4 L 304.1,-31.7 L 299.3,-32.9 L 294.4,-33.9 L 289.5,-34.8 L 284.6,-35.5 L 279.7,-36.2 L 274.8,-36.6 L 269.9,-37.0 L 264.9,-37.2 L 260.0,-37.2 L 255.1,-37.2 L 250.1,-37.0 L 245.2,-36.6 L 240.3,-36.2 L 235.4,-35.5 L 230.5,-34.8 L 225.6,-33.9 L 220.7,-32.9 L 215.9,-31.7 L 211.1,-30.4 L 206.4,-29.0 L 201.6,-27.4 L 196.9,-25.7 L 192.3,-23.9 L 187.7,-21.9 L 183.1,-19.8 L 178.6,-17.6 L 174.2,-15.2 L 169.8,-12.7 L 165.5,-10.1 L 161.3,-7.3 L 157.1,-4.4 L 153.0,-1.4 L 149.0,1.8 L 145.1,5.1 L 141.2,8.5 L 137.5,12.0 L 133.9,15.7 L 130.3,19.4 L 126.9,23.3 L 123.6,27.3 L 120.4,31.4 L 117.3,35.6 L 114.4,40.0 L 111.6,44.4 L 108.9,48.9 L 106.4,53.5 L 104.0,58.2 L 101.7,63.0 L 99.7,67.9 L 97.7,72.9 L 95.9,77.9 L 94.3,83.0 L 92.9,88.1 L 91.7,93.3 L 90.7,98.6 L 90.0,103.9 L 89.4,109.3 L 89.1,114.6 L 89.0,120.0 L 89.1,125.4 L 89.4,130.7 L 90.0,136.1 L 90.7,141.4 L 91.7,146.7 L 92.9,151.9 L 94.3,157.0 L 95.9,162.1 L 97.7,167.1 L 99.7,172.1 L 101.7,177.0 L 104.0,181.8 L 106.4,186.5 L 108.9,191.1 L 111.6,195.6 L 114.4,200.0 L 117.3,204.4 L 120.4,208.6 L 123.6,212.7 L 126.9,216.7 L 130.3,220.6 L 133.9,224.3 L 137.5,228.0 L 141.2,231.5 L 145.1,234.9 L 149.0,238.2 L 153.0,241.4 L 157.1,244.4 L 161.3,247.3 L 165.5,250.1 L 169.8,252.7 L 174.2,255.2 L 178.6,257.6 L 183.1,259.8 L 187.7,261.9 L 192.3,263.9 L 196.9,265.7 L 201.6,267.4 L 206.4,269.0 L 211.1,270.4 L 215.9,271.7 L 220.7,272.9 L 225.6,273.9 L 230.5,274.8 L 235.4,275.5 L 240.3,276.2 L 245.2,276.6 L 250.1,277.0 L 255.1,277.2 L 260.0,277.2 L 264.9,277.2 L 269.9,277.0 L 274.8,276.6 L 279.7,276.2 L 284.6,275.5 L 289.5,274.8 L 294.4,273.9 L 299.3,272.9 L 304.1,271.7 L 308.9,270.4 L 313.6,269.0 L 318.4,267.4 L 323.1,265.7 L 327.7,263.9 L 332.3,261.9 L 336.9,259.8 L 341.4,257.6 L 345.8,255.2 L 350.2,252.7 L 354.5,250.1 L 358.7,247.3 L 362.9,244.4 L 367.0,241.4 L 371.0,238.2 L 374.9,234.9 L 378.8,231.5 L 382.5,228.0 L 386.1,224.3 L 389.7,220.6 L 393.1,216.7 L 396.4,212.7 L 399.6,208.6 L 402.7,204.4 L 405.6,200.0 L 408.4,195.6 L 411.1,191.1 L 413.6,186.5 L 416.0,181.8 L 418.3,177.0 L 420.3,172.1 L 422.3,167.1 L 424.1,162.1 L 425.7,157.0 L 427.1,151.9 L 428.3,146.7 L 429.3,141.4 L 430.0,136.1 L 430.6,130.7 L 430.9,125.4 L 431.0,120.0 Z" fill="#f7fbff" stroke="#2d6ea3" stroke-width="2.5" stroke-dasharray="7 6"></path>
+				<path d="M220,80 A40,40 0 0 0 220,160 L300,160 A40,40 0 0 0 300,80 Z" fill="#ffffff" stroke="#333" stroke-width="2"></path>
+				<circle cx="220" cy="120" r="40" fill="#e7f4ff" stroke="#333" stroke-width="2"></circle>
+				<circle cx="300" cy="120" r="40" fill="#e7f4ff" stroke="#333" stroke-width="2"></circle>
+				<circle cx="220" cy="120" r="3.5" fill="#111"></circle>
+				<circle cx="300" cy="120" r="3.5" fill="#111"></circle>
+				<text x="162" y="34" font-size="13" fill="#2d6ea3">traced loop (schematic)</text>
+				<text x="188" y="196" font-size="13" fill="#333">two unit disks</text>
+			</svg>
+			<figcaption>Schematic of the path traced by the taut string around two tangent unit disks (not to scale).</figcaption>
+		</figure>
+
+		<h2>Extra Credit Solution (Setup + Numerical Result)</h2>
+		<h3>Interactive: Pull Angle Around Two Disks</h3>
+		<p>Drag the angle slider to move the pulled point around the two-disk stadium and watch the taut string update.</p>
+		<div class="extra-interactive">
+			<canvas id="extra-tangent-canvas" width="720" height="520" aria-label="Interactive tangents around two tangent unit disks"></canvas>
+			<div class="extra-controls">
+				<label for="extra-angle">Angle:</label>
+				<input id="extra-angle" type="range" min="0" max="360" step="1" value="20">
+				<span id="extra-angle-value">20°</span>
+			</div>
+			<div class="extra-readout" id="extra-angle-readout">Loading...</div>
+		</div>
+		<figure class="fiddler-figure">
+			<svg viewBox="0 0 520 260" aria-label="Stadium with tangents and angles for extra credit setup">
+				<path d="M140,70 A70,70 0 0 0 140,190 L300,190 A70,70 0 0 0 300,70 Z" fill="#f7fbff" stroke="none"></path>
+				<circle cx="140" cy="130" r="70" fill="#cfc7e9" stroke="#333" stroke-width="1.5"></circle>
+				<circle cx="300" cy="130" r="70" fill="#cfc7e9" stroke="#333" stroke-width="1.5"></circle>
+				<circle cx="140" cy="130" r="3.5" fill="#111"></circle>
+				<circle cx="300" cy="130" r="3.5" fill="#111"></circle>
+				<circle cx="455" cy="130" r="6" fill="#111"></circle>
+				<line x1="455" y1="130" x2="331.6" y2="67.5" stroke="#111" stroke-width="3"></line>
+				<line x1="455" y1="130" x2="331.6" y2="192.5" stroke="#111" stroke-width="3"></line>
+				<path d="M331.6,67.5 A70,70 0 0 0 300,60 L140,60 A70,70 0 0 0 140,200 L300,200 A70,70 0 0 0 331.6,192.5" fill="none" stroke="#111" stroke-width="4"></path>
+			</svg>
+			<figcaption>String consists of two tangents from \(P\) plus the far-side stadium boundary between tangency points.</figcaption>
+		</figure>
+		<p>The two disks are tangent, so the convex hull is a stadium: two semicircles of radius 1 joined by two line segments of length 2. Its perimeter is</p>
+		<p>\[
+			P_0=2\pi+4.
+		\]</p>
+		<p>When the string is taut, it consists of two tangent segments from \(P\) to the stadium plus the far-side boundary arc between the tangency points.</p>
+		<p>For points on the right side with \(|y|\le 1\), both tangency points lie on the right semicircle. The same computation as the main problem gives</p>
+		<p>\[
+			14=P_0-2\alpha+2\tan\alpha
+			\quad\Longrightarrow\quad
+			\tan\alpha-\alpha=5-\pi,
+		\]</p>
+		<p>so those parts of the loop are circular arcs centered at \((\pm1,0)\) with radius \(d=\sec\alpha\approx 3.2753267\).</p>
+		<p>For the top and bottom portions (\(|y|>1\)), tangency points lie on opposite semicircles. If \(P=(x,y)\) with \(y>1\), let</p>
+		<p>\[
+			d_r=\sqrt{(x-1)^2+y^2},\quad d_l=\sqrt{(x+1)^2+y^2},
+		\]</p>
+		<p>then the tangent lengths are \(\sqrt{d_r^2-1}\) and \(\sqrt{d_l^2-1}\), and the wrapped arc length is</p>
+		<p>\[
+			P_0-\Bigl(2+(\theta_l-\theta_r)\Bigr),
+		\]</p>
+		<p>where \(\theta_r,\theta_l\) are the tangency angles on the right/left circles. This yields an implicit equation for the boundary curve.</p>
+		<p>Numerically, I solve for the polar radius \(r(\phi)\) (measured from the midpoint between the circles) that satisfies the taut-string condition at each angle \(\phi\). Then I compute the area by</p>
+		<p>\[
+			A=\frac12\int_{0}^{2\pi} r(\phi)^2\,d\phi
+		\]</p>
+		<p>More explicitly, let \(P=(r\cos\phi,r\sin\phi)\). Define</p>
+		<p>\[
+			d_r=\sqrt{r^2-2r\cos\phi+1},\quad
+			d_l=\sqrt{r^2+2r\cos\phi+1}
+		\]</p>
+		<p>and</p>
+		<p>\[
+			\phi_r=\operatorname{atan2}(r\sin\phi,\ r\cos\phi-1),\quad
+			\phi_l=\operatorname{atan2}(r\sin\phi,\ r\cos\phi+1),
+		\]</p>
+		<p>\[
+			\alpha_r=\arccos\!\left(\frac{1}{d_r}\right),\quad
+			\alpha_l=\arccos\!\left(\frac{1}{d_l}\right).
+		\]</p>
+		<p>The tangency angles on each circle are \(\theta_r^{\pm}=\phi_r\pm\alpha_r\) and \(\theta_l^{\pm}=\phi_l\pm\alpha_l\). Choose the two tangency points that are visible from \(P\). Let \(L_{\text{far}}(r,\phi)\) be the length of the stadium boundary on the far side between those two points (perimeter minus the visible arc). Then the taut-string condition is</p>
+		<p>\[
+			L(r,\phi)=|P-T_1|+|P-T_2|+L_{\text{far}}(r,\phi)=14.
+		\]</p>
+		<p>For each \(\phi\), I solve \(L(r,\phi)=14\) for \(r\) by bisection, then plug \(r(\phi)\) into the area integral above. The result:</p>
+		<p><a href="/blog/fiddler/2026/03/2026-03-20-code.html">Numerical code used for the integration</a></p>
+		<div class="callout">
+			<p><strong>Extra credit area (numerical):</strong></p>
+			<p>\[
+				A_{\text{two disks}}\approx 52.2851.
+			\]</p>
+		</div>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/03/2026-03-13.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+		<script>
+			(function () {
+				var canvas = document.getElementById("extra-tangent-canvas");
+				var slider = document.getElementById("extra-angle");
+				var angleValue = document.getElementById("extra-angle-value");
+				var readout = document.getElementById("extra-angle-readout");
+				if (!canvas || !slider || !angleValue || !readout) {
+					return;
+				}
+
+				var ctx = canvas.getContext("2d");
+				var W = canvas.width;
+				var H = canvas.height;
+				var cx = W / 2;
+				var cy = H / 2;
+				var R = 65;
+
+				var targetLength = 14;
+				var locusCache = null;
+
+				function unitToCanvas(x, y) {
+					return { x: cx + x * R, y: cy - y * R };
+				}
+
+				function buildBoundary() {
+					var points = [];
+					var normals = [];
+					var segLengths = [];
+					var i;
+					var steps = 160;
+
+					for (i = 0; i <= steps; i += 1) {
+						var t = -Math.PI / 2 + (Math.PI * i) / steps;
+						points.push({ x: 1 + Math.cos(t), y: Math.sin(t) });
+						normals.push({ x: Math.cos(t), y: Math.sin(t) });
+					}
+					for (i = 1; i <= steps; i += 1) {
+						var u = i / steps;
+						points.push({ x: 1 - 2 * u, y: 1 });
+						normals.push({ x: 0, y: 1 });
+					}
+					for (i = 1; i <= steps; i += 1) {
+						var t2 = Math.PI / 2 + (Math.PI * i) / steps;
+						points.push({ x: -1 + Math.cos(t2), y: Math.sin(t2) });
+						normals.push({ x: Math.cos(t2), y: Math.sin(t2) });
+					}
+					for (i = 1; i <= steps; i += 1) {
+						var u2 = i / steps;
+						points.push({ x: -1 + 2 * u2, y: -1 });
+						normals.push({ x: 0, y: -1 });
+					}
+
+					for (i = 0; i < points.length; i += 1) {
+						var j = (i + 1) % points.length;
+						var dx = points[j].x - points[i].x;
+						var dy = points[j].y - points[i].y;
+						segLengths.push(Math.hypot(dx, dy));
+					}
+
+					return { points: points, normals: normals, segLengths: segLengths };
+				}
+
+				var boundary = buildBoundary();
+
+				function visibleArcIndices(px, py) {
+					var points = boundary.points;
+					var normals = boundary.normals;
+					var n = points.length;
+					var visible = new Array(n);
+					var i;
+					for (i = 0; i < n; i += 1) {
+						var q = points[i];
+						var m = normals[i];
+						var vx = px - q.x;
+						var vy = py - q.y;
+						visible[i] = (vx * m.x + vy * m.y) >= 0;
+					}
+
+					var maxLen = 0;
+					var maxStart = 0;
+					var curr = 0;
+					var currStart = 0;
+					for (i = 0; i < 2 * n; i += 1) {
+						var v = visible[i % n];
+						if (v) {
+							if (curr === 0) {
+								currStart = i;
+							}
+							curr += 1;
+							if (curr > maxLen) {
+								maxLen = curr;
+								maxStart = currStart;
+							}
+						} else {
+							curr = 0;
+						}
+					}
+					if (maxLen === 0) {
+						return null;
+					}
+					var start = maxStart % n;
+					var end = (maxStart + maxLen - 1) % n;
+					return [start, end];
+				}
+
+				function pathLength(start, end) {
+					var len = 0;
+					var i = start;
+					while (i !== end) {
+						len += boundary.segLengths[i];
+						i = (i + 1) % boundary.points.length;
+					}
+					return len;
+				}
+
+				function drawBoundaryPath(indices) {
+					var points = boundary.points;
+					var n = points.length;
+					var a = indices[0];
+					var b = indices[1];
+
+					var len1 = pathLength(a, b);
+					var len2 = pathLength(b, a);
+					var start = len1 >= len2 ? a : b;
+					var end = len1 >= len2 ? b : a;
+
+					ctx.beginPath();
+					var p0 = unitToCanvas(points[start].x, points[start].y);
+					ctx.moveTo(p0.x, p0.y);
+					var i = start;
+					while (i !== end) {
+						var j = (i + 1) % n;
+						var pj = unitToCanvas(points[j].x, points[j].y);
+						ctx.lineTo(pj.x, pj.y);
+						i = j;
+					}
+					ctx.strokeStyle = "#111";
+					ctx.lineWidth = 4;
+					ctx.stroke();
+				}
+
+				function stringLength(px, py) {
+					var indices = visibleArcIndices(px, py);
+					if (!indices) {
+						return null;
+					}
+					var points = boundary.points;
+					var visLen = pathLength(indices[0], indices[1]);
+					var totalPerimeter = 0;
+					var i;
+					for (i = 0; i < boundary.segLengths.length; i += 1) {
+						totalPerimeter += boundary.segLengths[i];
+					}
+					var farLen = totalPerimeter - visLen;
+					var q1 = points[indices[0]];
+					var q2 = points[indices[1]];
+					var d1 = Math.hypot(px - q1.x, py - q1.y);
+					var d2 = Math.hypot(px - q2.x, py - q2.y);
+					return { length: farLen + d1 + d2, indices: indices };
+				}
+
+				function solveRadius(phi) {
+					var lo = 2.0;
+					var hi = 5.0;
+					var i;
+					var Llo = stringLength(lo * Math.cos(phi), lo * Math.sin(phi));
+					if (!Llo) {
+						return null;
+					}
+					while (Llo.length > targetLength && lo > 1.2) {
+						lo -= 0.2;
+						Llo = stringLength(lo * Math.cos(phi), lo * Math.sin(phi));
+						if (!Llo) {
+							return null;
+						}
+					}
+					var Lhi = stringLength(hi * Math.cos(phi), hi * Math.sin(phi));
+					while (Lhi && Lhi.length < targetLength && hi < 8) {
+						hi += 0.4;
+						Lhi = stringLength(hi * Math.cos(phi), hi * Math.sin(phi));
+					}
+					if (!Lhi) {
+						return null;
+					}
+					for (i = 0; i < 40; i += 1) {
+						var mid = 0.5 * (lo + hi);
+						var Lmid = stringLength(mid * Math.cos(phi), mid * Math.sin(phi));
+						if (!Lmid) {
+							return null;
+						}
+						if (Lmid.length > targetLength) {
+							hi = mid;
+						} else {
+							lo = mid;
+						}
+					}
+					return 0.5 * (lo + hi);
+				}
+
+				function buildLocus() {
+					var pts = [];
+					var steps = 180;
+					var i;
+					for (i = 0; i <= steps; i += 1) {
+						var phi = (2 * Math.PI * i) / steps;
+						var r = solveRadius(phi);
+						if (r) {
+							pts.push({ x: r * Math.cos(phi), y: r * Math.sin(phi) });
+						}
+					}
+					return pts;
+				}
+
+				function draw() {
+					var deg = parseInt(slider.value, 10) || 0;
+					angleValue.textContent = String(deg) + "\u00b0";
+					var phi = deg * Math.PI / 180;
+					var Pdistance = solveRadius(phi);
+					if (!Pdistance) {
+						readout.textContent = "Unable to compute path at this angle.";
+						return;
+					}
+
+					var px = Pdistance * Math.cos(phi);
+					var py = Pdistance * Math.sin(phi);
+
+					var P = unitToCanvas(px, py);
+					var lengthInfo = stringLength(px, py);
+					var tangency = lengthInfo ? lengthInfo.indices : null;
+
+					ctx.clearRect(0, 0, W, H);
+					ctx.fillStyle = "#ffffff";
+					ctx.fillRect(0, 0, W, H);
+
+					var left = unitToCanvas(-1, 0);
+					var right = unitToCanvas(1, 0);
+
+					if (!locusCache) {
+						locusCache = buildLocus();
+					}
+					if (locusCache.length > 1) {
+						ctx.beginPath();
+						var lp0 = unitToCanvas(locusCache[0].x, locusCache[0].y);
+						ctx.moveTo(lp0.x, lp0.y);
+						for (var k = 1; k < locusCache.length; k += 1) {
+							var lpk = unitToCanvas(locusCache[k].x, locusCache[k].y);
+							ctx.lineTo(lpk.x, lpk.y);
+						}
+						ctx.closePath();
+						ctx.setLineDash([6, 6]);
+						ctx.strokeStyle = "#888";
+						ctx.lineWidth = 1.5;
+						ctx.stroke();
+						ctx.setLineDash([]);
+					}
+
+					ctx.beginPath();
+					ctx.arc(left.x, left.y, R, 0, 2 * Math.PI);
+					ctx.arc(right.x, right.y, R, 0, 2 * Math.PI);
+					ctx.fillStyle = "#cfc7e9";
+					ctx.fill();
+					ctx.lineWidth = 2;
+					ctx.strokeStyle = "#333";
+					ctx.stroke();
+
+					if (tangency) {
+						var t1 = boundary.points[tangency[0]];
+						var t2 = boundary.points[tangency[1]];
+						var T1 = unitToCanvas(t1.x, t1.y);
+						var T2 = unitToCanvas(t2.x, t2.y);
+
+						ctx.beginPath();
+						ctx.moveTo(P.x, P.y);
+						ctx.lineTo(T1.x, T1.y);
+						ctx.moveTo(P.x, P.y);
+						ctx.lineTo(T2.x, T2.y);
+						ctx.lineWidth = 3;
+						ctx.strokeStyle = "#111";
+						ctx.stroke();
+
+						ctx.beginPath();
+						ctx.arc(T1.x, T1.y, 4, 0, 2 * Math.PI);
+						ctx.arc(T2.x, T2.y, 4, 0, 2 * Math.PI);
+						ctx.fillStyle = "#2d6ea3";
+						ctx.fill();
+
+						drawBoundaryPath(tangency);
+					} else {
+						ctx.fillStyle = "#a33";
+						ctx.font = "14px sans-serif";
+						ctx.fillText("Move point farther out to see tangents.", 16, 24);
+					}
+
+					ctx.beginPath();
+					ctx.arc(left.x, left.y, 3.5, 0, 2 * Math.PI);
+					ctx.fillStyle = "#111";
+					ctx.fill();
+					ctx.beginPath();
+					ctx.arc(right.x, right.y, 3.5, 0, 2 * Math.PI);
+					ctx.fillStyle = "#111";
+					ctx.fill();
+
+					ctx.beginPath();
+					ctx.arc(P.x, P.y, 6, 0, 2 * Math.PI);
+					ctx.fillStyle = "#111";
+					ctx.fill();
+
+					readout.textContent = "Pulled point radius from center: " + Pdistance.toFixed(2) + " (units). Dashed curve shows the locus of P for string length 14.";
+				}
+
+				slider.addEventListener("input", draw);
+				draw();
+			})();
+		</script>
+	</body>
+</html>

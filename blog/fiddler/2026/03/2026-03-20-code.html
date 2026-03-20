@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - Mar 20, 2026 - Numerical Code</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			pre code {
+				display: block;
+				padding: 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				overflow-x: auto;
+				font-size: 0.92em;
+				line-height: 1.35;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: Mar 20, 2026</h1>
+		<p><em>Numerical code used for the extra credit area calculation.</em></p>
+
+		<p>This script samples the stadium boundary to find the two tangency points for each pulled point, solves \(L(r,\phi)=14\) by bisection, and integrates \(A=\frac12\int_0^{2\pi} r(\phi)^2\,d\phi\) using a uniform angular grid.</p>
+
+		<pre><code class="language-python">import math
+
+target_len = 14.0
+
+# Build stadium boundary (two unit circles centered at (-1,0) and (1,0))
+points = []
+normals = []
+seg_lengths = []
+steps = 200
+
+# Right semicircle
+for i in range(steps + 1):
+    t = -math.pi / 2 + math.pi * i / steps
+    points.append((1 + math.cos(t), math.sin(t)))
+    normals.append((math.cos(t), math.sin(t)))
+
+# Top segment
+for i in range(1, steps + 1):
+    u = i / steps
+    points.append((1 - 2 * u, 1.0))
+    normals.append((0.0, 1.0))
+
+# Left semicircle
+for i in range(1, steps + 1):
+    t = math.pi / 2 + math.pi * i / steps
+    points.append((-1 + math.cos(t), math.sin(t)))
+    normals.append((math.cos(t), math.sin(t)))
+
+# Bottom segment
+for i in range(1, steps + 1):
+    u = i / steps
+    points.append((-1 + 2 * u, -1.0))
+    normals.append((0.0, -1.0))
+
+n = len(points)
+for i in range(n):
+    j = (i + 1) % n
+    dx = points[j][0] - points[i][0]
+    dy = points[j][1] - points[i][1]
+    seg_lengths.append(math.hypot(dx, dy))
+
+perimeter = sum(seg_lengths)
+
+def visible_arc_indices(px, py):
+    visible = [False] * n
+    for i in range(n):
+        qx, qy = points[i]
+        nx, ny = normals[i]
+        vx = px - qx
+        vy = py - qy
+        visible[i] = (vx * nx + vy * ny) &gt;= 0
+
+    max_len = 0
+    max_start = 0
+    curr = 0
+    curr_start = 0
+    for i in range(2 * n):
+        v = visible[i % n]
+        if v:
+            if curr == 0:
+                curr_start = i
+            curr += 1
+            if curr &gt; max_len:
+                max_len = curr
+                max_start = curr_start
+        else:
+            curr = 0
+
+    if max_len == 0:
+        return None
+
+    start = max_start % n
+    end = (max_start + max_len - 1) % n
+    return start, end
+
+def path_length(start, end):
+    length = 0.0
+    i = start
+    while i != end:
+        length += seg_lengths[i]
+        i = (i + 1) % n
+    return length
+
+def string_length(px, py):
+    idx = visible_arc_indices(px, py)
+    if not idx:
+        return None
+    vis_len = path_length(idx[0], idx[1])
+    far_len = perimeter - vis_len
+    q1 = points[idx[0]]
+    q2 = points[idx[1]]
+    d1 = math.hypot(px - q1[0], py - q1[1])
+    d2 = math.hypot(px - q2[0], py - q2[1])
+    return far_len + d1 + d2
+
+def solve_radius(phi):
+    lo = 2.0
+    hi = 5.0
+    Llo = string_length(lo * math.cos(phi), lo * math.sin(phi))
+    if Llo is None:
+        return None
+
+    while Llo &gt; target_len and lo &gt; 1.2:
+        lo -= 0.2
+        Llo = string_length(lo * math.cos(phi), lo * math.sin(phi))
+        if Llo is None:
+            return None
+
+    Lhi = string_length(hi * math.cos(phi), hi * math.sin(phi))
+    while Lhi is not None and Lhi &lt; target_len and hi &lt; 8:
+        hi += 0.4
+        Lhi = string_length(hi * math.cos(phi), hi * math.sin(phi))
+    if Lhi is None:
+        return None
+
+    for _ in range(40):
+        mid = 0.5 * (lo + hi)
+        Lmid = string_length(mid * math.cos(phi), mid * math.sin(phi))
+        if Lmid is None:
+            return None
+        if Lmid &gt; target_len:
+            hi = mid
+        else:
+            lo = mid
+    return 0.5 * (lo + hi)
+
+def compute_area(samples=720):
+    total = 0.0
+    for i in range(samples):
+        phi = 2 * math.pi * i / samples
+        r = solve_radius(phi)
+        if r is None:
+            continue
+        total += r * r
+    return 0.5 * total * (2 * math.pi / samples)
+
+area = compute_area()
+print(area)
+</code></pre>
+
+		<p><a href="/blog/fiddler/2026/03/2026-03-20.html">Back to the main post</a></p>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+	</body>
+</html>
