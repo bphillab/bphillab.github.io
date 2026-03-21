@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Ellipse Fit Approximation - Mar 20, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.fiddler-figure {
+				margin: 18px 0;
+			}
+			.fiddler-figure svg {
+				width: 100%;
+				max-width: 520px;
+				height: auto;
+				border: 1px solid #d6d6d6;
+				background: #ffffff;
+			}
+			.fiddler-figure figcaption {
+				font-size: 0.95em;
+				color: #555;
+				margin-top: 6px;
+			}
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+			}
+			.extra-interactive {
+				margin: 16px 0 22px;
+				max-width: 560px;
+			}
+			.extra-interactive canvas {
+				width: 100%;
+				max-width: 520px;
+				height: auto;
+				border: 1px solid #d6d6d6;
+				background: #ffffff;
+			}
+			.extra-controls {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				flex-wrap: wrap;
+				margin: 8px 0 6px;
+			}
+			.extra-controls input {
+				width: 180px;
+			}
+			.extra-readout {
+				font-size: 0.95em;
+				color: #444;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>Ellipse Fit Approximation: Mar 20, 2026</h1>
+		<p><em>Posted on Mar 20, 2026</em></p>
+
+		<p>This page fits an ellipse to the numerically computed boundary of the extra-credit string locus from the <a href="/blog/fiddler/2026/03/2026-03-20.html">Mar 20, 2026 Fiddler</a>. The ellipse is a good visual approximation but not an exact solution.</p>
+
+		<div class="callout">
+			<p><strong>Best-fit ellipse (least squares):</strong></p>
+			<p>\[
+				\frac{x^2}{4.2518^2}+\frac{y^2}{3.9204^2}=1
+			\]</p>
+			<p>Center \((0.00007, 0)\), mean normal error \(\approx 0.010\), max error \(\approx 0.024\) (units).</p>
+		</div>
+
+		<h2>Interactive: Locus vs Ellipse Fit</h2>
+		<p>Gray dashed curve: numerically computed locus of the pulled point. Red dashed curve: ellipse fit.</p>
+		<div class="extra-interactive">
+			<canvas id="extra-tangent-canvas" width="720" height="520" aria-label="Interactive tangents around two tangent unit disks with ellipse fit"></canvas>
+			<div class="extra-controls">
+				<label for="extra-angle">Angle:</label>
+				<input id="extra-angle" type="range" min="0" max="360" step="1" value="20">
+				<span id="extra-angle-value">20°</span>
+			</div>
+			<div class="extra-readout" id="extra-angle-readout">Loading...</div>
+		</div>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/03/2026-03-20.html">Back to main post</a></p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+		<script>
+			(function () {
+				var canvas = document.getElementById("extra-tangent-canvas");
+				var slider = document.getElementById("extra-angle");
+				var angleValue = document.getElementById("extra-angle-value");
+				var readout = document.getElementById("extra-angle-readout");
+				if (!canvas || !slider || !angleValue || !readout) {
+					return;
+				}
+
+				var ctx = canvas.getContext("2d");
+				var W = canvas.width;
+				var H = canvas.height;
+				var cx = W / 2;
+				var cy = H / 2;
+				var R = 65;
+
+				var targetLength = 14;
+				var locusCache = null;
+				var ellipseFit = {
+					cx: 0.0000686,
+					cy: 0.0,
+					a: 4.251796,
+					b: 3.920411
+				};
+
+				function unitToCanvas(x, y) {
+					return { x: cx + x * R, y: cy - y * R };
+				}
+
+				function buildBoundary() {
+					var points = [];
+					var normals = [];
+					var segLengths = [];
+					var i;
+					var steps = 160;
+
+					for (i = 0; i <= steps; i += 1) {
+						var t = -Math.PI / 2 + (Math.PI * i) / steps;
+						points.push({ x: 1 + Math.cos(t), y: Math.sin(t) });
+						normals.push({ x: Math.cos(t), y: Math.sin(t) });
+					}
+					for (i = 1; i <= steps; i += 1) {
+						var u = i / steps;
+						points.push({ x: 1 - 2 * u, y: 1 });
+						normals.push({ x: 0, y: 1 });
+					}
+					for (i = 1; i <= steps; i += 1) {
+						var t2 = Math.PI / 2 + (Math.PI * i) / steps;
+						points.push({ x: -1 + Math.cos(t2), y: Math.sin(t2) });
+						normals.push({ x: Math.cos(t2), y: Math.sin(t2) });
+					}
+					for (i = 1; i <= steps; i += 1) {
+						var u2 = i / steps;
+						points.push({ x: -1 + 2 * u2, y: -1 });
+						normals.push({ x: 0, y: -1 });
+					}
+
+					for (i = 0; i < points.length; i += 1) {
+						var j = (i + 1) % points.length;
+						var dx = points[j].x - points[i].x;
+						var dy = points[j].y - points[i].y;
+						segLengths.push(Math.hypot(dx, dy));
+					}
+
+					return { points: points, normals: normals, segLengths: segLengths };
+				}
+
+				var boundary = buildBoundary();
+
+				function visibleArcIndices(px, py) {
+					var points = boundary.points;
+					var normals = boundary.normals;
+					var n = points.length;
+					var visible = new Array(n);
+					var i;
+					for (i = 0; i < n; i += 1) {
+						var q = points[i];
+						var m = normals[i];
+						var vx = px - q.x;
+						var vy = py - q.y;
+						visible[i] = (vx * m.x + vy * m.y) >= 0;
+					}
+
+					var maxLen = 0;
+					var maxStart = 0;
+					var curr = 0;
+					var currStart = 0;
+					for (i = 0; i < 2 * n; i += 1) {
+						var v = visible[i % n];
+						if (v) {
+							if (curr === 0) {
+								currStart = i;
+							}
+							curr += 1;
+							if (curr > maxLen) {
+								maxLen = curr;
+								maxStart = currStart;
+							}
+						} else {
+							curr = 0;
+						}
+					}
+					if (maxLen === 0) {
+						return null;
+					}
+					var start = maxStart % n;
+					var end = (maxStart + maxLen - 1) % n;
+					return [start, end];
+				}
+
+				function pathLength(start, end) {
+					var len = 0;
+					var i = start;
+					while (i !== end) {
+						len += boundary.segLengths[i];
+						i = (i + 1) % boundary.points.length;
+					}
+					return len;
+				}
+
+				function drawBoundaryPath(indices) {
+					var points = boundary.points;
+					var n = points.length;
+					var a = indices[0];
+					var b = indices[1];
+
+					var len1 = pathLength(a, b);
+					var len2 = pathLength(b, a);
+					var start = len1 >= len2 ? a : b;
+					var end = len1 >= len2 ? b : a;
+
+					ctx.beginPath();
+					var p0 = unitToCanvas(points[start].x, points[start].y);
+					ctx.moveTo(p0.x, p0.y);
+					var i = start;
+					while (i !== end) {
+						var j = (i + 1) % n;
+						var pj = unitToCanvas(points[j].x, points[j].y);
+						ctx.lineTo(pj.x, pj.y);
+						i = j;
+					}
+					ctx.strokeStyle = "#111";
+					ctx.lineWidth = 4;
+					ctx.stroke();
+				}
+
+				function stringLength(px, py) {
+					var indices = visibleArcIndices(px, py);
+					if (!indices) {
+						return null;
+					}
+					var points = boundary.points;
+					var visLen = pathLength(indices[0], indices[1]);
+					var totalPerimeter = 0;
+					var i;
+					for (i = 0; i < boundary.segLengths.length; i += 1) {
+						totalPerimeter += boundary.segLengths[i];
+					}
+					var farLen = totalPerimeter - visLen;
+					var q1 = points[indices[0]];
+					var q2 = points[indices[1]];
+					var d1 = Math.hypot(px - q1.x, py - q1.y);
+					var d2 = Math.hypot(px - q2.x, py - q2.y);
+					return { length: farLen + d1 + d2, indices: indices };
+				}
+
+				function solveRadius(phi) {
+					var lo = 2.0;
+					var hi = 5.0;
+					var i;
+					var Llo = stringLength(lo * Math.cos(phi), lo * Math.sin(phi));
+					if (!Llo) {
+						return null;
+					}
+					while (Llo.length > targetLength && lo > 1.2) {
+						lo -= 0.2;
+						Llo = stringLength(lo * Math.cos(phi), lo * Math.sin(phi));
+						if (!Llo) {
+							return null;
+						}
+					}
+					var Lhi = stringLength(hi * Math.cos(phi), hi * Math.sin(phi));
+					while (Lhi && Lhi.length < targetLength && hi < 8) {
+						hi += 0.4;
+						Lhi = stringLength(hi * Math.cos(phi), hi * Math.sin(phi));
+					}
+					if (!Lhi) {
+						return null;
+					}
+					for (i = 0; i < 40; i += 1) {
+						var mid = 0.5 * (lo + hi);
+						var Lmid = stringLength(mid * Math.cos(phi), mid * Math.sin(phi));
+						if (!Lmid) {
+							return null;
+						}
+						if (Lmid.length > targetLength) {
+							hi = mid;
+						} else {
+							lo = mid;
+						}
+					}
+					return 0.5 * (lo + hi);
+				}
+
+				function buildLocus() {
+					var pts = [];
+					var steps = 180;
+					var i;
+					for (i = 0; i <= steps; i += 1) {
+						var phi = (2 * Math.PI * i) / steps;
+						var r = solveRadius(phi);
+						if (r) {
+							pts.push({ x: r * Math.cos(phi), y: r * Math.sin(phi) });
+						}
+					}
+					return pts;
+				}
+
+				function drawEllipseFit() {
+					var steps = 200;
+					var i;
+					ctx.beginPath();
+					for (i = 0; i <= steps; i += 1) {
+						var t = (2 * Math.PI * i) / steps;
+						var x = ellipseFit.cx + ellipseFit.a * Math.cos(t);
+						var y = ellipseFit.cy + ellipseFit.b * Math.sin(t);
+						var p = unitToCanvas(x, y);
+						if (i === 0) {
+							ctx.moveTo(p.x, p.y);
+						} else {
+							ctx.lineTo(p.x, p.y);
+						}
+					}
+					ctx.closePath();
+					ctx.setLineDash([4, 3]);
+					ctx.strokeStyle = "#d05050";
+					ctx.lineWidth = 1.6;
+					ctx.stroke();
+					ctx.setLineDash([]);
+				}
+
+				function draw() {
+					var deg = parseInt(slider.value, 10) || 0;
+					angleValue.textContent = String(deg) + "\u00b0";
+					var phi = deg * Math.PI / 180;
+					var Pdistance = solveRadius(phi);
+					if (!Pdistance) {
+						readout.textContent = "Unable to compute path at this angle.";
+						return;
+					}
+
+					var px = Pdistance * Math.cos(phi);
+					var py = Pdistance * Math.sin(phi);
+
+					var P = unitToCanvas(px, py);
+					var lengthInfo = stringLength(px, py);
+					var tangency = lengthInfo ? lengthInfo.indices : null;
+
+					ctx.clearRect(0, 0, W, H);
+					ctx.fillStyle = "#ffffff";
+					ctx.fillRect(0, 0, W, H);
+
+					var left = unitToCanvas(-1, 0);
+					var right = unitToCanvas(1, 0);
+
+					if (!locusCache) {
+						locusCache = buildLocus();
+					}
+					if (locusCache.length > 1) {
+						ctx.beginPath();
+						var lp0 = unitToCanvas(locusCache[0].x, locusCache[0].y);
+						ctx.moveTo(lp0.x, lp0.y);
+						for (var k = 1; k < locusCache.length; k += 1) {
+							var lpk = unitToCanvas(locusCache[k].x, locusCache[k].y);
+							ctx.lineTo(lpk.x, lpk.y);
+						}
+						ctx.closePath();
+						ctx.setLineDash([6, 6]);
+						ctx.strokeStyle = "#888";
+						ctx.lineWidth = 1.5;
+						ctx.stroke();
+						ctx.setLineDash([]);
+					}
+
+					drawEllipseFit();
+
+					ctx.beginPath();
+					ctx.arc(left.x, left.y, R, 0, 2 * Math.PI);
+					ctx.arc(right.x, right.y, R, 0, 2 * Math.PI);
+					ctx.fillStyle = "#cfc7e9";
+					ctx.fill();
+					ctx.lineWidth = 2;
+					ctx.strokeStyle = "#333";
+					ctx.stroke();
+
+					if (tangency) {
+						var t1 = boundary.points[tangency[0]];
+						var t2 = boundary.points[tangency[1]];
+						var T1 = unitToCanvas(t1.x, t1.y);
+						var T2 = unitToCanvas(t2.x, t2.y);
+
+						ctx.beginPath();
+						ctx.moveTo(P.x, P.y);
+						ctx.lineTo(T1.x, T1.y);
+						ctx.moveTo(P.x, P.y);
+						ctx.lineTo(T2.x, T2.y);
+						ctx.lineWidth = 3;
+						ctx.strokeStyle = "#111";
+						ctx.stroke();
+
+						ctx.beginPath();
+						ctx.arc(T1.x, T1.y, 4, 0, 2 * Math.PI);
+						ctx.arc(T2.x, T2.y, 4, 0, 2 * Math.PI);
+						ctx.fillStyle = "#2d6ea3";
+						ctx.fill();
+
+						drawBoundaryPath(tangency);
+					} else {
+						ctx.fillStyle = "#a33";
+						ctx.font = "14px sans-serif";
+						ctx.fillText("Move point farther out to see tangents.", 16, 24);
+					}
+
+					ctx.beginPath();
+					ctx.arc(left.x, left.y, 3.5, 0, 2 * Math.PI);
+					ctx.fillStyle = "#111";
+					ctx.fill();
+					ctx.beginPath();
+					ctx.arc(right.x, right.y, 3.5, 0, 2 * Math.PI);
+					ctx.fillStyle = "#111";
+					ctx.fill();
+
+					ctx.beginPath();
+					ctx.arc(P.x, P.y, 6, 0, 2 * Math.PI);
+					ctx.fillStyle = "#111";
+					ctx.fill();
+
+					readout.textContent = "Pulled point radius from center: " + Pdistance.toFixed(2) + " (units). Dashed gray curve shows the locus of P. Red dashed curve shows the ellipse fit.";
+				}
+
+				slider.addEventListener("input", draw);
+				draw();
+			})();
+		</script>
+	</body>
+</html>
