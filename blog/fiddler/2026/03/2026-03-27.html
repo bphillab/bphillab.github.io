@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - Mar 27, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: Mar 27, 2026</h1>
+		<p><em>Posted on Mar 27, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>From Dean Ballard comes a premier puzzle of primes:</p>
+		<p>Suppose you want to make two groups with equal sums using the first \(N_2\) prime numbers. What is the smallest value of \(N_2\) for which you can do this?</p>
+		<p>The answer is three! (Clearly, that wasn't actually the puzzle.)</p>
+		<p>The first three primes are 2, 3, and 5, and you can split them up into two sets: \(\{2,3\}\) and \(\{5\}\). Sure enough, \(2+3=5\).</p>
+		<p>Your puzzle involves making three groups with equal sums using the first \(N_3\) prime numbers. What is the smallest value of \(N_3\) for which you can do this?</p>
+
+		<h2>Solution</h2>
+		<p>The total sum of the first \(N_3\) primes must be divisible by 3.</p>
+		<p>The first nine primes sum to \(2+3+5+7+11+13+17+19+23=100\), which is not divisible by 3. The first ten primes sum to \(129\), which is divisible by 3, so \(N_3 \ge 10\).</p>
+		<p>For \(N_3=10\), the target sum per group is \(129/3=43\). One valid partition is:</p>
+		<ul>
+			<li>\(\{29,11,3\}\)</li>
+			<li>\(\{23,13,7\}\)</li>
+			<li>\(\{19,17,5,2\}\)</li>
+		</ul>
+		<p>Each set sums to 43, so the smallest possible value is <strong>\(N_3=10\)</strong>.</p>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>Now you want to make six groups with equal sums using the first \(N_6\) prime numbers. What is the smallest value of \(N_6\) for which you can do this?</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>Again, the total sum must be divisible by 6. The first time this happens is at \(N_6=57\).</p>
+		<p>The sum of the first 57 primes is \(6870\), so the target per group is \(6870/6=1145\). Here is one explicit partition into six groups of sum 1145:</p>
+		<ul>
+			<li>\(\{13,43,59,89,137,139,197,199,269\}\)</li>
+			<li>\(\{5,11,17,29,53,103,109,163,181,211,263\}\)</li>
+			<li>\(\{19,37,61,101,107,167,173,223,257\}\)</li>
+			<li>\(\{3,47,71,83,127,157,179,227,251\}\)</li>
+			<li>\(\{23,31,67,97,113,151,193,229,241\}\)</li>
+			<li>\(\{2,7,41,73,79,131,149,191,233,239\}\)</li>
+		</ul>
+		<p>Each set sums to 1145, so the smallest possible value is <strong>\(N_6=57\)</strong>.</p>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/03/2026-03-20.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+	</body>
+</html>
