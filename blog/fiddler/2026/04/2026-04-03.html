@@ -31,9 +31,14 @@
 			.fi-controls {
 				display: flex;
 				flex-wrap: wrap;
-				gap: 10px 16px;
+				gap: 10px 14px;
 				margin-top: 8px;
 				align-items: center;
+			}
+			.fi-control {
+				display: flex;
+				align-items: center;
+				gap: 8px;
 			}
 			.fi-controls label {
 				font-size: 0.95em;
@@ -104,12 +109,18 @@
 				</div>
 			</div>
 			<div class="fi-controls">
-				<label for="tetra-yaw">Yaw</label>
-				<input id="tetra-yaw" type="range" min="0" max="360" step="1" value="0">
-				<label for="tetra-pitch">Pitch</label>
-				<input id="tetra-pitch" type="range" min="0" max="360" step="1" value="0">
-				<label for="tetra-roll">Roll</label>
-				<input id="tetra-roll" type="range" min="0" max="360" step="1" value="0">
+				<div class="fi-control">
+					<label for="tetra-yaw">Yaw</label>
+					<input id="tetra-yaw" type="range" min="0" max="360" step="1" value="0">
+				</div>
+				<div class="fi-control">
+					<label for="tetra-pitch">Pitch</label>
+					<input id="tetra-pitch" type="range" min="0" max="360" step="1" value="0">
+				</div>
+				<div class="fi-control">
+					<label for="tetra-roll">Roll</label>
+					<input id="tetra-roll" type="range" min="0" max="360" step="1" value="0">
+				</div>
 				<button class="fi-reset" id="tetra-reset" type="button">Reset</button>
 			</div>
 			<div class="fi-readout" id="tetra-readout">Loading...</div>
@@ -158,12 +169,18 @@
 				</div>
 			</div>
 			<div class="fi-controls">
-				<label for="dodeca-yaw">Yaw</label>
-				<input id="dodeca-yaw" type="range" min="0" max="360" step="1" value="0">
-				<label for="dodeca-pitch">Pitch</label>
-				<input id="dodeca-pitch" type="range" min="0" max="360" step="1" value="0">
-				<label for="dodeca-roll">Roll</label>
-				<input id="dodeca-roll" type="range" min="0" max="360" step="1" value="0">
+				<div class="fi-control">
+					<label for="dodeca-yaw">Yaw</label>
+					<input id="dodeca-yaw" type="range" min="0" max="360" step="1" value="0">
+				</div>
+				<div class="fi-control">
+					<label for="dodeca-pitch">Pitch</label>
+					<input id="dodeca-pitch" type="range" min="0" max="360" step="1" value="0">
+				</div>
+				<div class="fi-control">
+					<label for="dodeca-roll">Roll</label>
+					<input id="dodeca-roll" type="range" min="0" max="360" step="1" value="0">
+				</div>
 				<button class="fi-reset" id="dodeca-reset" type="button">Reset</button>
 			</div>
 			<div class="fi-readout" id="dodeca-readout">Loading...</div>
