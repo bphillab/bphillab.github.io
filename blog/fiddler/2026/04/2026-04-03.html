@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - Apr 3, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.fiddler-interactive {
+				margin: 16px 0 26px;
+				max-width: 560px;
+			}
+			.fiddler-interactive canvas {
+				width: 100%;
+				max-width: 520px;
+				height: auto;
+				border: 1px solid #d6d6d6;
+				background: #ffffff;
+			}
+			.fi-views {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 14px;
+			}
+			.fi-panel {
+				flex: 1 1 240px;
+			}
+			.fi-panel-title {
+				margin: 0 0 6px;
+				font-size: 0.92em;
+				color: #555;
+			}
+			.fi-controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px 16px;
+				margin-top: 8px;
+				align-items: center;
+			}
+			.fi-controls label {
+				font-size: 0.95em;
+			}
+			.fi-controls input[type="range"] {
+				width: 160px;
+			}
+			.fi-readout {
+				margin-top: 8px;
+				font-size: 0.95em;
+				color: #444;
+			}
+			.fi-reset {
+				padding: 6px 10px;
+				border: 1px solid #bbb;
+				background: #f7f7f7;
+				cursor: pointer;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: Apr 3, 2026</h1>
+		<p><em>Posted on Apr 3, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>An alien, more specifically an Eridian, named Rocky needs to pass a solid xenonite crystal to his human friend in a neighboring spaceship. The crystal is shaped like a regular tetrahedron, as shown below, and all its edges have length 1.</p>
+		<p>To safely transport the crystal, Rocky needs to create a long cylindrical tunnel between the spaceships, and then orient the tetrahedron so that it fits through the tunnel. It is okay if the crystal fits snugly inside the tunnel; in this case, it can slide along without any friction.</p>
+		<p>What is the minimum possible radius for the tunnel so that the crystal will fit through it?</p>
+
+		<h2>Main Solution</h2>
+		<p>To minimize the cylinder radius, we want the smallest possible circle that contains an orthogonal projection of the tetrahedron. So pick an axis direction, project the tetrahedron onto the perpendicular plane, and take the circumradius of that projection.</p>
+		<p>Place the regular tetrahedron with vertices at \((\pm1,\pm1,\pm1)\) and scale by \(1/(2\sqrt{2})\) so every edge has length 1.</p>
+		<p>Choose the cylinder axis to be the line through the midpoints of a pair of opposite edges; in these coordinates, that can be the \(x\)-axis.</p>
+		<p>Projecting onto the \(yz\)-plane gives the four points</p>
+		<p>\[
+			\left(\pm\frac{1}{2\sqrt{2}}, \pm\frac{1}{2\sqrt{2}}\right),
+		\]</p>
+		<p>which form a square of side length \(1/\sqrt{2}\). The smallest circle containing that square has radius</p>
+		<p>\[
+			r=\frac{\text{diagonal}}{2}=\frac{\left(1/\sqrt{2}\right)\sqrt{2}}{2}=\frac{1}{2}.
+		\]</p>
+		<p>This orientation puts all four projected vertices on the circle, so it is snug. Any tilt breaks the symmetry and increases the required covering circle, so this is minimal.</p>
+		<p><strong>Minimum possible radius: \( \boxed{\tfrac{1}{2}} \).</strong></p>
+
+		<h3>Interactive: Rotate the Tetrahedron</h3>
+		<p>Rotate the tetrahedron and watch the shadow radius. The display uses an orthographic projection.</p>
+		<div class="fiddler-interactive" id="tetra-interactive">
+			<div class="fi-views">
+				<div class="fi-panel">
+					<p class="fi-panel-title">Solid view</p>
+					<canvas id="tetra-3d" width="520" height="360" aria-label="Tetrahedron solid view"></canvas>
+				</div>
+				<div class="fi-panel">
+					<p class="fi-panel-title">Shadow view</p>
+					<canvas id="tetra-canvas" width="520" height="360" aria-label="Tetrahedron shadow and minimum covering circle"></canvas>
+				</div>
+			</div>
+			<div class="fi-controls">
+				<label for="tetra-yaw">Yaw</label>
+				<input id="tetra-yaw" type="range" min="0" max="360" step="1" value="0">
+				<label for="tetra-pitch">Pitch</label>
+				<input id="tetra-pitch" type="range" min="0" max="360" step="1" value="0">
+				<label for="tetra-roll">Roll</label>
+				<input id="tetra-roll" type="range" min="0" max="360" step="1" value="0">
+				<button class="fi-reset" id="tetra-reset" type="button">Reset</button>
+			</div>
+			<div class="fi-readout" id="tetra-readout">Loading...</div>
+		</div>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>Next, Rocky wants to transport a solid crystal shaped like a regular dodecahedron to his human friend. As before, each edge has length 1.</p>
+		<p>This time, the long tunnel between the space ships can be any right prismatic shape, not necessarily a cylinder. Once again, Rocky needs the crystal to fit through the tunnel, and it is okay if that fit is snug.</p>
+		<p>What is the minimum possible cross-sectional area for the tunnel so that the crystal will fit through it?</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>For a right prism, the crystal fits iff one orthogonal projection of the dodecahedron fits inside the cross-section. So the minimum possible cross-sectional area equals the minimum area of an orthogonal projection of the dodecahedron.</p>
+		<p>Use the standard coordinates for a regular dodecahedron:</p>
+		<ul>
+			<li>\((\pm1,\pm1,\pm1)\),</li>
+			<li>\((0,\pm1/\varphi,\pm\varphi)\),</li>
+			<li>\((\pm1/\varphi,\pm\varphi,0)\),</li>
+			<li>\((\pm\varphi,0,\pm1/\varphi)\),</li>
+		</ul>
+		<p>where \(\varphi=(1+\sqrt{5})/2\). In this model the edge length is \(2/\varphi\), so scale by \(\varphi/2\) to make the edges length 1.</p>
+		<p>By symmetry, it suffices to check the three main symmetry axes: through opposite faces, through opposite vertices, and through opposite edges. The smallest shadow comes from the 2-fold symmetry axis through opposite edges. Take that axis as the \(x\)-axis and project onto the \(yz\)-plane.</p>
+		<p>The convex hull of the projected vertices is an octagon with vertices</p>
+		<p>\[
+			\left(\pm\frac{1+\varphi}{2}, 0\right),\quad
+			\left(\pm\frac{1}{2}, \pm\frac{1+\varphi}{2}\right),\quad
+			\left(\pm\frac{\varphi}{2}, \pm\frac{\varphi}{2}\right),
+		\]</p>
+		<p>listed in cyclic order. Its area (shoelace formula) is</p>
+		<p>\[
+			A=\frac{5}{2}+\sqrt{5}=\frac{5+2\sqrt{5}}{2}.
+		\]</p>
+		<p>Projections along the other symmetry axes are larger, so this is minimal.</p>
+		<p><strong>Minimum possible cross-sectional area: \( \boxed{\frac{5+2\sqrt{5}}{2}} \).</strong></p>
+
+		<h3>Interactive: Rotate the Dodecahedron</h3>
+		<p>Rotate the dodecahedron and watch the cross-sectional area of its shadow.</p>
+		<div class="fiddler-interactive" id="dodeca-interactive">
+			<div class="fi-views">
+				<div class="fi-panel">
+					<p class="fi-panel-title">Solid view</p>
+					<canvas id="dodeca-3d" width="520" height="360" aria-label="Dodecahedron solid view"></canvas>
+				</div>
+				<div class="fi-panel">
+					<p class="fi-panel-title">Shadow view</p>
+					<canvas id="dodeca-canvas" width="520" height="360" aria-label="Dodecahedron shadow"></canvas>
+				</div>
+			</div>
+			<div class="fi-controls">
+				<label for="dodeca-yaw">Yaw</label>
+				<input id="dodeca-yaw" type="range" min="0" max="360" step="1" value="0">
+				<label for="dodeca-pitch">Pitch</label>
+				<input id="dodeca-pitch" type="range" min="0" max="360" step="1" value="0">
+				<label for="dodeca-roll">Roll</label>
+				<input id="dodeca-roll" type="range" min="0" max="360" step="1" value="0">
+				<button class="fi-reset" id="dodeca-reset" type="button">Reset</button>
+			</div>
+			<div class="fi-readout" id="dodeca-readout">Loading...</div>
+		</div>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/03/2026-03-27.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<script>
+			(function() {
+				const degToRad = (deg) => deg * Math.PI / 180;
+
+				const rotatePoint = (p, yaw, pitch, roll) => {
+					let x = p[0];
+					let y = p[1];
+					let z = p[2];
+
+					const cx = Math.cos(roll);
+					const sx = Math.sin(roll);
+					let y1 = y * cx - z * sx;
+					let z1 = y * sx + z * cx;
+					let x1 = x;
+
+					const cy = Math.cos(pitch);
+					const sy = Math.sin(pitch);
+					let x2 = x1 * cy + z1 * sy;
+					let z2 = -x1 * sy + z1 * cy;
+					let y2 = y1;
+
+					const cz = Math.cos(yaw);
+					const sz = Math.sin(yaw);
+					let x3 = x2 * cz - y2 * sz;
+					let y3 = x2 * sz + y2 * cz;
+					let z3 = z2;
+
+					return [x3, y3, z3];
+				};
+
+				const cross3 = (a, b) => ([
+					a[1] * b[2] - a[2] * b[1],
+					a[2] * b[0] - a[0] * b[2],
+					a[0] * b[1] - a[1] * b[0]
+				]);
+
+				const dot3 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+
+				const normalize3 = (v) => {
+					const len = Math.hypot(v[0], v[1], v[2]);
+					if (len === 0) {
+						return [0, 0, 0];
+					}
+					return [v[0] / len, v[1] / len, v[2] / len];
+				};
+
+				const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+
+				const makeDiameter = (a, b) => {
+					const cx = (a[0] + b[0]) / 2;
+					const cy = (a[1] + b[1]) / 2;
+					return { center: [cx, cy], r: dist([cx, cy], a) };
+				};
+
+				const makeCircumcircle = (a, b, c) => {
+					const ax = a[0];
+					const ay = a[1];
+					const bx = b[0];
+					const by = b[1];
+					const cx = c[0];
+					const cy = c[1];
+					const d = (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by)) * 2;
+					if (Math.abs(d) < 1e-12) {
+						return null;
+					}
+					const ax2ay2 = ax * ax + ay * ay;
+					const bx2by2 = bx * bx + by * by;
+					const cx2cy2 = cx * cx + cy * cy;
+					const ux = (ax2ay2 * (by - cy) + bx2by2 * (cy - ay) + cx2cy2 * (ay - by)) / d;
+					const uy = (ax2ay2 * (cx - bx) + bx2by2 * (ax - cx) + cx2cy2 * (bx - ax)) / d;
+					return { center: [ux, uy], r: Math.hypot(ux - ax, uy - ay) };
+				};
+
+				const isInCircle = (p, circle) => {
+					return Math.hypot(p[0] - circle.center[0], p[1] - circle.center[1]) <= circle.r + 1e-9;
+				};
+
+				const makeEnclosingCircle = (points) => {
+					const shuffled = points.slice();
+					for (let i = shuffled.length - 1; i > 0; i -= 1) {
+						const j = Math.floor(Math.random() * (i + 1));
+						const tmp = shuffled[i];
+						shuffled[i] = shuffled[j];
+						shuffled[j] = tmp;
+					}
+					let circle = null;
+					for (let i = 0; i < shuffled.length; i += 1) {
+						const p = shuffled[i];
+						if (circle && isInCircle(p, circle)) {
+							continue;
+						}
+						circle = { center: [p[0], p[1]], r: 0 };
+						for (let j = 0; j < i; j += 1) {
+							const q = shuffled[j];
+							if (isInCircle(q, circle)) {
+								continue;
+							}
+							circle = makeDiameter(p, q);
+							for (let k = 0; k < j; k += 1) {
+								const r = shuffled[k];
+								if (isInCircle(r, circle)) {
+									continue;
+								}
+								const circum = makeCircumcircle(p, q, r);
+								if (circum) {
+									circle = circum;
+								}
+							}
+						}
+					}
+					return circle;
+				};
+
+				const convexHull = (points) => {
+					if (points.length <= 1) {
+						return points.slice();
+					}
+					const pts = points.slice().sort((a, b) => {
+						if (a[0] !== b[0]) {
+							return a[0] - b[0];
+						}
+						return a[1] - b[1];
+					});
+					const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+					const lower = [];
+					for (const p of pts) {
+						while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) {
+							lower.pop();
+						}
+						lower.push(p);
+					}
+					const upper = [];
+					for (let i = pts.length - 1; i >= 0; i -= 1) {
+						const p = pts[i];
+						while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) {
+							upper.pop();
+						}
+						upper.push(p);
+					}
+					upper.pop();
+					lower.pop();
+					return lower.concat(upper);
+				};
+
+				const polygonArea = (poly) => {
+					if (poly.length < 3) {
+						return 0;
+					}
+					let area = 0;
+					for (let i = 0; i < poly.length; i += 1) {
+						const [x1, y1] = poly[i];
+						const [x2, y2] = poly[(i + 1) % poly.length];
+						area += x1 * y2 - x2 * y1;
+					}
+					return Math.abs(area) / 2;
+				};
+
+				const getBounds = (points) => {
+					let minX = Infinity;
+					let maxX = -Infinity;
+					let minY = Infinity;
+					let maxY = -Infinity;
+					for (const p of points) {
+						minX = Math.min(minX, p[0]);
+						maxX = Math.max(maxX, p[0]);
+						minY = Math.min(minY, p[1]);
+						maxY = Math.max(maxY, p[1]);
+					}
+					return { minX, maxX, minY, maxY };
+				};
+
+				const hexToRgb = (hex) => {
+					const clean = hex.replace("#", "");
+					const num = parseInt(clean, 16);
+					return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+				};
+
+				const shadeColor = (hex, factor) => {
+					const [r, g, b] = hexToRgb(hex);
+					const clamp = (v) => Math.max(0, Math.min(255, Math.round(v)));
+					return `rgb(${clamp(r * factor)}, ${clamp(g * factor)}, ${clamp(b * factor)})`;
+				};
+
+				const drawProjection = (canvas, points, hull, circle) => {
+					const ctx = canvas.getContext("2d");
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					const bounds = getBounds(points);
+					const padding = 24;
+					const spanX = Math.max(bounds.maxX - bounds.minX, 1e-6);
+					const spanY = Math.max(bounds.maxY - bounds.minY, 1e-6);
+					const scale = Math.min((canvas.width - padding * 2) / spanX, (canvas.height - padding * 2) / spanY);
+					const cx = (bounds.minX + bounds.maxX) / 2;
+					const cy = (bounds.minY + bounds.maxY) / 2;
+					const toCanvas = (p) => {
+						const x = (p[0] - cx) * scale + canvas.width / 2;
+						const y = (cy - p[1]) * scale + canvas.height / 2;
+						return [x, y];
+					};
+
+					if (circle) {
+						const c = toCanvas(circle.center);
+						ctx.beginPath();
+						ctx.arc(c[0], c[1], circle.r * scale, 0, Math.PI * 2);
+						ctx.strokeStyle = "#2d6ea3";
+						ctx.lineWidth = 2;
+						ctx.setLineDash([6, 5]);
+						ctx.stroke();
+						ctx.setLineDash([]);
+					}
+
+					if (hull.length >= 2) {
+						ctx.beginPath();
+						const [x0, y0] = toCanvas(hull[0]);
+						ctx.moveTo(x0, y0);
+						for (let i = 1; i < hull.length; i += 1) {
+							const [x, y] = toCanvas(hull[i]);
+							ctx.lineTo(x, y);
+						}
+						ctx.closePath();
+						ctx.strokeStyle = "#333";
+						ctx.lineWidth = 2;
+						ctx.stroke();
+					}
+
+					ctx.fillStyle = "#111";
+					for (const p of points) {
+						const [x, y] = toCanvas(p);
+						ctx.beginPath();
+						ctx.arc(x, y, 3, 0, Math.PI * 2);
+						ctx.fill();
+					}
+				};
+
+				const buildHullFaces = (verts) => {
+					const eps = 1e-9;
+					const centroid = verts.reduce((acc, v) => [acc[0] + v[0], acc[1] + v[1], acc[2] + v[2]], [0, 0, 0])
+						.map((val) => val / verts.length);
+					const planes = new Map();
+					for (let i = 0; i < verts.length; i += 1) {
+						for (let j = i + 1; j < verts.length; j += 1) {
+							for (let k = j + 1; k < verts.length; k += 1) {
+								const a = verts[i];
+								const b = verts[j];
+								const c = verts[k];
+								const nRaw = cross3([b[0] - a[0], b[1] - a[1], b[2] - a[2]], [c[0] - a[0], c[1] - a[1], c[2] - a[2]]);
+								const norm = Math.hypot(nRaw[0], nRaw[1], nRaw[2]);
+								if (norm < eps) {
+									continue;
+								}
+								let n = [nRaw[0] / norm, nRaw[1] / norm, nRaw[2] / norm];
+								let d = dot3(n, a);
+								if (dot3(n, centroid) > d) {
+									n = [-n[0], -n[1], -n[2]];
+									d = -d;
+								}
+								let hasOutside = false;
+								for (let idx = 0; idx < verts.length; idx += 1) {
+									const p = verts[idx];
+									if (dot3(n, p) - d > eps) {
+										hasOutside = true;
+										break;
+									}
+								}
+								if (hasOutside) {
+									continue;
+								}
+								const key = `${n[0].toFixed(6)},${n[1].toFixed(6)},${n[2].toFixed(6)},${d.toFixed(6)}`;
+								if (!planes.has(key)) {
+									planes.set(key, { n, d, indices: new Set() });
+								}
+								const plane = planes.get(key);
+								for (let idx = 0; idx < verts.length; idx += 1) {
+									const p = verts[idx];
+									if (Math.abs(dot3(n, p) - d) < 1e-6) {
+										plane.indices.add(idx);
+									}
+								}
+							}
+						}
+					}
+
+					const faces = [];
+					for (const plane of planes.values()) {
+						const faceIndices = Array.from(plane.indices);
+						if (faceIndices.length < 3) {
+							continue;
+						}
+						const faceVerts = faceIndices.map((idx) => verts[idx]);
+						const faceCentroid = faceVerts.reduce((acc, v) => [acc[0] + v[0], acc[1] + v[1], acc[2] + v[2]], [0, 0, 0])
+							.map((val) => val / faceVerts.length);
+						let t = [1, 0, 0];
+						if (Math.abs(dot3(t, plane.n)) > 0.9) {
+							t = [0, 1, 0];
+						}
+						const u = normalize3(cross3(plane.n, t));
+						const v = cross3(plane.n, u);
+						const withAngles = faceIndices.map((idx) => {
+							const p = verts[idx];
+							const rel = [p[0] - faceCentroid[0], p[1] - faceCentroid[1], p[2] - faceCentroid[2]];
+							return {
+								idx,
+								angle: Math.atan2(dot3(rel, v), dot3(rel, u))
+							};
+						});
+						withAngles.sort((a, b) => a.angle - b.angle);
+						const ordered = withAngles.map((entry) => entry.idx);
+						const p0 = verts[ordered[0]];
+						const p1 = verts[ordered[1]];
+						const p2 = verts[ordered[2]];
+						const nTest = normalize3(cross3([p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]], [p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]]));
+						if (dot3(nTest, plane.n) < 0) {
+							ordered.reverse();
+						}
+						faces.push(ordered);
+					}
+					return faces;
+				};
+
+				const drawSolid = (canvas, verts, faces, options) => {
+					const ctx = canvas.getContext("2d");
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					const { color, edgeColor } = options;
+					const lightDir = normalize3([0.4, 0.6, 1]);
+					const padding = 28;
+					const bounds = getBounds(verts.map((v) => [v[0], v[1]]));
+					const spanX = Math.max(bounds.maxX - bounds.minX, 1e-6);
+					const spanY = Math.max(bounds.maxY - bounds.minY, 1e-6);
+					const scale = Math.min((canvas.width - padding * 2) / spanX, (canvas.height - padding * 2) / spanY);
+					const cx = (bounds.minX + bounds.maxX) / 2;
+					const cy = (bounds.minY + bounds.maxY) / 2;
+
+					const project = (p) => {
+						const camera = 4.5;
+						const z = p[2];
+						const factor = camera / (camera - z);
+						const x = (p[0] * factor - cx) * scale + canvas.width / 2;
+						const y = (cy - p[1] * factor) * scale + canvas.height / 2;
+						return [x, y, z];
+					};
+
+					const projected = verts.map(project);
+					const triangles = [];
+					for (const face of faces) {
+						for (let i = 1; i < face.length - 1; i += 1) {
+							const a = face[0];
+							const b = face[i];
+							const c = face[i + 1];
+							const pa = verts[a];
+							const pb = verts[b];
+							const pc = verts[c];
+							const normal = normalize3(cross3([pb[0] - pa[0], pb[1] - pa[1], pb[2] - pa[2]], [pc[0] - pa[0], pc[1] - pa[1], pc[2] - pa[2]]));
+							const depth = (pa[2] + pb[2] + pc[2]) / 3;
+							triangles.push({ a, b, c, normal, depth });
+						}
+					}
+					triangles.sort((t1, t2) => t1.depth - t2.depth);
+
+					for (const tri of triangles) {
+						const pa = projected[tri.a];
+						const pb = projected[tri.b];
+						const pc = projected[tri.c];
+						const shade = 0.35 + 0.65 * Math.max(0, dot3(tri.normal, lightDir));
+						ctx.beginPath();
+						ctx.moveTo(pa[0], pa[1]);
+						ctx.lineTo(pb[0], pb[1]);
+						ctx.lineTo(pc[0], pc[1]);
+						ctx.closePath();
+						ctx.fillStyle = shadeColor(color, shade);
+						ctx.fill();
+						ctx.strokeStyle = edgeColor;
+						ctx.lineWidth = 1;
+						ctx.stroke();
+					}
+				};
+
+				const tetraVerts = (() => {
+					const scale = 1 / (2 * Math.sqrt(2));
+					return [
+						[1, 1, 1],
+						[1, -1, -1],
+						[-1, 1, -1],
+						[-1, -1, 1]
+					].map((v) => [v[0] * scale, v[1] * scale, v[2] * scale]);
+				})();
+
+				const dodecaVerts = (() => {
+					const phi = (1 + Math.sqrt(5)) / 2;
+					const verts = [];
+					for (const sx of [-1, 1]) {
+						for (const sy of [-1, 1]) {
+							for (const sz of [-1, 1]) {
+								verts.push([sx, sy, sz]);
+							}
+						}
+					}
+					for (const sy of [-1, 1]) {
+						for (const sz of [-1, 1]) {
+							verts.push([0, sy / phi, sz * phi]);
+						}
+					}
+					for (const sx of [-1, 1]) {
+						for (const sy of [-1, 1]) {
+							verts.push([sx / phi, sy * phi, 0]);
+						}
+					}
+					for (const sx of [-1, 1]) {
+						for (const sz of [-1, 1]) {
+							verts.push([sx * phi, 0, sz / phi]);
+						}
+					}
+					const edgeLen = 2 / phi;
+					const scale = 1 / edgeLen;
+					return verts.map((v) => [v[0] * scale, v[1] * scale, v[2] * scale]);
+				})();
+
+				const setupInteractive = (prefix, verts, faces, isCircleMode) => {
+					const canvas = document.getElementById(`${prefix}-canvas`);
+					const canvas3d = document.getElementById(`${prefix}-3d`);
+					const yawInput = document.getElementById(`${prefix}-yaw`);
+					const pitchInput = document.getElementById(`${prefix}-pitch`);
+					const rollInput = document.getElementById(`${prefix}-roll`);
+					const readout = document.getElementById(`${prefix}-readout`);
+					const reset = document.getElementById(`${prefix}-reset`);
+
+					const render = () => {
+						const yaw = degToRad(parseFloat(yawInput.value));
+						const pitch = degToRad(parseFloat(pitchInput.value));
+						const roll = degToRad(parseFloat(rollInput.value));
+						const rotated = verts.map((v) => rotatePoint(v, yaw, pitch, roll));
+						const points2d = rotated.map((v) => [v[0], v[1]]);
+						const hull = convexHull(points2d);
+						drawSolid(canvas3d, rotated, faces, { color: "#a9c4df", edgeColor: "#3a3a3a" });
+						if (isCircleMode) {
+							const circle = makeEnclosingCircle(points2d);
+							drawProjection(canvas, points2d, hull, circle);
+							readout.textContent = `Current shadow radius: ${circle.r.toFixed(4)} (minimum is 0.5000).`;
+						} else {
+							const area = polygonArea(hull);
+							drawProjection(canvas, points2d, hull, null);
+							readout.textContent = `Current shadow area: ${area.toFixed(4)} (minimum is ${(2.5 + Math.sqrt(5)).toFixed(4)}).`;
+						}
+					};
+
+					const resetValues = () => {
+						yawInput.value = 0;
+						pitchInput.value = 0;
+						rollInput.value = 0;
+						render();
+					};
+
+					yawInput.addEventListener("input", render);
+					pitchInput.addEventListener("input", render);
+					rollInput.addEventListener("input", render);
+					reset.addEventListener("click", resetValues);
+
+					render();
+				};
+
+				const tetraFaces = buildHullFaces(tetraVerts);
+				const dodecaFaces = buildHullFaces(dodecaVerts);
+				setupInteractive("tetra", tetraVerts, tetraFaces, true);
+				setupInteractive("dodeca", dodecaVerts, dodecaFaces, false);
+			})();
+		</script>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+	</body>
+</html>
