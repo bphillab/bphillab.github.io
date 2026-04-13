@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - Apr 10, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+			}
+			.cube-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+				gap: 12px;
+				margin: 18px 0 22px;
+				max-width: 760px;
+			}
+			.cube-card {
+				padding: 12px;
+				border: 1px solid #d6d6d6;
+				background: rgba(255, 255, 255, 0.72);
+			}
+			.cube-card h3 {
+				margin: 0 0 8px;
+				font-size: 1rem;
+			}
+			.cube-digits {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+			}
+			.cube-digit {
+				min-width: 40px;
+				padding: 6px 8px;
+				border: 1px solid #cad3dd;
+				background: #fff;
+				text-align: center;
+				font-weight: 700;
+			}
+			.checker {
+				margin: 16px 0 22px;
+				padding: 12px;
+				border: 1px solid #d6d6d6;
+				background: rgba(255, 255, 255, 0.68);
+				max-width: 760px;
+			}
+			.checker-controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+				align-items: center;
+				margin: 8px 0 10px;
+			}
+			.checker-controls input {
+				width: 120px;
+			}
+			.checker-output {
+				font-size: 0.96em;
+				color: #444;
+			}
+			.solution-table td:first-child,
+			.solution-table th:first-child {
+				width: 140px;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: Apr 10, 2026</h1>
+		<p><em>Posted on Apr 10, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>You have four 6-faced number cubes. To display a 3-digit number, you pick three distinct cubes and line them up left to right. Leading zeros are allowed, so for example 7 is displayed as 007.</p>
+		<p>A 6 can also be turned upside down and used as a 9, so 6 and 9 are effectively the same symbol.</p>
+		<p>How should the 24 faces be labeled so that you can display every whole number from 1 through \(N\), with no gaps, and how large can \(N\) be?</p>
+
+		<h2>Main Solution</h2>
+		<p>The key is to count how many cubes each digit must appear on.</p>
+		<ul>
+			<li>Because one-digit numbers are shown with two leading zeros, the digit 0 must appear on at least two cubes.</li>
+			<li>To make 111, 222, 333, 444, 555, and 666, the symbols 1, 2, 3, 4, 5, and 6/9 must each appear on at least three cubes.</li>
+			<li>To make 77 and 88, the digits 7 and 8 must each appear on at least two cubes.</li>
+		</ul>
+		<p>If we want to reach at least 776, that already forces at least</p>
+		<p>\[
+			2 + 6\cdot 3 + 2 + 2 = 24
+		\]</p>
+		<p>digit-cube incidences. But the four cubes have exactly \(4\cdot 6=24\) faces total, so this uses every face with no slack at all.</p>
+		<p>Now look one step farther. To make 777, the digit 7 would have to appear on <em>three</em> cubes, not just two. That would require at least 25 incidences overall, which is impossible.</p>
+		<div class="callout">
+			<p><strong>Upper bound:</strong> \(N \le 776\).</p>
+		</div>
+		<p>So the whole problem is whether 776 is actually achievable.</p>
+
+		<h3>A Working Design</h3>
+		<p>It is. One optimal arrangement is:</p>
+		<div class="cube-grid" aria-label="Four optimal digit cubes">
+			<div class="cube-card">
+				<h3>Cube A</h3>
+				<div class="cube-digits">
+					<span class="cube-digit">0</span>
+					<span class="cube-digit">1</span>
+					<span class="cube-digit">2</span>
+					<span class="cube-digit">3</span>
+					<span class="cube-digit">4</span>
+					<span class="cube-digit">5</span>
+				</div>
+			</div>
+			<div class="cube-card">
+				<h3>Cube B</h3>
+				<div class="cube-digits">
+					<span class="cube-digit">0</span>
+					<span class="cube-digit">1</span>
+					<span class="cube-digit">2</span>
+					<span class="cube-digit">3</span>
+					<span class="cube-digit">4</span>
+					<span class="cube-digit">6/9</span>
+				</div>
+			</div>
+			<div class="cube-card">
+				<h3>Cube C</h3>
+				<div class="cube-digits">
+					<span class="cube-digit">1</span>
+					<span class="cube-digit">2</span>
+					<span class="cube-digit">5</span>
+					<span class="cube-digit">6/9</span>
+					<span class="cube-digit">7</span>
+					<span class="cube-digit">8</span>
+				</div>
+			</div>
+			<div class="cube-card">
+				<h3>Cube D</h3>
+				<div class="cube-digits">
+					<span class="cube-digit">3</span>
+					<span class="cube-digit">4</span>
+					<span class="cube-digit">5</span>
+					<span class="cube-digit">6/9</span>
+					<span class="cube-digit">7</span>
+					<span class="cube-digit">8</span>
+				</div>
+			</div>
+		</div>
+		<p>These four cubes can display every number from 1 through 776. A few examples:</p>
+		<ul>
+			<li>7 = 0 on A, 0 on B, 7 on C</li>
+			<li>248 = 2 on A, 4 on B, 8 on D</li>
+			<li>666 = 6/9 on B, 6/9 on C, 6/9 on D</li>
+			<li>775 = 7 on C, 7 on D, 5 on A</li>
+		</ul>
+		<div class="callout">
+			<p><strong>Best possible value:</strong> \( \boxed{776} \).</p>
+		</div>
+
+		<h3>Interactive Checker</h3>
+		<p>Type any number from 1 to 999 and the checker will either show one valid cube assignment or report that the number cannot be made. For this design, the first failure is 777.</p>
+		<div class="checker">
+			<div class="checker-controls">
+				<label for="cube-number">Number:</label>
+				<input id="cube-number" type="number" min="1" max="999" step="1" value="776">
+				<button id="cube-check" type="button">Check number</button>
+				<button id="cube-first-miss" type="button">Find first miss</button>
+			</div>
+			<p id="cube-check-output" class="checker-output">Loading checker...</p>
+		</div>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>How many distinct unordered cube designs achieve this same optimal value \(N=776\)? Faces on the same cube are not ordered, and swapping two faces on one cube does not create a new design.</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>The upper-bound argument does almost all of the structural work.</p>
+		<table class="solution-table">
+			<thead>
+				<tr>
+					<th>Symbol</th>
+					<th>Required cubes</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr><td>0</td><td>2 cubes</td></tr>
+				<tr><td>1, 2, 3, 4, 5</td><td>3 cubes each</td></tr>
+				<tr><td>6/9</td><td>3 cubes</td></tr>
+				<tr><td>7, 8</td><td>2 cubes each</td></tr>
+			</tbody>
+		</table>
+		<p>Because these counts already add up to 24 exactly, <em>every</em> optimal design must have exactly this frequency profile. Equivalently, if we describe each cube by the three symbols it is missing, then:</p>
+		<ul>
+			<li>0, 7, and 8 must each be missing from exactly two cubes,</li>
+			<li>1, 2, 3, 4, 5, and 6/9 must each be missing from exactly one cube.</li>
+		</ul>
+		<p>That shrinks the search space dramatically. After generating all unordered 4-cube designs with exactly that missing-digit pattern, there are only 1075 candidates left to test.</p>
+		<p>An exhaustive computer check over those 1075 candidates shows that 855 of them can make every number from 1 through 776.</p>
+		<div class="callout">
+			<p><strong>Number of optimal unordered designs:</strong> \( \boxed{855} \).</p>
+		</div>
+		<p>The four cubes displayed above are one of those 855 optimal designs.</p>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/04/2026-04-03.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+		<script>
+			(function () {
+				var cubeNames = ["A", "B", "C", "D"];
+				var cubes = [
+					["0", "1", "2", "3", "4", "5"],
+					["0", "1", "2", "3", "4", "s"],
+					["1", "2", "5", "s", "7", "8"],
+					["3", "4", "5", "s", "7", "8"]
+				];
+				var perms = [
+					[0, 1, 2], [0, 1, 3], [0, 2, 1], [0, 2, 3], [0, 3, 1], [0, 3, 2],
+					[1, 0, 2], [1, 0, 3], [1, 2, 0], [1, 2, 3], [1, 3, 0], [1, 3, 2],
+					[2, 0, 1], [2, 0, 3], [2, 1, 0], [2, 1, 3], [2, 3, 0], [2, 3, 1],
+					[3, 0, 1], [3, 0, 2], [3, 1, 0], [3, 1, 2], [3, 2, 0], [3, 2, 1]
+				];
+				var input = document.getElementById("cube-number");
+				var checkButton = document.getElementById("cube-check");
+				var missButton = document.getElementById("cube-first-miss");
+				var output = document.getElementById("cube-check-output");
+
+				function normalizeDigit(ch) {
+					return ch === "6" || ch === "9" ? "s" : ch;
+				}
+
+				function displayDigit(ch) {
+					return ch === "s" ? "6/9" : ch;
+				}
+
+				function paddedDigits(n) {
+					return String(n).padStart(3, "0").split("").map(normalizeDigit);
+				}
+
+				function findAssignment(n) {
+					var digits = paddedDigits(n);
+					var i;
+					for (i = 0; i < perms.length; i += 1) {
+						var perm = perms[i];
+						if (
+							cubes[perm[0]].indexOf(digits[0]) !== -1 &&
+							cubes[perm[1]].indexOf(digits[1]) !== -1 &&
+							cubes[perm[2]].indexOf(digits[2]) !== -1
+						) {
+							return {
+								digits: digits,
+								perm: perm
+							};
+						}
+					}
+					return null;
+				}
+
+				function describeAssignment(n) {
+					var assignment = findAssignment(n);
+					if (!assignment) {
+						return n + " cannot be made with these cubes.";
+					}
+					var parts = [];
+					var i;
+					for (i = 0; i < 3; i += 1) {
+						parts.push(displayDigit(assignment.digits[i]) + " on Cube " + cubeNames[assignment.perm[i]]);
+					}
+					return n + " can be shown as " + parts.join(", ");
+				}
+
+				function updateCheck() {
+					var n = parseInt(input.value, 10);
+					if (!Number.isFinite(n) || n < 1 || n > 999) {
+						output.textContent = "Enter a whole number from 1 to 999.";
+						return;
+					}
+					output.textContent = describeAssignment(n);
+				}
+
+				function findFirstMiss() {
+					var n;
+					for (n = 1; n <= 999; n += 1) {
+						if (!findAssignment(n)) {
+							output.textContent = "The first number this design misses is " + n + ".";
+							input.value = n;
+							return;
+						}
+					}
+					output.textContent = "This design makes every number from 1 to 999.";
+				}
+
+				checkButton.addEventListener("click", updateCheck);
+				missButton.addEventListener("click", findFirstMiss);
+				input.addEventListener("input", updateCheck);
+				findFirstMiss();
+				input.value = 776;
+				updateCheck();
+			}());
+		</script>
+	</body>
+</html>
