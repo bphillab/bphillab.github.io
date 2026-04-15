@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>MoMath Mindbender - Disjoint Unit Disks - Apr 15, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>MoMath Mindbender: Disjoint Unit Disks</h1>
+		<p><em>Posted on Apr 15, 2026</em></p>
+
+		<h2>Source</h2>
+		<p>Monthly Mindbenders (April 2026).</p>
+
+		<h2>Problem</h2>
+		<p>Your adversary chooses 10 points on the plane, and your mission is to cover them with disjoint unit disks.</p>
+		<p>If the points are close together, it is easy: one disk will cover them all. If they are far apart, you can cover each point with its own disk. Can you always do it?</p>
+
+		<h2>Answer</h2>
+		<p><strong>Yes.</strong> No matter how the 10 points are placed, there is always a collection of pairwise disjoint unit disks whose union contains all 10 points.</p>
+
+		<h2>Why</h2>
+		<p>Take the standard hexagonal packing of unit disks, the densest way to pack congruent disks in the plane without overlap. Its density is</p>
+		<p>\[
+		\frac{\pi}{\sqrt{12}} = \frac{\pi}{2\sqrt{3}} \approx 0.9069.
+		\]</p>
+		<p>Now translate that entire packing by a random vector. For any fixed point in the plane, the chance that it lands inside one of the disks is exactly the packing density, so each chosen point is covered with probability \(p \approx 0.9069\).</p>
+		<p>Let \(X\) be the number of the 10 points that get covered. By linearity of expectation,</p>
+		<p>\[
+		\mathbb{E}[X] = 10p > 9.
+		\]</p>
+		<p>If every translate of the packing missed at least one of the 10 points, then we would always have \(X \le 9\), which would force \(\mathbb{E}[X] \le 9\). That contradicts the inequality above.</p>
+		<p>So there must be some translate of the hexagonal packing that covers all 10 points at once. The disks in that packing are pairwise disjoint, and we can ignore all disks that do not contain one of the chosen points. Therefore 10 points can always be covered by disjoint unit disks.</p>
+
+		<p><strong>More MoMath Mindbenders:</strong> <a href="/blog/momath/2026/03/2026-03-16-disjoint-subset-sums.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+	</body>
+</html>
