@@ -4,6 +4,37 @@
 		<title>MoMath Mindbender - Disjoint Unit Disks - Apr 15, 2026 - Benjamin Phillabaum, Data Cat</title>
 		<link rel="stylesheet" type="text/css" href="/css/main.css">
 		<script defer src="/analytics.js"></script>
+		<style>
+			.mindbender-play {
+				margin: 14px 0 20px;
+				max-width: 720px;
+			}
+			.mindbender-controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px 12px;
+				align-items: center;
+				margin: 10px 0;
+			}
+			.mindbender-controls button {
+				padding: 6px 10px;
+				border: 1px solid #b8b8b8;
+				background: #f7f7f7;
+				cursor: pointer;
+			}
+			.mindbender-readout {
+				margin: 8px 0;
+				font-size: 0.96em;
+			}
+			.mindbender-badge {
+				display: inline-block;
+				padding: 2px 6px;
+				border-radius: 6px;
+				background: #e6eef7;
+				border: 1px solid #9bb6cf;
+				font-size: 0.9em;
+			}
+		</style>
 		<script defer src="/mathjax.js"></script>
 	</head>
 	<body>
@@ -30,6 +61,26 @@
 		<h2>Answer</h2>
 		<p><strong>Yes.</strong> No matter how the 10 points are placed, there is always a collection of pairwise disjoint unit disks whose union contains all 10 points.</p>
 
+		<h2>Interactive Explorer</h2>
+		<p>Click to add points, drag to move them, and shift-click a point to delete it. The solver searches for a translate of the standard hexagonal packing from the proof.</p>
+		<div class="mindbender-play">
+			<canvas id="disk-canvas" width="720" height="480" style="width:100%;max-width:720px;height:auto;border:1px solid #ccc;background:#fff;"></canvas>
+			<div class="mindbender-controls">
+				<label for="disk-preset">Preset:</label>
+				<select id="disk-preset">
+					<option value="random10">Random 10 Points</option>
+					<option value="counter45">45-Point Counterexample</option>
+				</select>
+				<button id="disk-random">Random 10 Points</button>
+				<button id="disk-load-preset">Load Preset</button>
+				<button id="disk-solve">Solve</button>
+				<button id="disk-clear">Clear</button>
+				<span id="disk-status" class="mindbender-badge">Ready</span>
+			</div>
+			<p id="disk-readout" class="mindbender-readout">No points yet.</p>
+			<p id="disk-note" class="mindbender-readout">The theorem guarantees success for 10 or fewer points. The interactive solver looks for a matching hexagonal-packing translate numerically.</p>
+		</div>
+
 		<h2>Why</h2>
 		<p>Take the standard hexagonal packing of unit disks, the densest way to pack congruent disks in the plane without overlap. Its density is</p>
 		<p>\[
@@ -52,5 +103,452 @@
         		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
 			</ul>
 		</footer>
+		<script>
+			(function () {
+				var canvas = document.getElementById("disk-canvas");
+				var presetSelect = document.getElementById("disk-preset");
+				var randomButton = document.getElementById("disk-random");
+				var loadPresetButton = document.getElementById("disk-load-preset");
+				var solveButton = document.getElementById("disk-solve");
+				var clearButton = document.getElementById("disk-clear");
+				var status = document.getElementById("disk-status");
+				var readout = document.getElementById("disk-readout");
+				var note = document.getElementById("disk-note");
+
+				if (!canvas || !presetSelect || !randomButton || !loadPresetButton || !solveButton || !clearButton || !status || !readout || !note) {
+					return;
+				}
+
+				var ctx = canvas.getContext("2d");
+				var W = canvas.width;
+				var H = canvas.height;
+				var SQRT3 = Math.sqrt(3);
+				var xMin = -1;
+				var xMax = 11;
+				var yMin = -1;
+				var yMax = 7;
+				var plotW = xMax - xMin;
+				var plotH = yMax - yMin;
+				var points = [];
+				var solution = null;
+				var dragIndex = -1;
+
+				function clamp(value, min, max) {
+					return Math.max(min, Math.min(max, value));
+				}
+
+				function wrap01(value) {
+					var wrapped = value % 1;
+					return wrapped < 0 ? wrapped + 1 : wrapped;
+				}
+
+				function worldToCanvas(point) {
+					return {
+						x: ((point.x - xMin) / plotW) * W,
+						y: H - ((point.y - yMin) / plotH) * H
+					};
+				}
+
+				function canvasToWorld(px, py) {
+					return {
+						x: xMin + (px / W) * plotW,
+						y: yMin + ((H - py) / H) * plotH
+					};
+				}
+
+				function translationFromUV(u, v) {
+					return {
+						x: 2 * u + v,
+						y: SQRT3 * v
+					};
+				}
+
+				function nearestLatticePoint(qx, qy) {
+					var alpha = (qx / 2) - (qy / (2 * SQRT3));
+					var beta = qy / SQRT3;
+					var baseM = Math.round(alpha);
+					var baseN = Math.round(beta);
+					var best = null;
+					var dm;
+					var dn;
+
+					for (dm = -2; dm <= 2; dm += 1) {
+						for (dn = -2; dn <= 2; dn += 1) {
+							var m = baseM + dm;
+							var n = baseN + dn;
+							var cx = 2 * m + n;
+							var cy = SQRT3 * n;
+							var dx = qx - cx;
+							var dy = qy - cy;
+							var d2 = dx * dx + dy * dy;
+							if (!best || d2 < best.distSq) {
+								best = { m: m, n: n, distSq: d2, centerX: cx, centerY: cy };
+							}
+						}
+					}
+
+					return best;
+				}
+
+				function evaluateTranslation(u, v) {
+					var translation = translationFromUV(u, v);
+					var assignment = [];
+					var maxDistSq = 0;
+					var i;
+
+					for (i = 0; i < points.length; i += 1) {
+						var nearest = nearestLatticePoint(points[i].x - translation.x, points[i].y - translation.y);
+						var center = {
+							x: translation.x + nearest.centerX,
+							y: translation.y + nearest.centerY,
+							m: nearest.m,
+							n: nearest.n,
+							distSq: nearest.distSq
+						};
+						assignment.push(center);
+						if (nearest.distSq > maxDistSq) {
+							maxDistSq = nearest.distSq;
+						}
+					}
+
+					return {
+						u: wrap01(u),
+						v: wrap01(v),
+						translation: translation,
+						assignment: assignment,
+						maxDistSq: maxDistSq
+					};
+				}
+
+				function dedupeCenters(assignment) {
+					var seen = new Map();
+					var i;
+
+					for (i = 0; i < assignment.length; i += 1) {
+						var key = assignment[i].m + "," + assignment[i].n;
+						if (!seen.has(key)) {
+							seen.set(key, { x: assignment[i].x, y: assignment[i].y, key: key });
+						}
+					}
+
+					return Array.from(seen.values());
+				}
+
+				function patternSearch(seedU, seedV) {
+					var current = evaluateTranslation(seedU, seedV);
+					var step = 0.25;
+					var iterations = 0;
+
+					while (step > 0.0005 && iterations < 80) {
+						var best = current;
+						var du;
+						var dv;
+
+						for (du = -1; du <= 1; du += 1) {
+							for (dv = -1; dv <= 1; dv += 1) {
+								var candidate = evaluateTranslation(current.u + du * step, current.v + dv * step);
+								if (candidate.maxDistSq < best.maxDistSq - 1e-10) {
+									best = candidate;
+								}
+							}
+						}
+
+						if (best !== current) {
+							current = best;
+						} else {
+							step /= 2;
+						}
+
+						iterations += 1;
+					}
+
+					return current;
+				}
+
+				function solveByHexPacking() {
+					if (!points.length) {
+						return { ok: true, centers: [], maxDistSq: 0 };
+					}
+
+					var seeds = [];
+					var coarse = 20;
+					var u;
+					var v;
+					var i;
+
+					for (u = 0; u < coarse; u += 1) {
+						for (v = 0; v < coarse; v += 1) {
+							seeds.push({ u: (u + 0.5) / coarse, v: (v + 0.5) / coarse });
+						}
+					}
+
+					for (i = 0; i < 160; i += 1) {
+						seeds.push({ u: Math.random(), v: Math.random() });
+					}
+
+					var candidates = seeds.map(function (seed) {
+						return evaluateTranslation(seed.u, seed.v);
+					});
+
+					candidates.sort(function (a, b) {
+						return a.maxDistSq - b.maxDistSq;
+					});
+
+					var best = candidates[0];
+					var limit = Math.min(18, candidates.length);
+
+					for (i = 0; i < limit; i += 1) {
+						var refined = patternSearch(candidates[i].u, candidates[i].v);
+						if (refined.maxDistSq < best.maxDistSq) {
+							best = refined;
+						}
+						if (best.maxDistSq <= 1.0000001) {
+							break;
+						}
+					}
+
+					var centers = dedupeCenters(best.assignment);
+					return {
+						ok: best.maxDistSq <= 1.0000001,
+						centers: centers,
+						maxDistSq: best.maxDistSq,
+						translation: best.translation
+					};
+				}
+
+				function randomPoint() {
+					return {
+						x: 0.5 + Math.random() * 9,
+						y: 0.5 + Math.random() * 5
+					};
+				}
+
+				function randomizePoints() {
+					points = [];
+					var i;
+
+					for (i = 0; i < 10; i += 1) {
+						points.push(randomPoint());
+					}
+
+					runSolver();
+				}
+
+				function load45PointCounterexample() {
+					var cx = 5;
+					var cy = 3;
+					var radii = [
+						{ radius: 0.1, count: 3, angleOffset: -Math.PI / 2 },
+						{ radius: 0.721, count: 21, angleOffset: -Math.PI / 2 },
+						{ radius: 1.0001, count: 21, angleOffset: -Math.PI / 2 }
+					];
+
+					points = [];
+					radii.forEach(function (ring) {
+						var i;
+						for (i = 0; i < ring.count; i += 1) {
+							var theta = ring.angleOffset + (2 * Math.PI * i) / ring.count;
+							points.push({
+								x: cx + ring.radius * Math.cos(theta),
+								y: cy + ring.radius * Math.sin(theta)
+							});
+						}
+					});
+
+					runSolver();
+				}
+
+				function loadPreset() {
+					if (presetSelect.value === "counter45") {
+						load45PointCounterexample();
+						return;
+					}
+					randomizePoints();
+				}
+
+				function clearPoints() {
+					points = [];
+					solution = null;
+					status.textContent = "Ready";
+					readout.textContent = "No points yet.";
+					draw();
+				}
+
+				function runSolver() {
+					solution = solveByHexPacking();
+					if (solution.ok) {
+						status.textContent = "Cover found";
+						readout.textContent = "Covered " + points.length + " point" + (points.length === 1 ? "" : "s") + " with " + solution.centers.length + " disjoint unit disk" + (solution.centers.length === 1 ? "" : "s") + ".";
+					} else {
+						status.textContent = "Search failed";
+						readout.textContent = "No covering found by the numerical search. Best radius needed was " + Math.sqrt(solution.maxDistSq).toFixed(4) + ".";
+					}
+					if (presetSelect.value === "counter45" && points.length === 45) {
+						note.textContent = "Loaded the 45-point example from Aloupis, Hearn, Iwasawa, and Uehara (CCCG 2012): 3 equally spaced points on radius 0.1, plus 21 on radius 0.721 and 21 on radius 1.0001. That paper reports this set as non-coverable by disjoint unit disks via exhaustive computer search.";
+					} else if (points.length > 10) {
+						note.textContent = "You currently have more than 10 points. The theorem on this page guarantees success only for 10 or fewer.";
+					} else {
+						note.textContent = "The theorem guarantees success for 10 or fewer points. The interactive solver looks for a matching hexagonal-packing translate numerically.";
+					}
+					draw();
+				}
+
+				function drawAxes() {
+					var x0 = worldToCanvas({ x: xMin, y: 0 });
+					var x1 = worldToCanvas({ x: xMax, y: 0 });
+					var y0 = worldToCanvas({ x: 0, y: yMin });
+					var y1 = worldToCanvas({ x: 0, y: yMax });
+					var x;
+					var y;
+
+					ctx.strokeStyle = "#e3e3e3";
+					ctx.lineWidth = 1;
+					for (x = Math.ceil(xMin); x <= Math.floor(xMax); x += 1) {
+						var gx = worldToCanvas({ x: x, y: 0 }).x;
+						ctx.beginPath();
+						ctx.moveTo(gx, 0);
+						ctx.lineTo(gx, H);
+						ctx.stroke();
+					}
+					for (y = Math.ceil(yMin); y <= Math.floor(yMax); y += 1) {
+						var gy = worldToCanvas({ x: 0, y: y }).y;
+						ctx.beginPath();
+						ctx.moveTo(0, gy);
+						ctx.lineTo(W, gy);
+						ctx.stroke();
+					}
+
+					ctx.strokeStyle = "#999";
+					ctx.beginPath();
+					ctx.moveTo(x0.x, x0.y);
+					ctx.lineTo(x1.x, x1.y);
+					ctx.moveTo(y0.x, y0.y);
+					ctx.lineTo(y1.x, y1.y);
+					ctx.stroke();
+				}
+
+				function drawDisks() {
+					if (!solution || !solution.centers.length) {
+						return;
+					}
+
+					var radiusPx = (1 / plotW) * W;
+					var i;
+
+					ctx.save();
+					for (i = 0; i < solution.centers.length; i += 1) {
+						var centerPx = worldToCanvas(solution.centers[i]);
+						ctx.beginPath();
+						ctx.fillStyle = "rgba(88, 144, 255, 0.16)";
+						ctx.strokeStyle = "rgba(50, 94, 185, 0.8)";
+						ctx.lineWidth = 2;
+						ctx.arc(centerPx.x, centerPx.y, radiusPx, 0, Math.PI * 2);
+						ctx.fill();
+						ctx.stroke();
+					}
+					ctx.restore();
+				}
+
+				function drawPoints() {
+					var i;
+					for (i = 0; i < points.length; i += 1) {
+						var p = worldToCanvas(points[i]);
+						ctx.beginPath();
+						ctx.fillStyle = "#c43d2d";
+						ctx.arc(p.x, p.y, 5.5, 0, Math.PI * 2);
+						ctx.fill();
+						ctx.strokeStyle = "#7d2117";
+						ctx.lineWidth = 1;
+						ctx.stroke();
+					}
+				}
+
+				function drawLegend() {
+					ctx.fillStyle = "#333";
+					ctx.font = "14px sans-serif";
+					ctx.fillText("Click to add. Drag to move. Shift-click to delete.", 16, 22);
+				}
+
+				function draw() {
+					ctx.clearRect(0, 0, W, H);
+					drawAxes();
+					drawDisks();
+					drawPoints();
+					drawLegend();
+				}
+
+				function findNearbyPoint(world, radiusPx) {
+					var i;
+					for (i = points.length - 1; i >= 0; i -= 1) {
+						var pointPx = worldToCanvas(points[i]);
+						var worldPx = worldToCanvas(world);
+						var dx = pointPx.x - worldPx.x;
+						var dy = pointPx.y - worldPx.y;
+						if (dx * dx + dy * dy <= radiusPx * radiusPx) {
+							return i;
+						}
+					}
+					return -1;
+				}
+
+				canvas.addEventListener("mousedown", function (event) {
+					var rect = canvas.getBoundingClientRect();
+					var px = (event.clientX - rect.left) * (canvas.width / rect.width);
+					var py = (event.clientY - rect.top) * (canvas.height / rect.height);
+					var world = canvasToWorld(px, py);
+					var idx = findNearbyPoint(world, 10);
+
+					if (idx >= 0 && event.shiftKey) {
+						points.splice(idx, 1);
+						runSolver();
+						return;
+					}
+
+					if (idx >= 0) {
+						dragIndex = idx;
+						return;
+					}
+
+					points.push({
+						x: clamp(world.x, xMin, xMax),
+						y: clamp(world.y, yMin, yMax)
+					});
+					runSolver();
+				});
+
+				canvas.addEventListener("mousemove", function (event) {
+					if (dragIndex < 0) {
+						return;
+					}
+
+					var rect = canvas.getBoundingClientRect();
+					var px = (event.clientX - rect.left) * (canvas.width / rect.width);
+					var py = (event.clientY - rect.top) * (canvas.height / rect.height);
+					var world = canvasToWorld(px, py);
+
+					points[dragIndex] = {
+						x: clamp(world.x, xMin, xMax),
+						y: clamp(world.y, yMin, yMax)
+					};
+					draw();
+				});
+
+				function finishDrag() {
+					if (dragIndex >= 0) {
+						dragIndex = -1;
+						runSolver();
+					}
+				}
+
+				canvas.addEventListener("mouseup", finishDrag);
+				canvas.addEventListener("mouseleave", finishDrag);
+				randomButton.addEventListener("click", randomizePoints);
+				loadPresetButton.addEventListener("click", loadPreset);
+				solveButton.addEventListener("click", runSolver);
+				clearButton.addEventListener("click", clearPoints);
+
+				randomizePoints();
+			}());
+		</script>
 	</body>
 </html>
