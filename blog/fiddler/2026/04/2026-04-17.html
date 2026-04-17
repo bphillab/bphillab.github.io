@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - Apr 17, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			.solution-table {
+				max-width: 760px;
+			}
+			.solution-table td:first-child,
+			.solution-table th:first-child {
+				width: 180px;
+			}
+			.buzz-explorer {
+				margin: 18px 0 24px;
+				padding: 12px;
+				border: 1px solid #d6d6d6;
+				background: rgba(255, 255, 255, 0.7);
+				max-width: 760px;
+			}
+			.buzz-controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+				align-items: center;
+				margin: 10px 0 12px;
+			}
+			.buzz-controls input {
+				width: 140px;
+			}
+			.buzz-controls button {
+				padding: 6px 10px;
+				border: 1px solid #bbb;
+				background: #f7f7f7;
+				cursor: pointer;
+			}
+			.buzz-output {
+				font-size: 0.96em;
+				color: #444;
+			}
+			.buzz-list {
+				margin-top: 8px;
+				font-family: "Helvetica", "Arial", "Sans-Serif";
+				font-size: 0.94em;
+				color: #555;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: Apr 17, 2026</h1>
+		<p><em>Posted on Apr 17, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>I recently introduced my children to a game called "Buzz" (also known as "Fizz buzz"), in which players take turns reciting whole numbers in order. However, in one particular variant of the game, anytime a number is a multiple of 7 or at least one of its digits is a 7, the player must say "buzz" instead of that number.</p>
+		<p>For example, here is how the first 20 turns of the game should proceed: 1, 2, 3, 4, 5, 6, buzz, 8, 9, 10, 11, 12, 13, buzz, 15, 16, buzz, 18, 19, 20.</p>
+		<p>How many times should "buzz" be said in the first 100 turns of the game?</p>
+
+		<h2>Main Solution</h2>
+		<p>Count the numbers from 1 through 100 that satisfy at least one of the two buzz rules.</p>
+		<table class="solution-table">
+			<thead>
+				<tr>
+					<th>Condition</th>
+					<th>Count</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Multiples of 7</td>
+					<td>14</td>
+				</tr>
+				<tr>
+					<td>Contains the digit 7</td>
+					<td>19</td>
+				</tr>
+				<tr>
+					<td>Counted twice</td>
+					<td>3</td>
+				</tr>
+			</tbody>
+		</table>
+		<p>The multiples of 7 are</p>
+		<p>\[
+			7,14,21,28,35,42,49,56,63,70,77,84,91,98.
+		\]</p>
+		<p>The numbers from 1 through 100 containing a 7 are</p>
+		<p>\[
+			7,17,27,37,47,57,67,70,71,72,73,74,75,76,77,78,79,87,97.
+		\]</p>
+		<p>The overlap is just \(7, 70,\) and \(77\), so by inclusion-exclusion the total number of buzzes is</p>
+		<p>\[
+			14 + 19 - 3 = 30.
+		\]</p>
+		<div class="callout">
+			<p><strong>Answer:</strong> \( \boxed{30} \).</p>
+		</div>
+
+		<h3>Buzz Explorer</h3>
+		<p>Enter any turn count \(N\) to see how many buzzes have occurred by then, along with the running percentage.</p>
+		<div class="buzz-explorer">
+			<div class="buzz-controls">
+				<label for="buzz-limit">Turns:</label>
+				<input id="buzz-limit" type="number" min="1" max="1000000" step="1" value="100">
+				<button id="buzz-check" type="button">Count buzzes</button>
+				<button id="buzz-threshold" type="button">Show threshold</button>
+			</div>
+			<p id="buzz-output" class="buzz-output">Loading...</p>
+			<p id="buzz-list" class="buzz-list"></p>
+		</div>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>As we just saw, in the first 20 turns of the game, 15 percent of the numbers were buzzed. But as the game proceeds, an increasing frequency of numbers get buzzed.</p>
+		<p>There is a certain minimum number \(N\) such that, for the \(N\)th turn in the game and for every turn thereafter, at least half the numbers up to that point have been buzzed. What is this value of \(N\)?</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>Let \(B(n)\) be the number of buzzes among the first \(n\) turns, and define</p>
+		<p>\[
+			D(n)=2B(n)-n.
+		\]</p>
+		<p>Then "at least half the first \(n\) turns are buzzes" is exactly the condition \(D(n)\ge 0\).</p>
+		<p>So we want the smallest value \(N\) such that \(D(n)\ge 0\) for every \(n\ge N\).</p>
+		<p>For this part I used a direct computer check. The script scans upward, treating each number as a buzz iff it is divisible by 7 or contains the digit 7, and tracks the running value of \(D(n)\).</p>
+		<p>The last time the running total is still below half occurs at</p>
+		<p>\[
+			n=708587,
+		\]</p>
+		<p>where</p>
+		<p>\[
+			B(708587)=354293
+			\qquad\text{and}\qquad
+			D(708587)=2\cdot 354293-708587=-1.
+		\]</p>
+		<p>At the very next turn, 708588 is itself a buzz because it is divisible by 7, so</p>
+		<p>\[
+			B(708588)=354294
+			\qquad\text{and}\qquad
+			D(708588)=2\cdot 354294-708588=0.
+		\]</p>
+		<p>From that point onward, the running total never drops below half again.</p>
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> \( \boxed{708588} \).</p>
+		</div>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/04/2026-04-10.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+		<script>
+			(function () {
+				const threshold = 708588;
+				const limitInput = document.getElementById("buzz-limit");
+				const countButton = document.getElementById("buzz-check");
+				const thresholdButton = document.getElementById("buzz-threshold");
+				const output = document.getElementById("buzz-output");
+				const listOutput = document.getElementById("buzz-list");
+
+				function isBuzz(n) {
+					return n % 7 === 0 || String(n).indexOf("7") !== -1;
+				}
+
+				function countBuzzes(limit) {
+					let buzzes = 0;
+					const firstBuzzes = [];
+					for (let n = 1; n <= limit; n += 1) {
+						if (isBuzz(n)) {
+							buzzes += 1;
+							if (firstBuzzes.length < 30) {
+								firstBuzzes.push(n);
+							}
+						}
+					}
+					return { buzzes, firstBuzzes };
+				}
+
+				function render(limit) {
+					if (!Number.isFinite(limit) || limit < 1) {
+						output.textContent = "Enter a positive whole number.";
+						listOutput.textContent = "";
+						return;
+					}
+
+					const cappedLimit = Math.min(1000000, Math.floor(limit));
+					const result = countBuzzes(cappedLimit);
+					const percentage = 100 * result.buzzes / cappedLimit;
+					output.textContent = result.buzzes + " of the first " + cappedLimit + " turns are buzzes (" + percentage.toFixed(2) + "%).";
+					if (cappedLimit <= 100) {
+						listOutput.textContent = "Buzz turns: " + result.firstBuzzes.join(", ");
+					} else {
+						listOutput.textContent = "First buzz turns: " + result.firstBuzzes.join(", ") + (result.buzzes > result.firstBuzzes.length ? ", ..." : "");
+					}
+				}
+
+				countButton.addEventListener("click", function () {
+					render(Number(limitInput.value));
+				});
+
+				thresholdButton.addEventListener("click", function () {
+					limitInput.value = threshold;
+					render(threshold);
+				});
+
+				limitInput.addEventListener("keydown", function (event) {
+					if (event.key === "Enter") {
+						render(Number(limitInput.value));
+					}
+				});
+
+				render(100);
+			}());
+		</script>
+	</body>
+</html>
