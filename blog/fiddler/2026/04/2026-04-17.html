@@ -138,24 +138,66 @@
 		\]</p>
 		<p>Then "at least half the first \(n\) turns are buzzes" is exactly the condition \(D(n)\ge 0\).</p>
 		<p>So we want the smallest value \(N\) such that \(D(n)\ge 0\) for every \(n\ge N\).</p>
-		<p>For this part I used a direct computer check. The script scans upward, treating each number as a buzz iff it is divisible by 7 or contains the digit 7, and tracks the running value of \(D(n)\).</p>
-		<p>The last time the running total is still below half occurs at</p>
+		<p>The right way to organize the count is in blocks of 100000 consecutive numbers. Write</p>
 		<p>\[
-			n=708587,
+			I_q=\{100000q,100000q+1,\dots,100000q+99999\}.
 		\]</p>
-		<p>where</p>
+		<p>If the prefix \(q\) contains a 7, then every number in \(I_q\) contains a 7, so every turn in that whole block is a buzz.</p>
+		<p>Now suppose \(q\) does <em>not</em> contain a 7. For a number \(n=100000q+r\) with \(0\le r&lt;100000\), the only ways \(n\) can be buzzed are:</p>
+		<ul>
+			<li>the last five digits \(r\) contain a 7, or</li>
+			<li>\(n\) is divisible by 7.</li>
+		</ul>
+		<p>Since \(100000\equiv 5 \pmod 7\), the divisibility condition becomes</p>
+		<p>\[
+			r\equiv -5q \pmod 7.
+		\]</p>
+		<p>So for a block whose prefix \(q\) has no 7, the entire buzz/non-buzz pattern depends only on \(q\bmod 7\). That means there are only 7 possible block types to check.</p>
+		<p>A finite check of those 7 cases gives two facts:</p>
+		<ul>
+			<li>each such block has total contribution at least \(-1228\) to \(D(n)\), and</li>
+			<li>within any such block, the running total can dip by at most \(9257\) below its value at the start of the block.</li>
+		</ul>
+		<p>Now look at the first seven blocks, from 0 up to 699999. Their prefixes are \(0,1,2,3,4,5,6\), none of which contain a 7, so they are exactly one copy each of the 7 block types above. Counting buzzes in these seven blocks gives a total of 345706 buzzes from 0 through 699999, so from 1 through 699999 there are</p>
+		<p>\[
+			B(699999)=345705
+		\]</p>
+		<p>buzzes. Therefore</p>
+		<p>\[
+			D(699999)=2\cdot 345705-699999=-8589.
+		\]</p>
+		<p>Next comes the block from 700000 through 799999. Every one of these numbers contains a 7, so every one of these 100000 turns is a buzz. That means \(D(n)\) increases by 1 at every step throughout this block.</p>
+		<p>Starting from \(D(699999)=-8589\), the running total first reaches 0 exactly 8589 steps later, at</p>
+		<p>\[
+			n=708588.
+		\]</p>
+		<p>Indeed, at the previous turn we still have</p>
 		<p>\[
 			B(708587)=354293
 			\qquad\text{and}\qquad
 			D(708587)=2\cdot 354293-708587=-1.
 		\]</p>
-		<p>At the very next turn, 708588 is itself a buzz because it is divisible by 7, so</p>
+		<p>while at turn 708588 we have</p>
 		<p>\[
 			B(708588)=354294
 			\qquad\text{and}\qquad
 			D(708588)=2\cdot 354294-708588=0.
 		\]</p>
-		<p>From that point onward, the running total never drops below half again.</p>
+		<p>So \(N\) cannot be smaller than 708588. It remains to show that once we reach that point, \(D(n)\) never becomes negative again.</p>
+		<p>By the end of the all-buzz block we are far above zero:</p>
+		<p>\[
+			D(799999)=91411,
+			\qquad
+			D(800000)=91410.
+		\]</p>
+		<p>From then on, any block whose prefix contains a 7 is again all buzzes, so it only pushes \(D(n)\) upward.</p>
+		<p>For a block whose prefix does not contain a 7, we already know two things: the whole block decreases \(D\) by at most 1228, and even inside the block the temporary dip below the block's starting value is at most 9257.</p>
+		<p>Among any 10 consecutive block prefixes, one ends in 7, so there can never be more than 9 consecutive blocks whose prefixes avoid the digit 7. Therefore, starting at any block boundary, the worst possible drop before the next all-buzz block arrives is at most</p>
+		<p>\[
+			9\cdot 1228 + 9257 = 20309.
+		\]</p>
+		<p>But at \(n=800000\) we already have \(D(800000)=91410\), which is much larger than 20309. So from that point onward, even the worst possible stretch of non-all-buzz blocks cannot drive \(D(n)\) below 0.</p>
+		<p>Since \(D(708587)=-1\) but \(D(n)\ge 0\) for every \(n\ge 708588\), the minimum value is</p>
 		<div class="callout">
 			<p><strong>Extra credit answer:</strong> \( \boxed{708588} \).</p>
 		</div>
