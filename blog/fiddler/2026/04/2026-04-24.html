@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - Apr 24, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			.solution-table {
+				max-width: 760px;
+			}
+			.solution-table td:first-child,
+			.solution-table th:first-child {
+				width: 180px;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: Apr 24, 2026</h1>
+		<p><em>Posted on Apr 24, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>A standard analog clock includes an hour hand, a minute hand, and 60 minute markers, 12 of which are also hour markers.</p>
+		<p>At a certain time, both the hour hand and minute hand are both pointing directly at minute markers. The hour hand is 13 markers ahead (clockwise) of the minute hand.</p>
+		<p>At what time does this occur?</p>
+
+		<h2>Main Solution</h2>
+		<p>Let the minute hand point at marker \(m\), where \(m\) is an integer from 0 through 59. Then the time is \(h:m\), where \(h\) is the hour and \(m\) is the number of minutes past the hour.</p>
+		<p>The minute hand is easy: at \(m\) minutes, it is exactly at marker \(m\).</p>
+		<p>The hour hand is at angle</p>
+		<p>\[
+			30h+\frac{m}{2}
+		\]</p>
+		<p>degrees, so for it to land exactly on a minute marker we need</p>
+		<p>\[
+			30h+\frac{m}{2}=6k
+		\]</p>
+		<p>for some integer marker \(k\). Multiplying by 2 gives</p>
+		<p>\[
+			60h+m=12k.
+		\]</p>
+		<p>Since \(60h\) is already divisible by 12, \(m\) must also be divisible by 12. So the only possible minute values are</p>
+		<p>\[
+			m\in\{0,12,24,36,48\}.
+		\]</p>
+		<p>Write \(m=12t\) with \(t\in\{0,1,2,3,4\}\). Then the hour hand is at marker</p>
+		<p>\[
+			k=5h+t.
+		\]</p>
+		<p>The condition that the hour hand is 13 markers clockwise of the minute hand means</p>
+		<p>\[
+			k\equiv m+13 \pmod{60}.
+		\]</p>
+		<p>Substituting \(m=12t\) and \(k=5h+t\), we get</p>
+		<p>\[
+			5h+t\equiv 12t+13 \pmod{60},
+		\]</p>
+		<p>or</p>
+		<p>\[
+			5h\equiv 11t+13 \pmod{60}.
+		\]</p>
+		<p>Now test the five possible values of \(t\):</p>
+		<table class="solution-table">
+			<thead>
+				<tr>
+					<th>\(t\)</th>
+					<th>\(m=12t\)</th>
+					<th>\(11t+13\)</th>
+					<th>Integer hour?</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr><td>0</td><td>0</td><td>13</td><td>No</td></tr>
+				<tr><td>1</td><td>12</td><td>24</td><td>No</td></tr>
+				<tr><td>2</td><td>24</td><td>35</td><td>Yes, \(h=7\)</td></tr>
+				<tr><td>3</td><td>36</td><td>46</td><td>No</td></tr>
+				<tr><td>4</td><td>48</td><td>57</td><td>No</td></tr>
+			</tbody>
+		</table>
+		<p>The only solution is \(h=7\) with \(m=24\), so the time is</p>
+		<div class="callout">
+			<p><strong>Answer:</strong> \( \boxed{7{:}24} \).</p>
+		</div>
+		<p>Checking it directly: at 7:24 the minute hand is at marker 24, and the hour hand is at \(5\cdot 7 + 2 = 37\), which is indeed 13 markers ahead.</p>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>At various times of day, the minute and hour hands form a right angle. But is there a time of day when the hour hand, minute hand, and second hand together form two right angles?</p>
+		<p>If not, what time minimizes</p>
+		<p>\[
+			f(A,B)=(A-90)^2+(B-90)^2,
+		\]</p>
+		<p>where \(A\) and \(B\) are the two nearly right angles formed by the three hands?</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>No exact solution exists.</p>
+		<p>If three hands form two right angles exactly, then one pair of hands must be opposite each other and the third hand must be perpendicular to both. There are only three cases to check.</p>
+		<table class="solution-table">
+			<thead>
+				<tr>
+					<th>Opposite pair</th>
+					<th>Perpendicular hand</th>
+					<th>Result</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Minute and hour</td>
+					<td>Second</td>
+					<td>Impossible by parity</td>
+				</tr>
+				<tr>
+					<td>Second and hour</td>
+					<td>Minute</td>
+					<td>Impossible by parity</td>
+				</tr>
+				<tr>
+					<td>Second and minute</td>
+					<td>Hour</td>
+					<td>Impossible by parity</td>
+				</tr>
+			</tbody>
+		</table>
+		<p>For example, if the minute and hour hands were opposite, then</p>
+		<p>\[
+			\frac{11}{120}t=180(2n+1)
+		\]</p>
+		<p>for some integer \(n\), while requiring the second hand to be perpendicular gives</p>
+		<p>\[
+			\frac{59}{10}t=90(2m+1)
+		\]</p>
+		<p>for some integer \(m\). Eliminating \(t\) yields</p>
+		<p>\[
+			1416(2n+1)=11(2m+1),
+		\]</p>
+		<p>whose left side is even and right side is odd. Contradiction.</p>
+		<p>The other two cases lead to the same kind of even-versus-odd contradiction, so an exact solution is impossible.</p>
+
+		<p>A check of all six possible cyclic orderings over one 12-hour cycle shows that the global minimum occurs when the minute and hour hands are almost opposite and the second hand is almost perpendicular to both. On the best interval, the hands appear in clockwise order \(S,H,M\), so the two nearly right angles are</p>
+		<p>\[
+			A(t)=\angle(S,H)=-\frac{719}{120}t+82440
+		\]</p>
+		<p>and</p>
+		<p>\[
+			B(t)=\angle(M,S)=\frac{59}{10}t-81000.
+		\]</p>
+		<p>Thus</p>
+		<p>\[
+			f(t)=\left(-\frac{719}{120}t+82350\right)^2+\left(\frac{59}{10}t-81090\right)^2.
+		\]</p>
+		<p>This quadratic is minimized at</p>
+		<p>\[
+			t=\frac{559782576}{40729}\text{ seconds}
+			\approx 13744.078568\text{ seconds after 12:00,}
+		\]</p>
+		<p>which is</p>
+		<p>\[
+			\boxed{3{:}49{:}04.079}
+		\]</p>
+		<p>to the nearest thousandth of a second.</p>
+		<p>By symmetry, the other solution in a 12-hour cycle is</p>
+		<p>\[
+			43200-t\approx 29455.921432\text{ seconds,}
+		\]</p>
+		<p>namely</p>
+		<p>\[
+			\boxed{8{:}10{:}55.921}.
+		\]</p>
+		<p>At these times, the three smaller pairwise angles are approximately</p>
+		<p>\[
+			90.062579^\circ,\quad 90.063552^\circ,\quad 179.873869^\circ.
+		\]</p>
+		<p>The minimum square error is therefore</p>
+		<p>\[
+			f_{\min}=\frac{324}{40729}\approx 0.007955.
+		\]</p>
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> No exact time exists. The minimum occurs at \( \boxed{3{:}49{:}04.079} \) and \( \boxed{8{:}10{:}55.921} \) in each 12-hour cycle.</p>
+		</div>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/04/2026-04-17.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+	</body>
+</html>
