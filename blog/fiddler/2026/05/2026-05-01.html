@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - May 1, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			.frog-explorer {
+				margin: 18px 0 24px;
+				max-width: 760px;
+			}
+			.frog-board {
+				width: 100%;
+				max-width: 640px;
+				height: auto;
+				border: 1px solid #d6d6d6;
+				background: #ffffff;
+			}
+			.frog-controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 12px 18px;
+				align-items: center;
+				margin: 10px 0 8px;
+			}
+			.frog-controls label {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.frog-controls input[type="range"] {
+				width: 180px;
+			}
+			.frog-controls button {
+				padding: 6px 10px;
+				border: 1px solid #d0d0d0;
+				background: #f7f7f7;
+				cursor: pointer;
+			}
+			.frog-controls button:disabled {
+				cursor: default;
+				opacity: 0.55;
+			}
+			.frog-readout {
+				font-size: 0.95em;
+				color: #444;
+				margin: 8px 0;
+			}
+			.frog-hint {
+				font-size: 0.92em;
+				color: #666;
+				margin: 6px 0 10px;
+			}
+			.frog-path {
+				font-size: 0.92em;
+				color: #444;
+				margin: 8px 0 0;
+				max-width: 760px;
+				overflow-wrap: anywhere;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: May 1, 2026</h1>
+		<p><em>Posted on May 1, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>This week's puzzle was a collaboration with high-schooler Connor Hill, the First Place Winner from this year's Regeneron Science Talent Search. Connor's project involved an original, computer-assisted proof to find the complete list of noble polyhedra, in which all the faces are indistinguishable and all the vertices are indistinguishable. The five Platonic solids are perhaps the best known examples of noble polyhedra, but Connor documented all of them, including two infinite sets and 146 exceptional cases, among which were 85 new examples.</p>
+		<p>Here's the puzzle from Connor, unrelated to his work, which is about a frog that makes very particular hops:</p>
+		<p>A frog is hopping around a chessboard, always from the center of one square to the center of another square. Each square has side length 1, but the board itself is not necessarily 8-by-8. Instead, it's \(N\)-by-\(N\), where \(N\) is some large whole number.</p>
+		<p>Every jump the frog makes must be the same distance, which we'll call \(L\). The frog wants to make four jumps such that:</p>
+		<ul>
+			<li>After the fourth jump, the frog has returned to its starting square.</li>
+			<li>The frog visits a total of four distinct squares along the way, including the square on which it starts (and also stops).</li>
+			<li>The path the frog takes is not a square loop.</li>
+			<li>The frog is never on a square that is diagonal (that is, a bishop's move away) from the starting square.</li>
+		</ul>
+		<p>What is the smallest jumping distance \(L\) for which this is possible?</p>
+
+		<h2>Main Solution</h2>
+		<p>Put the starting square at \((0,0)\), where all square centers have integer coordinates. The frog's jump length is the distance between two lattice points.</p>
+		<p>If \(L&lt;\sqrt{5}\), then the only possible lattice distances are</p>
+		<p>\[
+			1,\quad \sqrt{2},\quad 2.
+		\]</p>
+		<p>We can rule these out one at a time:</p>
+		<p>If \(L=1\), then every move is horizontal or vertical by one square. Any closed four-step walk through four distinct squares is necessarily the boundary of a unit square, which is forbidden.</p>
+		<p>If \(L=\sqrt{2}\), then the very first hop from \((0,0)\) lands on \((\pm 1,\pm 1)\), a square diagonal from the start, which is also forbidden.</p>
+		<p>If \(L=2\), then every move is horizontal or vertical by two squares. A closed four-step walk must use one pair of opposite horizontal moves and one pair of opposite vertical moves, so again the only possibility is a square loop.</p>
+		<p>So \(L\) must be at least \(\sqrt{5}\).</p>
+		<p>Now take the four squares</p>
+		<p>\[
+			(0,0)\to (1,2)\to (0,4)\to (-1,2)\to (0,0).
+		\]</p>
+		<p>Each jump has length</p>
+		<p>\[
+			\sqrt{1^2+2^2}=\sqrt{5}.
+		\]</p>
+		<p>The frog visits exactly four distinct squares, returns to the start after the fourth jump, and the loop is a rhombus rather than a square. Also, the intermediate squares \((1,2)\), \((0,4)\), and \((-1,2)\) are not diagonal from \((0,0)\), since none of them has coordinates with equal absolute value.</p>
+		<div class="callout">
+			<p><strong>Answer:</strong> \( \boxed{\sqrt{5}} \).</p>
+		</div>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>The frog is jumping around the board with the same minimum distance \(L\) just found.</p>
+		<p>But this time, the frog also wants to be able to hop to every location on the chessboard. What is the minimum value of \(N\) for which this is possible?</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>With \(L=\sqrt{5}\), each move is a knight move: \((\pm 1,\pm 2)\) or \((\pm 2,\pm 1)\).</p>
+		<p>A \(2\times 2\) board has no legal moves at all, so it is impossible. On a \(3\times 3\) board, the center square is isolated, so the frog cannot reach every square.</p>
+		<p>On a \(4\times 4\) board, however, every square is reachable from every other square by knight moves. So this is the first nontrivial board on which the frog can eventually hop to every location.</p>
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> \( \boxed{4} \).</p>
+		</div>
+		<p><em>Degenerate note:</em> if one allows the trivial \(1\times 1\) board, then there is only one location to reach. The first board on which the frog can actually move and still reach every square is \(4\times 4\).</p>
+
+		<h2>Interactive Explorer</h2>
+		<p>The main demo focuses on the 4-jump loop from the original puzzle. The extra-credit demo focuses on reachability and a full-board walk. Click any square to change the starting square.</p>
+		<h3>Main Demo</h3>
+		<p>Try different board sizes and jump lengths for the original problem. The slider only uses values of \(L^2\) that can occur between lattice points.</p>
+		<div class="frog-explorer">
+			<canvas id="frog-main-canvas" class="frog-board" width="720" height="720" aria-label="Interactive chessboard explorer for the main frog puzzle"></canvas>
+			<div class="frog-controls">
+				<label for="frog-main-board-size">
+					<span>\(N\)</span>
+					<input id="frog-main-board-size" type="range" min="1" max="12" step="1" value="5">
+					<span id="frog-main-board-size-value">5</span>
+				</label>
+				<label for="frog-main-length-squared">
+					<span>\(L^2\)</span>
+					<input id="frog-main-length-squared" type="range" min="0" max="12" step="1" value="3">
+					<span id="frog-main-length-squared-value">5</span>
+				</label>
+				<button id="frog-main-demo" type="button">Load Main Demo</button>
+				<button id="frog-main-play-path" type="button">Play Loop</button>
+			</div>
+			<p class="frog-readout" id="frog-main-length-readout">Loading...</p>
+			<p class="frog-readout" id="frog-main-status-readout"></p>
+			<p class="frog-hint" id="frog-main-loop-readout"></p>
+		</div>
+
+		<h3>Extra Credit Demo</h3>
+		<p>This one is about visiting every square. The starting square counts as already visited, and when the board is fully reachable the demo shows an explicit covering walk.</p>
+		<div class="frog-explorer">
+			<canvas id="frog-extra-canvas" class="frog-board" width="720" height="720" aria-label="Interactive chessboard explorer for the extra credit frog puzzle"></canvas>
+			<div class="frog-controls">
+				<label for="frog-extra-board-size">
+					<span>\(N\)</span>
+					<input id="frog-extra-board-size" type="range" min="1" max="12" step="1" value="4">
+					<span id="frog-extra-board-size-value">4</span>
+				</label>
+				<label for="frog-extra-length-squared">
+					<span>\(L^2\)</span>
+					<input id="frog-extra-length-squared" type="range" min="0" max="12" step="1" value="3">
+					<span id="frog-extra-length-squared-value">5</span>
+				</label>
+				<button id="frog-extra-demo" type="button">Load Extra Demo</button>
+				<button id="frog-extra-play-path" type="button">Play Walk</button>
+			</div>
+			<p class="frog-readout" id="frog-extra-length-readout">Loading...</p>
+			<p class="frog-readout" id="frog-extra-status-readout"></p>
+			<p class="frog-hint" id="frog-extra-loop-readout"></p>
+			<p class="frog-path" id="frog-extra-cover-readout"></p>
+		</div>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/04/2026-04-24.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+		<script>
+			(function () {
+				var moveCache = {};
+				var validLengthSquares = [1, 2, 4, 5, 8, 9, 10, 13, 16, 17, 18, 20, 25];
+
+				function gcd(a, b) {
+					while (b !== 0) {
+						var t = a % b;
+						a = b;
+						b = t;
+					}
+					return Math.abs(a);
+				}
+
+				function formatLength(k) {
+					var root = Math.sqrt(k);
+					if (Math.round(root) === root) {
+						return String(root);
+					}
+					return "sqrt(" + k + ") approx " + root.toFixed(3);
+				}
+
+				function sliderIndexForLengthSquared(k) {
+					var idx = validLengthSquares.indexOf(k);
+					return idx >= 0 ? idx : 0;
+				}
+
+				function getMoves(k) {
+					if (moveCache[k]) {
+						return moveCache[k];
+					}
+					var moves = [];
+					var limit = Math.floor(Math.sqrt(k));
+					for (var dx = -limit; dx <= limit; dx += 1) {
+						for (var dy = -limit; dy <= limit; dy += 1) {
+							if (dx === 0 && dy === 0) {
+								continue;
+							}
+							if (dx * dx + dy * dy === k) {
+								moves.push({ dx: dx, dy: dy });
+							}
+						}
+					}
+					moveCache[k] = moves;
+					return moves;
+				}
+
+				function summarizeMoves(moves) {
+					if (!moves.length) {
+						return "none";
+					}
+					var seen = {};
+					var parts = [];
+					for (var i = 0; i < moves.length; i += 1) {
+						var ax = Math.abs(moves[i].dx);
+						var ay = Math.abs(moves[i].dy);
+						var key = ax < ay ? ax + "," + ay : ay + "," + ax;
+						if (seen[key]) {
+							continue;
+						}
+						seen[key] = true;
+						if (ax === ay) {
+							parts.push("(±" + ax + ", ±" + ay + ")");
+						} else {
+							parts.push("(±" + Math.min(ax, ay) + ", ±" + Math.max(ax, ay) + ") and permutations");
+						}
+					}
+					return parts.join("; ");
+				}
+
+				function commonMoveFactor(moves) {
+					if (!moves.length) {
+						return 0;
+					}
+					var g = 0;
+					for (var i = 0; i < moves.length; i += 1) {
+						g = gcd(g, gcd(Math.abs(moves[i].dx), Math.abs(moves[i].dy)));
+					}
+					return g;
+				}
+
+				function buildBoardData(N, k) {
+					var moves = getMoves(k);
+					var cells = [];
+					var cellMap = {};
+					var adjacency = {};
+					var adjacencySet = {};
+					for (var row = 0; row < N; row += 1) {
+						for (var col = 0; col < N; col += 1) {
+							var key = col + "," + row;
+							var cell = { x: col, y: row, key: key };
+							cells.push(cell);
+							cellMap[key] = cell;
+							adjacency[key] = [];
+							adjacencySet[key] = {};
+						}
+					}
+
+					for (var i = 0; i < cells.length; i += 1) {
+						var from = cells[i];
+						for (var j = 0; j < moves.length; j += 1) {
+							var nx = from.x + moves[j].dx;
+							var ny = from.y + moves[j].dy;
+							if (nx >= 0 && nx < N && ny >= 0 && ny < N) {
+								var toKey = nx + "," + ny;
+								adjacency[from.key].push(cellMap[toKey]);
+								adjacencySet[from.key][toKey] = true;
+							}
+						}
+					}
+
+					return {
+						N: N,
+						lengthSquared: k,
+						moves: moves,
+						cells: cells,
+						cellMap: cellMap,
+						adjacency: adjacency,
+						adjacencySet: adjacencySet
+					};
+				}
+
+				function isDiagonalFromStart(start, point) {
+					var dx = point.x - start.x;
+					var dy = point.y - start.y;
+					return dx !== 0 && Math.abs(dx) === Math.abs(dy);
+				}
+
+				function isSquareLoop(path) {
+					var s = path[0];
+					var a = path[1];
+					var b = path[2];
+					var v1x = a.x - s.x;
+					var v1y = a.y - s.y;
+					var v2x = b.x - a.x;
+					var v2y = b.y - a.y;
+					return v1x * v2x + v1y * v2y === 0;
+				}
+
+				function findLoopFromStart(data, start) {
+					var neighborsA = data.adjacency[start.key];
+					for (var i = 0; i < neighborsA.length; i += 1) {
+						var a = neighborsA[i];
+						if (isDiagonalFromStart(start, a)) {
+							continue;
+						}
+						var neighborsB = data.adjacency[a.key];
+						for (var j = 0; j < neighborsB.length; j += 1) {
+							var b = neighborsB[j];
+							if (b.key === start.key || b.key === a.key || isDiagonalFromStart(start, b)) {
+								continue;
+							}
+							var neighborsC = data.adjacency[b.key];
+							for (var m = 0; m < neighborsC.length; m += 1) {
+								var c = neighborsC[m];
+								if (c.key === start.key || c.key === a.key || c.key === b.key || isDiagonalFromStart(start, c)) {
+									continue;
+								}
+								if (!data.adjacencySet[c.key][start.key]) {
+									continue;
+								}
+								var path = [start, a, b, c, start];
+								if (!isSquareLoop(path)) {
+									return path;
+								}
+							}
+						}
+					}
+					return null;
+				}
+
+				function findAnyLoop(data) {
+					for (var i = 0; i < data.cells.length; i += 1) {
+						var path = findLoopFromStart(data, data.cells[i]);
+						if (path) {
+							return path;
+						}
+					}
+					return null;
+				}
+
+				function bfsReachable(data, start) {
+					var queue = [start];
+					var seen = {};
+					var order = [];
+					seen[start.key] = true;
+					while (queue.length) {
+						var current = queue.shift();
+						order.push(current);
+						var nexts = data.adjacency[current.key];
+						for (var i = 0; i < nexts.length; i += 1) {
+							if (!seen[nexts[i].key]) {
+								seen[nexts[i].key] = true;
+								queue.push(nexts[i]);
+							}
+						}
+					}
+					return { seen: seen, count: order.length };
+				}
+
+				function buildCoverageWalk(data, start) {
+					var visited = {};
+					var walk = [start];
+
+					function dfs(node) {
+						visited[node.key] = true;
+						var nexts = data.adjacency[node.key].slice().sort(function (a, b) {
+							if (a.y !== b.y) {
+								return a.y - b.y;
+							}
+							return a.x - b.x;
+						});
+						for (var i = 0; i < nexts.length; i += 1) {
+							var next = nexts[i];
+							if (visited[next.key]) {
+								continue;
+							}
+							walk.push(next);
+							dfs(next);
+							walk.push(node);
+						}
+					}
+
+					dfs(start);
+					return walk;
+				}
+
+				function connectedBoard(N, k) {
+					var data = buildBoardData(N, k);
+					if (!data.cells.length) {
+						return false;
+					}
+					var reachable = bfsReachable(data, data.cells[0]);
+					var edgeCount = 0;
+					for (var i = 0; i < data.cells.length; i += 1) {
+						edgeCount += data.adjacency[data.cells[i].key].length;
+					}
+					return reachable.count === data.cells.length && edgeCount > 0;
+				}
+
+				function firstConnectedBoard(k, maxN) {
+					for (var N = 2; N <= maxN; N += 1) {
+						if (connectedBoard(N, k)) {
+							return N;
+						}
+					}
+					return null;
+				}
+
+				function firstLoopBoard(k, maxN) {
+					for (var N = 1; N <= maxN; N += 1) {
+						var data = buildBoardData(N, k);
+						if (findAnyLoop(data)) {
+							return N;
+						}
+					}
+					return null;
+				}
+
+				function formatPoint(cell) {
+					return "(" + (cell.x + 1) + ", " + (cell.y + 1) + ")";
+				}
+
+				function formatLoop(path) {
+					var parts = [];
+					for (var i = 0; i < path.length; i += 1) {
+						parts.push(formatPoint(path[i]));
+					}
+					return parts.join(" -> ");
+				}
+
+				function getLayout(canvas, N) {
+					var padding = 34;
+					var size = Math.min((canvas.width - 2 * padding) / N, (canvas.height - 2 * padding) / N);
+					var boardWidth = size * N;
+					var boardHeight = size * N;
+					return {
+						size: size,
+						left: (canvas.width - boardWidth) / 2,
+						top: (canvas.height - boardHeight) / 2
+					};
+				}
+
+				function centerOfCell(layout, cell, N) {
+					return {
+						x: layout.left + (cell.x + 0.5) * layout.size,
+						y: layout.top + (N - cell.y - 0.5) * layout.size
+					};
+				}
+
+				function drawPath(ctx, layout, path, color, dashed, N) {
+					ctx.save();
+					ctx.strokeStyle = color;
+					ctx.lineWidth = Math.max(2, layout.size * 0.12);
+					if (dashed) {
+						ctx.setLineDash([10, 8]);
+					}
+					ctx.beginPath();
+					for (var i = 0; i < path.length; i += 1) {
+						var pt = centerOfCell(layout, path[i], N);
+						if (i === 0) {
+							ctx.moveTo(pt.x, pt.y);
+						} else {
+							ctx.lineTo(pt.x, pt.y);
+						}
+					}
+					ctx.stroke();
+					ctx.setLineDash([]);
+					for (var j = 0; j < path.length - 1; j += 1) {
+						var node = centerOfCell(layout, path[j], N);
+						ctx.fillStyle = j === 0 ? "#b86b00" : color;
+						ctx.beginPath();
+						ctx.arc(node.x, node.y, Math.max(4, layout.size * 0.12), 0, Math.PI * 2);
+						ctx.fill();
+					}
+					ctx.restore();
+				}
+
+				function createExplorer(options) {
+					var canvas = document.getElementById(options.canvasId);
+					var boardSlider = document.getElementById(options.boardSliderId);
+					var boardValue = document.getElementById(options.boardValueId);
+					var lengthSlider = document.getElementById(options.lengthSliderId);
+					var lengthValue = document.getElementById(options.lengthValueId);
+					var demoButton = document.getElementById(options.demoButtonId);
+					var playButton = document.getElementById(options.playButtonId);
+					var lengthReadout = document.getElementById(options.lengthReadoutId);
+					var statusReadout = document.getElementById(options.statusReadoutId);
+					var loopReadout = document.getElementById(options.loopReadoutId);
+					var coverReadout = options.coverReadoutId ? document.getElementById(options.coverReadoutId) : null;
+					if (!canvas || !boardSlider || !boardValue || !lengthSlider || !lengthValue || !demoButton || !playButton || !lengthReadout || !statusReadout || !loopReadout) {
+						return;
+					}
+
+					var ctx = canvas.getContext("2d");
+					var state = {
+						N: options.defaultN,
+						lengthSquared: options.defaultLengthSquared,
+						startX: options.defaultStartX,
+						startY: options.defaultStartY
+					};
+					var latestRender = null;
+					var animation = {
+						timer: null,
+						path: null,
+						step: 0
+					};
+
+					function stopAnimation() {
+						if (animation.timer) {
+							clearInterval(animation.timer);
+						}
+						animation.timer = null;
+						animation.path = null;
+						animation.step = 0;
+						playButton.textContent = options.playLabel;
+					}
+
+					function getAnimatedPath(renderData) {
+						if (options.mode === "extra") {
+							return renderData.coverageWalk && renderData.coverageWalk.length > 1 ? renderData.coverageWalk : null;
+						}
+						if (renderData.localLoop) {
+							return renderData.localLoop;
+						}
+						if (renderData.exampleLoop) {
+							return renderData.exampleLoop;
+						}
+						return null;
+					}
+
+					function setStartForParameters() {
+						var data = buildBoardData(state.N, state.lengthSquared);
+						if (options.mode === "main") {
+							var loop = findAnyLoop(data);
+							if (loop) {
+								state.startX = loop[0].x;
+								state.startY = loop[0].y;
+								return;
+							}
+						}
+						state.startX = Math.floor((state.N - 1) / 2);
+						state.startY = Math.floor((state.N - 1) / 2);
+					}
+
+					function drawBoard(renderData) {
+						var layout = getLayout(canvas, renderData.N);
+						ctx.clearRect(0, 0, canvas.width, canvas.height);
+						ctx.fillStyle = "#ffffff";
+						ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+						var localLoopCells = {};
+						var exampleLoopCells = {};
+						var animatedVisitedCells = {};
+						var i;
+						if (renderData.localLoop) {
+							for (i = 0; i < renderData.localLoop.length - 1; i += 1) {
+								localLoopCells[renderData.localLoop[i].key] = true;
+							}
+						}
+						if (renderData.exampleLoop) {
+							for (i = 0; i < renderData.exampleLoop.length - 1; i += 1) {
+								exampleLoopCells[renderData.exampleLoop[i].key] = true;
+							}
+						}
+						if (animation.timer && animation.path) {
+							for (i = 0; i <= animation.step && i < animation.path.length; i += 1) {
+								animatedVisitedCells[animation.path[i].key] = true;
+							}
+						}
+
+						for (i = 0; i < renderData.data.cells.length; i += 1) {
+							var cell = renderData.data.cells[i];
+							var left = layout.left + cell.x * layout.size;
+							var top = layout.top + (renderData.N - cell.y - 1) * layout.size;
+							var fill = "#f4f4f4";
+							if (renderData.reachable.seen[cell.key]) {
+								fill = options.mode === "extra" ? "#e1f3ea" : "#e8f2ff";
+							}
+							if (options.mode === "main") {
+								if (exampleLoopCells[cell.key]) {
+									fill = "#f7e9ef";
+								}
+								if (localLoopCells[cell.key]) {
+									fill = "#f4dbe4";
+								}
+							}
+							if (animatedVisitedCells[cell.key]) {
+								fill = options.mode === "extra" ? "#bfe3cf" : "#e7bfd0";
+							}
+							if (cell.key === renderData.start.key) {
+								fill = animatedVisitedCells[cell.key]
+									? (options.mode === "extra" ? "#9fd4b7" : "#e2a7bf")
+									: "#ffe3a3";
+							}
+							ctx.fillStyle = fill;
+							ctx.fillRect(left, top, layout.size, layout.size);
+							ctx.strokeStyle = "#cfcfcf";
+							ctx.lineWidth = 1;
+							ctx.strokeRect(left, top, layout.size, layout.size);
+						}
+
+						var pathToAnimate = getAnimatedPath(renderData);
+						if (options.mode === "extra") {
+							if (renderData.coverageWalk && renderData.coverageWalk.length > 1) {
+								drawPath(ctx, layout, renderData.coverageWalk, "#2d6ea3", false, renderData.N);
+							}
+						} else {
+							if (renderData.exampleLoop && (!renderData.localLoop || renderData.exampleLoop[0].key !== renderData.localLoop[0].key)) {
+								drawPath(ctx, layout, renderData.exampleLoop, "#b5527d", true, renderData.N);
+							}
+							if (renderData.localLoop) {
+								drawPath(ctx, layout, renderData.localLoop, "#9f315d", false, renderData.N);
+							}
+						}
+						if (animation.timer && pathToAnimate && animation.path === pathToAnimate) {
+							drawPath(ctx, layout, animation.path.slice(0, animation.step + 1), "#111111", false, renderData.N);
+							var current = centerOfCell(layout, animation.path[animation.step], renderData.N);
+							ctx.save();
+							ctx.fillStyle = "#111111";
+							ctx.beginPath();
+							ctx.arc(current.x, current.y, Math.max(6, layout.size * 0.16), 0, Math.PI * 2);
+							ctx.fill();
+							ctx.restore();
+						}
+
+						ctx.save();
+						ctx.fillStyle = "#555";
+						ctx.font = "14px sans-serif";
+						ctx.textAlign = "center";
+						for (i = 0; i < renderData.N; i += 1) {
+							ctx.fillText(String(i + 1), layout.left + (i + 0.5) * layout.size, layout.top + renderData.N * layout.size + 18);
+							ctx.fillText(String(i + 1), layout.left - 16, layout.top + (renderData.N - i - 0.5) * layout.size + 5);
+						}
+						ctx.restore();
+					}
+
+					function render() {
+						boardValue.textContent = String(state.N);
+						lengthValue.textContent = String(state.lengthSquared);
+						lengthSlider.value = String(sliderIndexForLengthSquared(state.lengthSquared));
+
+						var data = buildBoardData(state.N, state.lengthSquared);
+						var startKey = state.startX + "," + state.startY;
+						var start = data.cellMap[startKey] || data.cellMap["0,0"];
+						if (!start) {
+							return;
+						}
+						state.startX = start.x;
+						state.startY = start.y;
+
+						var reachable = bfsReachable(data, start);
+						var localLoop = findLoopFromStart(data, start);
+						var exampleLoop = localLoop || findAnyLoop(data);
+						var coverageWalk = reachable.count === data.cells.length ? buildCoverageWalk(data, start) : null;
+						var minConnected = firstConnectedBoard(state.lengthSquared, 12);
+						var minLoop = firstLoopBoard(state.lengthSquared, 12);
+						var primitive = commonMoveFactor(data.moves);
+						var isMainDemo = state.lengthSquared === 5 && state.N >= 5 && start.x === 1 && start.y === 0;
+
+						lengthReadout.textContent =
+							"L = " + formatLength(state.lengthSquared) +
+							". Legal move offsets: " + summarizeMoves(data.moves) + ".";
+
+						if (options.mode === "main") {
+							statusReadout.textContent =
+								"Start " + formatPoint(start) +
+								". Reachable squares: " + reachable.count + " of " + data.cells.length +
+								". Smallest board with any such 4-jump loop for this L^2: " +
+								(minLoop ? "N = " + minLoop : "none up to 12") + ".";
+
+							if (!data.moves.length) {
+								loopReadout.textContent = "This jump length cannot occur between square centers.";
+							} else if (primitive > 1) {
+								loopReadout.textContent =
+									"Every move vector has a common factor of " + primitive +
+									", so the frog stays trapped in one residue class. A valid loop may still exist on some boards, but a fully reachable board does not.";
+							} else if (localLoop) {
+								loopReadout.textContent = "Valid 4-jump loop from the selected start: " + formatLoop(localLoop) + ".";
+							} else if (exampleLoop) {
+								loopReadout.textContent = "No valid 4-jump loop from the selected start. One example on this board is " + formatLoop(exampleLoop) + ".";
+							} else {
+								loopReadout.textContent = "No valid 4-jump loop found on this board.";
+							}
+							if (isMainDemo && localLoop) {
+								loopReadout.textContent += " This is the translated rhombus from the main solution.";
+							}
+						} else {
+							var graphConnected = reachable.count === data.cells.length;
+							var edgeTotal = 0;
+							for (var i = 0; i < data.cells.length; i += 1) {
+								edgeTotal += data.adjacency[data.cells[i].key].length;
+							}
+							statusReadout.textContent =
+								"Start " + formatPoint(start) +
+								". Reachable squares: " + reachable.count + " of " + data.cells.length +
+								". Graph connected: " + (graphConnected ? "yes" : "no") + "." +
+								" First nontrivial fully reachable board for this L^2: " +
+								(minConnected ? "N = " + minConnected : "none up to 12") + "." +
+								(edgeTotal === 0 ? " No legal jumps on this board." : "");
+
+							if (!data.moves.length) {
+								loopReadout.textContent = "This jump length cannot occur between square centers.";
+							} else if (primitive > 1) {
+								loopReadout.textContent =
+									"Every move vector has a common factor of " + primitive +
+									", so the frog stays trapped in one residue class. A fully reachable board is impossible.";
+							} else if (coverageWalk) {
+								loopReadout.textContent = "This board is fully reachable from the selected start. Use Play Walk to trace one explicit covering walk.";
+							} else {
+								loopReadout.textContent = "This board is not fully reachable from the selected start.";
+							}
+
+							if (coverReadout) {
+								if (coverageWalk) {
+									var shown = coverageWalk.slice(0, 40).map(formatPoint).join(" -> ");
+									if (coverageWalk.length > 40) {
+										shown += " -> ...";
+									}
+									coverReadout.textContent =
+										"Coverage walk from the selected start (" + (coverageWalk.length - 1) + " jumps): " + shown;
+								} else {
+									coverReadout.textContent = "No full-board walk from this start because not every square is reachable.";
+								}
+							}
+						}
+
+						latestRender = {
+							N: state.N,
+							data: data,
+							start: start,
+							reachable: reachable,
+							localLoop: localLoop,
+							exampleLoop: exampleLoop,
+							coverageWalk: coverageWalk
+						};
+						var activePath = getAnimatedPath(latestRender);
+						if (!activePath) {
+							stopAnimation();
+							playButton.disabled = true;
+						} else {
+							playButton.disabled = false;
+							if (animation.timer && animation.path !== activePath) {
+								stopAnimation();
+							}
+						}
+						drawBoard(latestRender);
+					}
+
+					boardSlider.addEventListener("input", function () {
+						stopAnimation();
+						state.N = parseInt(boardSlider.value, 10);
+						setStartForParameters();
+						render();
+					});
+
+					lengthSlider.addEventListener("input", function () {
+						stopAnimation();
+						state.lengthSquared = validLengthSquares[parseInt(lengthSlider.value, 10)];
+						setStartForParameters();
+						render();
+					});
+
+					demoButton.addEventListener("click", function () {
+						stopAnimation();
+						state.N = options.demo.N;
+						state.lengthSquared = options.demo.lengthSquared;
+						state.startX = options.demo.startX;
+						state.startY = options.demo.startY;
+						boardSlider.value = String(options.demo.N);
+						lengthSlider.value = String(sliderIndexForLengthSquared(options.demo.lengthSquared));
+						render();
+					});
+
+					playButton.addEventListener("click", function () {
+						if (!latestRender) {
+							return;
+						}
+						var path = getAnimatedPath(latestRender);
+						if (!path || path.length < 2) {
+							return;
+						}
+						if (animation.timer) {
+							stopAnimation();
+							drawBoard(latestRender);
+							return;
+						}
+						animation.path = path;
+						animation.step = 0;
+						playButton.textContent = options.pauseLabel;
+						drawBoard(latestRender);
+						animation.timer = setInterval(function () {
+							if (!latestRender || animation.path !== getAnimatedPath(latestRender)) {
+								stopAnimation();
+								if (latestRender) {
+									drawBoard(latestRender);
+								}
+								return;
+							}
+							animation.step += 1;
+							if (animation.step >= animation.path.length) {
+								stopAnimation();
+								if (latestRender) {
+									drawBoard(latestRender);
+								}
+								return;
+							}
+							drawBoard(latestRender);
+						}, 450);
+					});
+
+					canvas.addEventListener("click", function (event) {
+						if (!latestRender) {
+							return;
+						}
+						var rect = canvas.getBoundingClientRect();
+						var scaleX = canvas.width / rect.width;
+						var scaleY = canvas.height / rect.height;
+						var x = (event.clientX - rect.left) * scaleX;
+						var y = (event.clientY - rect.top) * scaleY;
+						var layout = getLayout(canvas, state.N);
+						if (x < layout.left || x > layout.left + state.N * layout.size || y < layout.top || y > layout.top + state.N * layout.size) {
+							return;
+						}
+						var boardX = Math.floor((x - layout.left) / layout.size);
+						var boardRowFromTop = Math.floor((y - layout.top) / layout.size);
+						var boardY = state.N - 1 - boardRowFromTop;
+						stopAnimation();
+						state.startX = boardX;
+						state.startY = boardY;
+						render();
+					});
+
+					boardSlider.value = String(options.defaultN);
+					lengthSlider.value = String(sliderIndexForLengthSquared(options.defaultLengthSquared));
+					render();
+				}
+
+				createExplorer({
+					mode: "main",
+					canvasId: "frog-main-canvas",
+					boardSliderId: "frog-main-board-size",
+					boardValueId: "frog-main-board-size-value",
+					lengthSliderId: "frog-main-length-squared",
+					lengthValueId: "frog-main-length-squared-value",
+					demoButtonId: "frog-main-demo",
+					playButtonId: "frog-main-play-path",
+					lengthReadoutId: "frog-main-length-readout",
+					statusReadoutId: "frog-main-status-readout",
+					loopReadoutId: "frog-main-loop-readout",
+					defaultN: 5,
+					defaultLengthSquared: 5,
+					defaultStartX: 1,
+					defaultStartY: 0,
+					demo: { N: 5, lengthSquared: 5, startX: 1, startY: 0 },
+					playLabel: "Play Loop",
+					pauseLabel: "Pause Loop"
+				});
+
+				createExplorer({
+					mode: "extra",
+					canvasId: "frog-extra-canvas",
+					boardSliderId: "frog-extra-board-size",
+					boardValueId: "frog-extra-board-size-value",
+					lengthSliderId: "frog-extra-length-squared",
+					lengthValueId: "frog-extra-length-squared-value",
+					demoButtonId: "frog-extra-demo",
+					playButtonId: "frog-extra-play-path",
+					lengthReadoutId: "frog-extra-length-readout",
+					statusReadoutId: "frog-extra-status-readout",
+					loopReadoutId: "frog-extra-loop-readout",
+					coverReadoutId: "frog-extra-cover-readout",
+					defaultN: 4,
+					defaultLengthSquared: 5,
+					defaultStartX: 0,
+					defaultStartY: 0,
+					demo: { N: 4, lengthSquared: 5, startX: 0, startY: 0 },
+					playLabel: "Play Walk",
+					pauseLabel: "Pause Walk"
+				});
+			}());
+		</script>
+	</body>
+</html>
