@@ -135,13 +135,12 @@
 		<h2>Interactive Explorer</h2>
 		<p>The main demo focuses on the 4-jump loop from the original puzzle. The extra-credit demo focuses on reachability and a full-board walk. Click any square to change the starting square.</p>
 		<h3>Main Demo</h3>
-		<p>Try different board sizes and jump lengths for the original problem. The slider only uses values of \(L^2\) that can occur between lattice points.</p>
+		<p>Try different jump lengths for the original problem. The board size is set automatically to the smallest \(N\) that supports a valid 4-jump loop for that value of \(L\).</p>
 		<div class="frog-explorer">
 			<canvas id="frog-main-canvas" class="frog-board" width="720" height="720" aria-label="Interactive chessboard explorer for the main frog puzzle"></canvas>
 			<div class="frog-controls">
-				<label for="frog-main-board-size">
+				<label>
 					<span>\(N\)</span>
-					<input id="frog-main-board-size" type="range" min="1" max="12" step="1" value="5">
 					<span id="frog-main-board-size-value">5</span>
 				</label>
 				<label for="frog-main-length-squared">
@@ -510,7 +509,7 @@
 
 				function createExplorer(options) {
 					var canvas = document.getElementById(options.canvasId);
-					var boardSlider = document.getElementById(options.boardSliderId);
+					var boardSlider = options.boardSliderId ? document.getElementById(options.boardSliderId) : null;
 					var boardValue = document.getElementById(options.boardValueId);
 					var lengthSlider = document.getElementById(options.lengthSliderId);
 					var lengthValue = document.getElementById(options.lengthValueId);
@@ -520,7 +519,7 @@
 					var statusReadout = document.getElementById(options.statusReadoutId);
 					var loopReadout = document.getElementById(options.loopReadoutId);
 					var coverReadout = options.coverReadoutId ? document.getElementById(options.coverReadoutId) : null;
-					if (!canvas || !boardSlider || !boardValue || !lengthSlider || !lengthValue || !demoButton || !playButton || !lengthReadout || !statusReadout || !loopReadout) {
+					if (!canvas || !boardValue || !lengthSlider || !lengthValue || !demoButton || !playButton || !lengthReadout || !statusReadout || !loopReadout) {
 						return;
 					}
 
@@ -562,6 +561,10 @@
 					}
 
 					function setStartForParameters() {
+						if (options.autoBoardSize) {
+							var autoN = firstLoopBoard(state.lengthSquared, 12);
+							state.N = autoN || options.defaultN;
+						}
 						var data = buildBoardData(state.N, state.lengthSquared);
 						if (options.mode === "main") {
 							var loop = findAnyLoop(data);
@@ -605,29 +608,29 @@
 							var cell = renderData.data.cells[i];
 							var left = layout.left + cell.x * layout.size;
 							var top = layout.top + (renderData.N - cell.y - 1) * layout.size;
-							var fill = "#f4f4f4";
+							var fill = (cell.x + cell.y) % 2 === 0 ? "#f7fbff" : "#5b7fa6";
 							if (renderData.reachable.seen[cell.key]) {
-								fill = options.mode === "extra" ? "#e1f3ea" : "#e8f2ff";
+								fill = (cell.x + cell.y) % 2 === 0 ? "#dfeafb" : "#6f95bf";
 							}
 							if (options.mode === "main") {
 								if (exampleLoopCells[cell.key]) {
-									fill = "#f7e9ef";
+									fill = (cell.x + cell.y) % 2 === 0 ? "#d6e4fb" : "#6a8fbe";
 								}
 								if (localLoopCells[cell.key]) {
-									fill = "#f4dbe4";
+									fill = (cell.x + cell.y) % 2 === 0 ? "#c7dbfa" : "#5d83b4";
 								}
 							}
 							if (animatedVisitedCells[cell.key]) {
-								fill = options.mode === "extra" ? "#bfe3cf" : "#e7bfd0";
+								fill = (cell.x + cell.y) % 2 === 0 ? "#bfe3cf" : "#5f8f73";
 							}
 							if (cell.key === renderData.start.key) {
 								fill = animatedVisitedCells[cell.key]
-									? (options.mode === "extra" ? "#9fd4b7" : "#e2a7bf")
+									? ((cell.x + cell.y) % 2 === 0 ? "#9fd4b7" : "#4f7f64")
 									: "#ffe3a3";
 							}
 							ctx.fillStyle = fill;
 							ctx.fillRect(left, top, layout.size, layout.size);
-							ctx.strokeStyle = "#cfcfcf";
+							ctx.strokeStyle = "#d2deea";
 							ctx.lineWidth = 1;
 							ctx.strokeRect(left, top, layout.size, layout.size);
 						}
@@ -635,21 +638,21 @@
 						var pathToAnimate = getAnimatedPath(renderData);
 						if (options.mode === "extra") {
 							if (renderData.coverageWalk && renderData.coverageWalk.length > 1) {
-								drawPath(ctx, layout, renderData.coverageWalk, "#2d6ea3", false, renderData.N);
+								drawPath(ctx, layout, renderData.coverageWalk, "#2f7d4a", false, renderData.N);
 							}
 						} else {
 							if (renderData.exampleLoop && (!renderData.localLoop || renderData.exampleLoop[0].key !== renderData.localLoop[0].key)) {
-								drawPath(ctx, layout, renderData.exampleLoop, "#b5527d", true, renderData.N);
+								drawPath(ctx, layout, renderData.exampleLoop, "#5e9f73", true, renderData.N);
 							}
 							if (renderData.localLoop) {
-								drawPath(ctx, layout, renderData.localLoop, "#9f315d", false, renderData.N);
+								drawPath(ctx, layout, renderData.localLoop, "#2f7d4a", false, renderData.N);
 							}
 						}
 						if (animation.timer && pathToAnimate && animation.path === pathToAnimate) {
-							drawPath(ctx, layout, animation.path.slice(0, animation.step + 1), "#111111", false, renderData.N);
+							drawPath(ctx, layout, animation.path.slice(0, animation.step + 1), "#1f5f35", false, renderData.N);
 							var current = centerOfCell(layout, animation.path[animation.step], renderData.N);
 							ctx.save();
-							ctx.fillStyle = "#111111";
+							ctx.fillStyle = "#1f5f35";
 							ctx.beginPath();
 							ctx.arc(current.x, current.y, Math.max(6, layout.size * 0.16), 0, Math.PI * 2);
 							ctx.fill();
@@ -668,6 +671,10 @@
 					}
 
 					function render() {
+						if (options.autoBoardSize) {
+							var autoN = firstLoopBoard(state.lengthSquared, 12);
+							state.N = autoN || options.defaultN;
+						}
 						boardValue.textContent = String(state.N);
 						lengthValue.textContent = String(state.lengthSquared);
 						lengthSlider.value = String(sliderIndexForLengthSquared(state.lengthSquared));
@@ -779,12 +786,14 @@
 						drawBoard(latestRender);
 					}
 
-					boardSlider.addEventListener("input", function () {
-						stopAnimation();
-						state.N = parseInt(boardSlider.value, 10);
-						setStartForParameters();
-						render();
-					});
+					if (boardSlider) {
+						boardSlider.addEventListener("input", function () {
+							stopAnimation();
+							state.N = parseInt(boardSlider.value, 10);
+							setStartForParameters();
+							render();
+						});
+					}
 
 					lengthSlider.addEventListener("input", function () {
 						stopAnimation();
@@ -799,7 +808,13 @@
 						state.lengthSquared = options.demo.lengthSquared;
 						state.startX = options.demo.startX;
 						state.startY = options.demo.startY;
-						boardSlider.value = String(options.demo.N);
+						if (options.autoBoardSize) {
+							var demoN = firstLoopBoard(options.demo.lengthSquared, 12);
+							state.N = demoN || options.demo.N;
+						}
+						if (boardSlider) {
+							boardSlider.value = String(state.N);
+						}
 						lengthSlider.value = String(sliderIndexForLengthSquared(options.demo.lengthSquared));
 						render();
 					});
@@ -863,15 +878,17 @@
 						render();
 					});
 
-					boardSlider.value = String(options.defaultN);
+					if (boardSlider) {
+						boardSlider.value = String(options.defaultN);
+					}
 					lengthSlider.value = String(sliderIndexForLengthSquared(options.defaultLengthSquared));
+					setStartForParameters();
 					render();
 				}
 
 				createExplorer({
 					mode: "main",
 					canvasId: "frog-main-canvas",
-					boardSliderId: "frog-main-board-size",
 					boardValueId: "frog-main-board-size-value",
 					lengthSliderId: "frog-main-length-squared",
 					lengthValueId: "frog-main-length-squared-value",
@@ -886,7 +903,8 @@
 					defaultStartY: 0,
 					demo: { N: 5, lengthSquared: 5, startX: 1, startY: 0 },
 					playLabel: "Play Loop",
-					pauseLabel: "Pause Loop"
+					pauseLabel: "Pause Loop",
+					autoBoardSize: true
 				});
 
 				createExplorer({
