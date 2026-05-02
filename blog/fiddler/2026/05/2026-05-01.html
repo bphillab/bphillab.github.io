@@ -92,31 +92,43 @@
 			<li>The frog visits a total of four distinct squares along the way, including the square on which it starts (and also stops).</li>
 			<li>The path the frog takes is not a square loop.</li>
 			<li>The frog is never on a square that is diagonal (that is, a bishop's move away) from the starting square.</li>
+			<li>The frog is also never on a square that is horizontal or vertical from the starting square (that is, a rook's move away).</li>
 		</ul>
 		<p>What is the smallest jumping distance \(L\) for which this is possible?</p>
 
 		<h2>Main Solution</h2>
 		<p>Put the starting square at \((0,0)\), where all square centers have integer coordinates. The frog's jump length is the distance between two lattice points.</p>
-		<p>If \(L&lt;\sqrt{5}\), then the only possible lattice distances are</p>
+		<p>If \(L&lt;\sqrt{65}\), then the only possible lattice distances are</p>
 		<p>\[
-			1,\quad \sqrt{2},\quad 2.
+			1,\quad \sqrt{2},\quad 2,\quad \sqrt{5},\quad 2\sqrt{2},\quad 3,\quad \sqrt{10},\quad \sqrt{13},\quad 4,\quad \sqrt{17},\quad 3\sqrt{2},\quad 2\sqrt{5},\quad 5,\quad \sqrt{26},\quad \sqrt{29},\quad 4\sqrt{2},\quad \sqrt{34},\quad 6,\quad \sqrt{37},\quad 2\sqrt{10},\quad \sqrt{41},\quad 3\sqrt{5},\quad 7,\quad 5\sqrt{2},\quad 2\sqrt{13},\quad \sqrt{53},\quad \sqrt{58},\quad \sqrt{61},\quad 8.
 		\]</p>
-		<p>We can rule these out one at a time:</p>
+		<p>Rather than ruling these out one at a time, it is better to use the geometry of a four-step loop. If the loop is</p>
+		<p>\[
+			(0,0)\to u \to u+v \to v \to (0,0),
+		\]</p>
+		<p>then \(u\) and \(v\) must be lattice vectors of the same length \(L\). The loop is a rhombus, and it is not a square exactly when \(u\cdot v\neq 0\).</p>
+		<p>The new rule says that the three non-start vertices \(u\), \(v\), and \(u+v\) must all avoid both kinds of forbidden lines from the origin:</p>
+		<ul>
+			<li>not a bishop move: \(|x|\neq |y|\),</li>
+			<li>not a rook move: \(x\neq 0\) and \(y\neq 0\).</li>
+		</ul>
+		<p>For every lattice length with \(L^2&lt;65\), there is only one nontrivial way to write \(L^2\) as a sum of two squares. So, up to signs and swapping coordinates, the only possible edge vectors are the same pattern \((a,b)\) and \((\pm a,\pm b)\) or \((\pm b,\pm a)\).</p>
+		<p>Those possibilities all fail:</p>
 		<p>If \(L=1\), then every move is horizontal or vertical by one square. Any closed four-step walk through four distinct squares is necessarily the boundary of a unit square, which is forbidden.</p>
 		<p>If \(L=\sqrt{2}\), then the very first hop from \((0,0)\) lands on \((\pm 1,\pm 1)\), a square diagonal from the start, which is also forbidden.</p>
-		<p>If \(L=2\), then every move is horizontal or vertical by two squares. A closed four-step walk must use one pair of opposite horizontal moves and one pair of opposite vertical moves, so again the only possibility is a square loop.</p>
-		<p>So \(L\) must be at least \(\sqrt{5}\).</p>
+		<p>For every larger case below \(65\), choosing the second edge by sign changes or coordinate swaps either makes the loop a square, or puts one of \(u\), \(v\), or \(u+v\) on a rook line or bishop line from the start.</p>
+		<p>So \(L\) must be at least \(\sqrt{65}\).</p>
 		<p>Now take the four squares</p>
 		<p>\[
-			(0,0)\to (1,2)\to (0,4)\to (-1,2)\to (0,0).
+			(0,0)\to (8,1)\to (15,5)\to (7,4)\to (0,0).
 		\]</p>
 		<p>Each jump has length</p>
 		<p>\[
-			\sqrt{1^2+2^2}=\sqrt{5}.
+			\sqrt{8^2+1^2}=\sqrt{7^2+4^2}=\sqrt{65}.
 		\]</p>
-		<p>The frog visits exactly four distinct squares, returns to the start after the fourth jump, and the loop is a rhombus rather than a square. Also, the intermediate squares \((1,2)\), \((0,4)\), and \((-1,2)\) are not diagonal from \((0,0)\), since none of them has coordinates with equal absolute value.</p>
+		<p>The frog visits exactly four distinct squares, returns to the start after the fourth jump, and the loop is a rhombus rather than a square. Also, the intermediate squares \((8,1)\), \((15,5)\), and \((7,4)\) are neither diagonal from \((0,0)\) nor horizontal or vertical from it.</p>
 		<div class="callout">
-			<p><strong>Answer:</strong> \( \boxed{\sqrt{5}} \).</p>
+			<p><strong>Answer:</strong> \( \boxed{\sqrt{65}} \).</p>
 		</div>
 
 		<h2>This Week's Extra Credit</h2>
@@ -124,29 +136,32 @@
 		<p>But this time, the frog also wants to be able to hop to every location on the chessboard. What is the minimum value of \(N\) for which this is possible?</p>
 
 		<h2>Extra Credit Solution</h2>
-		<p>With \(L=\sqrt{5}\), each move is a knight move: \((\pm 1,\pm 2)\) or \((\pm 2,\pm 1)\).</p>
-		<p>A \(2\times 2\) board has no legal moves at all, so it is impossible. On a \(3\times 3\) board, the center square is isolated, so the frog cannot reach every square.</p>
-		<p>On a \(4\times 4\) board, however, every square is reachable from every other square by knight moves. So this is the first nontrivial board on which the frog can eventually hop to every location.</p>
+		<p>With \(L=\sqrt{65}\), the legal moves are</p>
+		<p>\[
+			(\pm 8,\pm 1),\quad (\pm 1,\pm 8),\quad (\pm 7,\pm 4),\quad (\pm 4,\pm 7).
+		\]</p>
+		<p>If \(N\le 13\), then the central square (or central block of squares) is isolated: every legal move changes one coordinate by at least \(7\), so from the middle of such a board there is nowhere to go.</p>
+		<p>On a \(14\times 14\) board, however, the move graph is connected, so every square is reachable from every other square. Thus \(14\) is the first nontrivial board on which the frog can eventually hop to every location.</p>
 		<div class="callout">
-			<p><strong>Extra credit answer:</strong> \( \boxed{4} \).</p>
+			<p><strong>Extra credit answer:</strong> \( \boxed{14} \).</p>
 		</div>
-		<p><em>Degenerate note:</em> if one allows the trivial \(1\times 1\) board, then there is only one location to reach. The first board on which the frog can actually move and still reach every square is \(4\times 4\).</p>
+		<p><em>Degenerate note:</em> if one allows the trivial \(1\times 1\) board, then there is only one location to reach. The first board on which the frog can actually move and still reach every square is \(14\times 14\).</p>
 
 		<h2>Interactive Explorer</h2>
-		<p>The main demo focuses on the 4-jump loop from the original puzzle. The extra-credit demo focuses on reachability and a full-board walk. Click any square to change the starting square.</p>
+		<p>The main demo focuses on the updated 4-jump loop with both bishop and rook restrictions. The extra-credit demo focuses on reachability and a full-board walk. Click any square to change the starting square.</p>
 		<h3>Main Demo</h3>
-		<p>Try different jump lengths for the original problem. The board size is set automatically to the smallest \(N\) that supports a valid 4-jump loop for that value of \(L\).</p>
+		<p>Try different jump lengths for the updated problem. The board size is set automatically to the smallest \(N\) that supports a valid 4-jump loop for that value of \(L\).</p>
 		<div class="frog-explorer">
 			<canvas id="frog-main-canvas" class="frog-board" width="720" height="720" aria-label="Interactive chessboard explorer for the main frog puzzle"></canvas>
 			<div class="frog-controls">
 				<label>
 					<span>\(N\)</span>
-					<span id="frog-main-board-size-value">5</span>
+					<span id="frog-main-board-size-value">13</span>
 				</label>
 				<label for="frog-main-length-squared">
 					<span>\(L^2\)</span>
-					<input id="frog-main-length-squared" type="range" min="0" max="12" step="1" value="3">
-					<span id="frog-main-length-squared-value">5</span>
+					<input id="frog-main-length-squared" type="range" min="0" max="29" step="1" value="29">
+					<span id="frog-main-length-squared-value">65</span>
 				</label>
 				<button id="frog-main-demo" type="button">Load Main Demo</button>
 				<button id="frog-main-play-path" type="button">Play Loop</button>
@@ -163,13 +178,13 @@
 			<div class="frog-controls">
 				<label for="frog-extra-board-size">
 					<span>\(N\)</span>
-					<input id="frog-extra-board-size" type="range" min="1" max="12" step="1" value="4">
-					<span id="frog-extra-board-size-value">4</span>
+					<input id="frog-extra-board-size" type="range" min="1" max="20" step="1" value="14">
+					<span id="frog-extra-board-size-value">14</span>
 				</label>
 				<label for="frog-extra-length-squared">
 					<span>\(L^2\)</span>
-					<input id="frog-extra-length-squared" type="range" min="0" max="12" step="1" value="3">
-					<span id="frog-extra-length-squared-value">5</span>
+					<input id="frog-extra-length-squared" type="range" min="0" max="29" step="1" value="29">
+					<span id="frog-extra-length-squared-value">65</span>
 				</label>
 				<button id="frog-extra-demo" type="button">Load Extra Demo</button>
 				<button id="frog-extra-play-path" type="button">Play Walk</button>
@@ -192,7 +207,7 @@
 		<script>
 			(function () {
 				var moveCache = {};
-				var validLengthSquares = [1, 2, 4, 5, 8, 9, 10, 13, 16, 17, 18, 20, 25];
+				var validLengthSquares = [1, 2, 4, 5, 8, 9, 10, 13, 16, 17, 18, 20, 25, 26, 29, 32, 34, 36, 37, 40, 41, 45, 49, 50, 52, 53, 58, 61, 64, 65];
 
 				function gcd(a, b) {
 					while (b !== 0) {
@@ -311,10 +326,22 @@
 					};
 				}
 
-				function isDiagonalFromStart(start, point) {
+				function isForbiddenFromStart(start, point) {
 					var dx = point.x - start.x;
 					var dy = point.y - start.y;
-					return dx !== 0 && Math.abs(dx) === Math.abs(dy);
+					return dx === 0 || dy === 0 || (dx !== 0 && Math.abs(dx) === Math.abs(dy));
+				}
+
+				function forbiddenReasonFromStart(start, point) {
+					var dx = point.x - start.x;
+					var dy = point.y - start.y;
+					if (dx === 0 || dy === 0) {
+						return "it lands on a rook line from the start";
+					}
+					if (Math.abs(dx) === Math.abs(dy)) {
+						return "it lands on a bishop line from the start";
+					}
+					return null;
 				}
 
 				function isSquareLoop(path) {
@@ -332,19 +359,19 @@
 					var neighborsA = data.adjacency[start.key];
 					for (var i = 0; i < neighborsA.length; i += 1) {
 						var a = neighborsA[i];
-						if (isDiagonalFromStart(start, a)) {
+						if (isForbiddenFromStart(start, a)) {
 							continue;
 						}
 						var neighborsB = data.adjacency[a.key];
 						for (var j = 0; j < neighborsB.length; j += 1) {
 							var b = neighborsB[j];
-							if (b.key === start.key || b.key === a.key || isDiagonalFromStart(start, b)) {
+							if (b.key === start.key || b.key === a.key || isForbiddenFromStart(start, b)) {
 								continue;
 							}
 							var neighborsC = data.adjacency[b.key];
 							for (var m = 0; m < neighborsC.length; m += 1) {
 								var c = neighborsC[m];
-								if (c.key === start.key || c.key === a.key || c.key === b.key || isDiagonalFromStart(start, c)) {
+								if (c.key === start.key || c.key === a.key || c.key === b.key || isForbiddenFromStart(start, c)) {
 									continue;
 								}
 								if (!data.adjacencySet[c.key][start.key]) {
@@ -368,6 +395,62 @@
 						}
 					}
 					return null;
+				}
+
+				function recordFailure(best, path, reason, failedCell) {
+					if (!best || path.length > best.path.length) {
+						return { path: path.slice(), reason: reason, failedCell: failedCell || path[path.length - 1] };
+					}
+					return best;
+				}
+
+				function findFailedLoopAttempt(data, start) {
+					var best = null;
+					var neighborsA = data.adjacency[start.key];
+					for (var i = 0; i < neighborsA.length; i += 1) {
+						var a = neighborsA[i];
+						var reasonA = forbiddenReasonFromStart(start, a);
+						if (reasonA) {
+							best = recordFailure(best, [start, a], "Jump 1 fails because " + reasonA + ".", a);
+							continue;
+						}
+						var neighborsB = data.adjacency[a.key];
+						for (var j = 0; j < neighborsB.length; j += 1) {
+							var b = neighborsB[j];
+							if (b.key === start.key || b.key === a.key) {
+								best = recordFailure(best, [start, a, b], "Jump 2 fails because it repeats a square too soon.", b);
+								continue;
+							}
+							var reasonB = forbiddenReasonFromStart(start, b);
+							if (reasonB) {
+								best = recordFailure(best, [start, a, b], "Jump 2 fails because " + reasonB + ".", b);
+								continue;
+							}
+							var neighborsC = data.adjacency[b.key];
+							for (var m = 0; m < neighborsC.length; m += 1) {
+								var c = neighborsC[m];
+								if (c.key === start.key || c.key === a.key || c.key === b.key) {
+									best = recordFailure(best, [start, a, b, c], "Jump 3 fails because it repeats a square before the loop closes.", c);
+									continue;
+								}
+								var reasonC = forbiddenReasonFromStart(start, c);
+								if (reasonC) {
+									best = recordFailure(best, [start, a, b, c], "Jump 3 fails because " + reasonC + ".", c);
+									continue;
+								}
+								if (!data.adjacencySet[c.key][start.key]) {
+									best = recordFailure(best, [start, a, b, c], "Jump 4 fails because there is no legal move back to the start.", c);
+									continue;
+								}
+								var path = [start, a, b, c, start];
+								if (isSquareLoop(path)) {
+									best = recordFailure(best, path, "Jump 4 closes a square loop, which is forbidden.", c);
+									continue;
+								}
+							}
+						}
+					}
+					return best;
 				}
 
 				function bfsReachable(data, start) {
@@ -507,6 +590,65 @@
 					ctx.restore();
 				}
 
+				function buildFirstVisitLabels(path) {
+					var labels = {};
+					if (!path || !path.length) {
+						return labels;
+					}
+					labels[path[0].key] = "S";
+					for (var i = 1; i < path.length; i += 1) {
+						if (!labels[path[i].key]) {
+							labels[path[i].key] = String(i);
+						}
+					}
+					return labels;
+				}
+
+				function drawCellLabels(ctx, layout, renderData, labels, highlightKey) {
+					var keys = Object.keys(labels);
+					for (var i = 0; i < keys.length; i += 1) {
+						var key = keys[i];
+						var cell = renderData.data.cellMap[key];
+						if (!cell) {
+							continue;
+						}
+						var center = centerOfCell(layout, cell, renderData.N);
+						var radius = Math.max(9, layout.size * 0.22);
+						ctx.save();
+						ctx.fillStyle = key === highlightKey ? "#1f5f35" : "rgba(255,255,255,0.92)";
+						ctx.beginPath();
+						ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
+						ctx.fill();
+						ctx.strokeStyle = key === highlightKey ? "#1f5f35" : "#31567d";
+						ctx.lineWidth = 1.5;
+						ctx.stroke();
+						ctx.fillStyle = key === highlightKey ? "#ffffff" : "#17324d";
+						ctx.font = Math.max(11, layout.size * 0.28) + "px sans-serif";
+						ctx.textAlign = "center";
+						ctx.textBaseline = "middle";
+						ctx.fillText(labels[key], center.x, center.y + 0.5);
+						ctx.restore();
+					}
+				}
+
+				function drawFailureMarker(ctx, layout, cell, N) {
+					if (!cell) {
+						return;
+					}
+					var center = centerOfCell(layout, cell, N);
+					var size = Math.max(8, layout.size * 0.18);
+					ctx.save();
+					ctx.strokeStyle = "#a12828";
+					ctx.lineWidth = Math.max(2, layout.size * 0.08);
+					ctx.beginPath();
+					ctx.moveTo(center.x - size, center.y - size);
+					ctx.lineTo(center.x + size, center.y + size);
+					ctx.moveTo(center.x + size, center.y - size);
+					ctx.lineTo(center.x - size, center.y + size);
+					ctx.stroke();
+					ctx.restore();
+				}
+
 				function createExplorer(options) {
 					var canvas = document.getElementById(options.canvasId);
 					var boardSlider = options.boardSliderId ? document.getElementById(options.boardSliderId) : null;
@@ -554,6 +696,9 @@
 						if (renderData.localLoop) {
 							return renderData.localLoop;
 						}
+						if (renderData.failedAttempt) {
+							return renderData.failedAttempt.path;
+						}
 						if (renderData.exampleLoop) {
 							return renderData.exampleLoop;
 						}
@@ -562,7 +707,7 @@
 
 					function setStartForParameters() {
 						if (options.autoBoardSize) {
-							var autoN = firstLoopBoard(state.lengthSquared, 12);
+							var autoN = firstLoopBoard(state.lengthSquared, 20);
 							state.N = autoN || options.defaultN;
 						}
 						var data = buildBoardData(state.N, state.lengthSquared);
@@ -586,6 +731,7 @@
 
 						var localLoopCells = {};
 						var exampleLoopCells = {};
+						var failedAttemptCells = {};
 						var animatedVisitedCells = {};
 						var i;
 						if (renderData.localLoop) {
@@ -596,6 +742,11 @@
 						if (renderData.exampleLoop) {
 							for (i = 0; i < renderData.exampleLoop.length - 1; i += 1) {
 								exampleLoopCells[renderData.exampleLoop[i].key] = true;
+							}
+						}
+						if (renderData.failedAttempt) {
+							for (i = 0; i < renderData.failedAttempt.path.length; i += 1) {
+								failedAttemptCells[renderData.failedAttempt.path[i].key] = true;
 							}
 						}
 						if (animation.timer && animation.path) {
@@ -613,6 +764,9 @@
 								fill = (cell.x + cell.y) % 2 === 0 ? "#dfeafb" : "#6f95bf";
 							}
 							if (options.mode === "main") {
+								if (failedAttemptCells[cell.key]) {
+									fill = (cell.x + cell.y) % 2 === 0 ? "#f8dddd" : "#bb7676";
+								}
 								if (exampleLoopCells[cell.key]) {
 									fill = (cell.x + cell.y) % 2 === 0 ? "#d6e4fb" : "#6a8fbe";
 								}
@@ -637,11 +791,18 @@
 
 						var pathToAnimate = getAnimatedPath(renderData);
 						if (options.mode === "extra") {
-							if (renderData.coverageWalk && renderData.coverageWalk.length > 1) {
-								drawPath(ctx, layout, renderData.coverageWalk, "#2f7d4a", false, renderData.N);
+							if (renderData.coverageLabels) {
+								var currentKey = animation.timer && animation.path && animation.step < animation.path.length
+									? animation.path[animation.step].key
+									: null;
+								drawCellLabels(ctx, layout, renderData, renderData.coverageLabels, currentKey);
 							}
 						} else {
-							if (renderData.exampleLoop && (!renderData.localLoop || renderData.exampleLoop[0].key !== renderData.localLoop[0].key)) {
+							if (renderData.failedAttempt && !renderData.localLoop) {
+								drawPath(ctx, layout, renderData.failedAttempt.path, "#a12828", true, renderData.N);
+								drawFailureMarker(ctx, layout, renderData.failedAttempt.failedCell, renderData.N);
+							}
+							if (!renderData.failedAttempt && renderData.exampleLoop && (!renderData.localLoop || renderData.exampleLoop[0].key !== renderData.localLoop[0].key)) {
 								drawPath(ctx, layout, renderData.exampleLoop, "#5e9f73", true, renderData.N);
 							}
 							if (renderData.localLoop) {
@@ -649,8 +810,10 @@
 							}
 						}
 						if (animation.timer && pathToAnimate && animation.path === pathToAnimate) {
-							drawPath(ctx, layout, animation.path.slice(0, animation.step + 1), "#1f5f35", false, renderData.N);
 							var current = centerOfCell(layout, animation.path[animation.step], renderData.N);
+							if (options.mode !== "extra") {
+								drawPath(ctx, layout, animation.path.slice(0, animation.step + 1), "#1f5f35", false, renderData.N);
+							}
 							ctx.save();
 							ctx.fillStyle = "#1f5f35";
 							ctx.beginPath();
@@ -672,7 +835,7 @@
 
 					function render() {
 						if (options.autoBoardSize) {
-							var autoN = firstLoopBoard(state.lengthSquared, 12);
+							var autoN = firstLoopBoard(state.lengthSquared, 20);
 							state.N = autoN || options.defaultN;
 						}
 						boardValue.textContent = String(state.N);
@@ -692,10 +855,12 @@
 						var localLoop = findLoopFromStart(data, start);
 						var exampleLoop = localLoop || findAnyLoop(data);
 						var coverageWalk = reachable.count === data.cells.length ? buildCoverageWalk(data, start) : null;
-						var minConnected = firstConnectedBoard(state.lengthSquared, 12);
-						var minLoop = firstLoopBoard(state.lengthSquared, 12);
+						var coverageLabels = coverageWalk ? buildFirstVisitLabels(coverageWalk) : null;
+						var failedAttempt = localLoop ? null : findFailedLoopAttempt(data, start);
+						var minConnected = firstConnectedBoard(state.lengthSquared, 20);
+						var minLoop = firstLoopBoard(state.lengthSquared, 20);
 						var primitive = commonMoveFactor(data.moves);
-						var isMainDemo = state.lengthSquared === 5 && state.N >= 5 && start.x === 1 && start.y === 0;
+						var isMainDemo = state.lengthSquared === 65 && state.N >= 13 && start.x === 0 && start.y === 0;
 
 						lengthReadout.textContent =
 							"L = " + formatLength(state.lengthSquared) +
@@ -706,7 +871,7 @@
 								"Start " + formatPoint(start) +
 								". Reachable squares: " + reachable.count + " of " + data.cells.length +
 								". Smallest board with any such 4-jump loop for this L^2: " +
-								(minLoop ? "N = " + minLoop : "none up to 12") + ".";
+								(minLoop ? "N = " + minLoop : "none up to 20") + ".";
 
 							if (!data.moves.length) {
 								loopReadout.textContent = "This jump length cannot occur between square centers.";
@@ -716,8 +881,10 @@
 									", so the frog stays trapped in one residue class. A valid loop may still exist on some boards, but a fully reachable board does not.";
 							} else if (localLoop) {
 								loopReadout.textContent = "Valid 4-jump loop from the selected start: " + formatLoop(localLoop) + ".";
+							} else if (failedAttempt) {
+								loopReadout.textContent = "No valid 4-jump loop from the selected start. Failed attempt: " + formatLoop(failedAttempt.path) + ". " + failedAttempt.reason;
 							} else if (exampleLoop) {
-								loopReadout.textContent = "No valid 4-jump loop from the selected start. One example on this board is " + formatLoop(exampleLoop) + ".";
+								loopReadout.textContent = "No valid 4-jump loop from the selected start. One example elsewhere on this board is " + formatLoop(exampleLoop) + ".";
 							} else {
 								loopReadout.textContent = "No valid 4-jump loop found on this board.";
 							}
@@ -735,7 +902,7 @@
 								". Reachable squares: " + reachable.count + " of " + data.cells.length +
 								". Graph connected: " + (graphConnected ? "yes" : "no") + "." +
 								" First nontrivial fully reachable board for this L^2: " +
-								(minConnected ? "N = " + minConnected : "none up to 12") + "." +
+								(minConnected ? "N = " + minConnected : "none up to 20") + "." +
 								(edgeTotal === 0 ? " No legal jumps on this board." : "");
 
 							if (!data.moves.length) {
@@ -757,7 +924,7 @@
 										shown += " -> ...";
 									}
 									coverReadout.textContent =
-										"Coverage walk from the selected start (" + (coverageWalk.length - 1) + " jumps): " + shown;
+										"Squares are labeled by first arrival jump. Coverage walk from the selected start (" + (coverageWalk.length - 1) + " jumps): " + shown;
 								} else {
 									coverReadout.textContent = "No full-board walk from this start because not every square is reachable.";
 								}
@@ -771,7 +938,9 @@
 							reachable: reachable,
 							localLoop: localLoop,
 							exampleLoop: exampleLoop,
-							coverageWalk: coverageWalk
+							coverageWalk: coverageWalk,
+							coverageLabels: coverageLabels,
+							failedAttempt: failedAttempt
 						};
 						var activePath = getAnimatedPath(latestRender);
 						if (!activePath) {
@@ -809,7 +978,7 @@
 						state.startX = options.demo.startX;
 						state.startY = options.demo.startY;
 						if (options.autoBoardSize) {
-							var demoN = firstLoopBoard(options.demo.lengthSquared, 12);
+							var demoN = firstLoopBoard(options.demo.lengthSquared, 20);
 							state.N = demoN || options.demo.N;
 						}
 						if (boardSlider) {
@@ -897,11 +1066,11 @@
 					lengthReadoutId: "frog-main-length-readout",
 					statusReadoutId: "frog-main-status-readout",
 					loopReadoutId: "frog-main-loop-readout",
-					defaultN: 5,
-					defaultLengthSquared: 5,
-					defaultStartX: 1,
+					defaultN: 13,
+					defaultLengthSquared: 65,
+					defaultStartX: 0,
 					defaultStartY: 0,
-					demo: { N: 5, lengthSquared: 5, startX: 1, startY: 0 },
+					demo: { N: 13, lengthSquared: 65, startX: 0, startY: 0 },
 					playLabel: "Play Loop",
 					pauseLabel: "Pause Loop",
 					autoBoardSize: true
@@ -920,11 +1089,11 @@
 					statusReadoutId: "frog-extra-status-readout",
 					loopReadoutId: "frog-extra-loop-readout",
 					coverReadoutId: "frog-extra-cover-readout",
-					defaultN: 4,
-					defaultLengthSquared: 5,
+					defaultN: 14,
+					defaultLengthSquared: 65,
 					defaultStartX: 0,
 					defaultStartY: 0,
-					demo: { N: 4, lengthSquared: 5, startX: 0, startY: 0 },
+					demo: { N: 14, lengthSquared: 65, startX: 0, startY: 0 },
 					playLabel: "Play Walk",
 					pauseLabel: "Pause Walk"
 				});
