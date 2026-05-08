@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - May 8, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: May 8, 2026</h1>
+		<p><em>Posted on May 8, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>I'm preparing a mixture of "random-ade" using a large, empty pitcher and two 12-ounce glasses.</p>
+		<p>First, I fill one glass with some amount of lemon juice chosen randomly and uniformly between 0 and 12 ounces. I fill the other glass with some amount of water, also chosen randomly and uniformly between 0 and 12 ounces. Next, I pour an equal amount from each glass into the pitcher until one of the glasses is empty.</p>
+		<p>At this point, I refill that empty glass with yet another random amount of the same liquid it previously contained. Once again, I pour an equal amount from each glass into the pitcher until one of the glasses is empty.</p>
+		<p>On average, how much random-ade can I expect to prepare? Note that all three random amounts are chosen independently.</p>
+
+		<h2>Main Solution</h2>
+		<p>Let the initial amounts be \(X\) and \(Y\), and let the refill amount be \(Z\). Each is independently uniform on \([0,12]\).</p>
+		<p>During the first pour, the process stops when the smaller of \(X\) and \(Y\) runs out. So the pitcher receives</p>
+		<p>\[
+			2\min(X,Y)
+		\]</p>
+		<p>ounces, and the amount left in the nonempty glass is</p>
+		<p>\[
+			|X-Y|.
+		\]</p>
+		<p>After refilling the empty glass with \(Z\), the second pour contributes</p>
+		<p>\[
+			2\min(|X-Y|,Z).
+		\]</p>
+		<p>So the total amount prepared is</p>
+		<p>\[
+			T=2\min(X,Y)+2\min(|X-Y|,Z).
+		\]</p>
+
+		<p>Now scale by 12. Write</p>
+		<p>\[
+			x=\frac{X}{12}, \qquad y=\frac{Y}{12}, \qquad z=\frac{Z}{12},
+		\]</p>
+		<p>so \(x,y,z\) are independent and uniform on \([0,1]\). Then</p>
+		<p>\[
+			T=24\left(\min(x,y)+\min(|x-y|,z)\right).
+		\]</p>
+		<p>We therefore need two expected values.</p>
+
+		<p>First, for two independent uniform random variables on \([0,1]\),</p>
+		<p>\[
+			\mathbb{E}[\min(x,y)]=\frac{1}{3}.
+		\]</p>
+
+		<p>Next, let \(D=|x-y|\). For a fixed value \(D=d\),</p>
+		<p>\[
+			\mathbb{E}[\min(d,z)]
+			=\int_0^d z\,dz+\int_d^1 d\,dz
+			=d-\frac{d^2}{2}.
+		\]</p>
+		<p>So</p>
+		<p>\[
+			\mathbb{E}[\min(D,z)]
+			=\mathbb{E}[D]-\frac{1}{2}\mathbb{E}[D^2].
+		\]</p>
+		<p>For \(D=|x-y|\) with \(x\) and \(y\) independent uniform on \([0,1]\), the standard values are</p>
+		<p>\[
+			\mathbb{E}[D]=\frac{1}{3},
+			\qquad
+			\mathbb{E}[D^2]=\frac{1}{6}.
+		\]</p>
+		<p>Therefore</p>
+		<p>\[
+			\mathbb{E}[\min(D,z)]
+			=\frac{1}{3}-\frac{1}{2}\cdot\frac{1}{6}
+			=\frac{1}{4}.
+		\]</p>
+
+		<p>Putting both pieces together,</p>
+		<p>\[
+			\mathbb{E}[T]
+			=24\left(\frac{1}{3}+\frac{1}{4}\right)
+			=24\cdot\frac{7}{12}
+			=14.
+		\]</p>
+		<div class="callout">
+			<p><strong>Answer:</strong> \( \boxed{14 \text{ ounces}} \).</p>
+		</div>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>This time there are three 12-ounce glasses.</p>
+		<p>I fill them with random amounts of lemon juice, lime juice, and water, each chosen independently and uniformly between 0 and 12 ounces. I pour equally from all three glasses until one is empty, refill that empty glass with a new random amount of the same liquid, and repeat. Then I refill the newly emptied glass again and do the same thing a third time.</p>
+		<p>On average, how much random-ade do I prepare now?</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>Again scale everything to \([0,1]\). Let the three initial fills be \(a\), \(b\), and \(c\), and sort them as</p>
+		<p>\[
+			x_1 \le x_2 \le x_3.
+		\]</p>
+		<p>The first pour contributes</p>
+		<p>\[
+			3x_1.
+		\]</p>
+		<p>After that pour, the two nonempty glasses contain \(x_2-x_1\) and \(x_3-x_1\). So if we define</p>
+		<p>\[
+			u=x_2-x_1, \qquad v=x_3-x_1,
+		\]</p>
+		<p>then the remaining problem is this: the next two rounds start from amounts \(u\), \(v\), and a fresh uniform random refill \(z\), where \(0 \le u \le v \le 1\).</p>
+
+		<p>Let \(g(u,v)\) be the expected sum of the round minima from those last two rounds. Since the next minimum is \(\min(u,z)\), there are three cases:</p>
+		<ul>
+			<li>If \(z&lt;u\), the second-round minimum is \(z\), and the third round contributes an expected \(u-z-\frac{(u-z)^2}{2}\).</li>
+			<li>If \(u \le z &lt; v\), the second-round minimum is \(u\), and the third round contributes an expected \(z-u-\frac{(z-u)^2}{2}\).</li>
+			<li>If \(z \ge v\), the second-round minimum is \(u\), and the third round contributes an expected \(v-u-\frac{(v-u)^2}{2}\).</li>
+		</ul>
+		<p>Averaging over \(z \sim \text{Uniform}(0,1)\) gives</p>
+		<p>\[
+			g(u,v)
+			=\int_0^u \left(u-\frac{(u-z)^2}{2}\right)\,dz
+			+\int_u^v \left(z-\frac{(z-u)^2}{2}\right)\,dz
+			+\int_v^1 \left(v-\frac{(v-u)^2}{2}\right)\,dz.
+		\]</p>
+		<p>Simplifying,</p>
+		<p>\[
+			g(u,v)=v-v^2+uv-\frac{uv^2}{2}+\frac{v^3}{3}.
+		\]</p>
+
+		<p>Now we average over the distribution of \(u\) and \(v\). For three independent uniform variables on \([0,1]\), the joint density of</p>
+		<p>\[
+			u=x_2-x_1, \qquad v=x_3-x_1
+		\]</p>
+		<p>is</p>
+		<p>\[
+			f(u,v)=6(1-v),
+			\qquad 0 \le u \le v \le 1.
+		\]</p>
+		<p>So the expected contribution from the last two rounds is</p>
+		<p>\[
+			\mathbb{E}[g(u,v)]
+			=\int_0^1 \int_0^v g(u,v)\,6(1-v)\,du\,dv
+			=\frac{11}{30}.
+		\]</p>
+
+		<p>Also, for three independent uniform random variables, the expected minimum is</p>
+		<p>\[
+			\mathbb{E}[x_1]=\frac{1}{4}.
+		\]</p>
+		<p>Therefore the expected total sum of the three round minima is</p>
+		<p>\[
+			\frac{1}{4}+\frac{11}{30}=\frac{37}{60}.
+		\]</p>
+		<p>Each round minimum is multiplied by 3 glasses and then by 12 ounces, so the expected amount of random-ade is</p>
+		<p>\[
+			36 \cdot \frac{37}{60}
+			=\frac{111}{5}
+			=22.2.
+		\]</p>
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> \( \boxed{\frac{111}{5} \text{ ounces}} = \boxed{22.2 \text{ ounces}} \).</p>
+		</div>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/05/2026-05-01.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+	</body>
+</html>
