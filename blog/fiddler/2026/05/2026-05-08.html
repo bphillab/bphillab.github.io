@@ -104,6 +104,69 @@
 			<p><strong>Answer:</strong> \( \boxed{14 \text{ ounces}} \).</p>
 		</div>
 
+		<h2>Generalization: More Rounds</h2>
+		<p>The same two-glass setup has a clean extension. Suppose we keep going for \(n\) total rounds: after each round, we refill the empty glass with a fresh independent uniform amount and continue.</p>
+		<p>Again work on the scaled interval \([0,1]\). Let \(F_r(w)\) be the expected sum of the round minima over the next \(r\) rounds if one glass currently contains a fixed amount \(w\) and the other is freshly refilled with a uniform random amount \(U\).</p>
+		<p>For one round,</p>
+		<p>\[
+			F_1(w)=\mathbb{E}[\min(w,U)]=w-\frac{w^2}{2}.
+		\]</p>
+		<p>For later use, the two-round case is</p>
+		<p>\[
+			F_2(w)
+			=\mathbb{E}\bigl[\min(w,U)+\min(|w-U|,V)\bigr]
+			=\frac{w}{2}+\frac{1}{3},
+		\]</p>
+		<p>where \(V\) is another independent uniform random variable on \([0,1]\).</p>
+		<p>Now assume \(r \ge 2\) and \(F_r(w)=\dfrac{w}{2}+c_r\) for some constant \(c_r\). After one more round, the contribution is \(\min(w,U)\), and the leftover amount is \(|w-U|\). So</p>
+		<p>\[
+			F_{r+1}(w)=\mathbb{E}[\min(w,U)]+\mathbb{E}[F_r(|w-U|)].
+		\]</p>
+		<p>Using the inductive form,</p>
+		<p>\[
+			F_{r+1}(w)
+			=\left(w-\frac{w^2}{2}\right)+\frac{1}{2}\mathbb{E}[|w-U|]+c_r.
+		\]</p>
+		<p>But</p>
+		<p>\[
+			\mathbb{E}[|w-U|]
+			=\int_0^w (w-u)\,du+\int_w^1 (u-w)\,du
+			=w^2-w+\frac{1}{2}.
+		\]</p>
+		<p>Therefore</p>
+		<p>\[
+			F_{r+1}(w)
+			=\left(w-\frac{w^2}{2}\right)+\frac{1}{2}\left(w^2-w+\frac{1}{2}\right)+c_r
+			=\frac{w}{2}+c_r+\frac{1}{4}.
+		\]</p>
+		<p>So once we reach \(F_2\), every additional round just adds another \(1/4\) to the expected scaled total. Since \(F_2(w)=\dfrac{w}{2}+\dfrac{1}{3}\), induction gives</p>
+		<p>\[
+			F_r(w)=\frac{w}{2}+\frac{1}{3}+\frac{r-2}{4}
+			\qquad (r \ge 2).
+		\]</p>
+
+		<p>Now return to the original process. Let \(S_n\) be the expected scaled sum of the \(n\) round minima when the first two glass amounts are independent uniforms \(X\) and \(Y\). The first round contributes \(\mathbb{E}[\min(X,Y)]=\dfrac{1}{3}\), and the leftover amount is \(D=|X-Y|\), with \(\mathbb{E}[D]=\dfrac{1}{3}\). For \(n \ge 2\),</p>
+		<p>\[
+			S_n
+			=\frac{1}{3}+\mathbb{E}[F_{n-1}(D)].
+		\]</p>
+		<p>For \(n=2\), this reproduces \(S_2=\dfrac{7}{12}\). For \(n \ge 3\), plugging in the formula for \(F_{n-1}\) gives</p>
+		<p>\[
+			S_n
+			=\frac{1}{3}+\frac{1}{2}\mathbb{E}[D]+\frac{1}{3}+\frac{n-3}{4}
+			=\frac{1}{3}+\frac{1}{6}+\frac{1}{3}+\frac{n-3}{4}
+			=\frac{3n+1}{12}.
+		\]</p>
+		<p>This same formula also matches \(n=1\) and \(n=2\). Undoing the scaling, the expected amount of random-ade after \(n\) rounds is</p>
+		<p>\[
+			24S_n
+			=24 \cdot \frac{3n+1}{12}
+			=6n+2.
+		\]</p>
+		<div class="callout">
+			<p><strong>General formula for \(n\) rounds:</strong> \( \boxed{6n+2 \text{ ounces}} \).</p>
+		</div>
+
 		<h2>This Week's Extra Credit</h2>
 		<p>This time there are three 12-ounce glasses.</p>
 		<p>I fill them with random amounts of lemon juice, lime juice, and water, each chosen independently and uniformly between 0 and 12 ounces. I pour equally from all three glasses until one is empty, refill that empty glass with a new random amount of the same liquid, and repeat. Then I refill the newly emptied glass again and do the same thing a third time.</p>
@@ -175,6 +238,76 @@
 		<div class="callout">
 			<p><strong>Extra credit answer:</strong> \( \boxed{\frac{111}{5} \text{ ounces}} = \boxed{22.2 \text{ ounces}} \).</p>
 		</div>
+
+		<h2>Generalization: \(m\) Glasses</h2>
+		<p>There is also a clean \(m\)-glass version of the extra-credit setup. Start with \(m\) glasses, each initially filled to an independent uniform level between 0 and 12 ounces. Pour equally from all \(m\) glasses until one empties, refill that glass with a fresh independent uniform amount of the same liquid, and continue for a total of \(m\) rounds.</p>
+		<p>After scaling by 12 again, each round contributes \(m\) times its minimum glass level. So if \(\tau_m\) is the total scaled time through the first \(m\) emptying events, the expected amount prepared is</p>
+		<p>\[
+			12m\,\mathbb{E}[\tau_m].
+		\]</p>
+
+		<p>To compute \(\mathbb{E}[\tau_m]\), view each glass as its own renewal process. For glass \(i\), let</p>
+		<p>\[
+			U_{i,1}, U_{i,2}, U_{i,3}, \dots
+		\]</p>
+		<p>be its successive independent uniform fills on \([0,1]\). Then its emptying times are</p>
+		<p>\[
+			S_{i,1}=U_{i,1}, \qquad S_{i,2}=U_{i,1}+U_{i,2}, \qquad S_{i,3}=U_{i,1}+U_{i,2}+U_{i,3}, \dots
+		\]</p>
+		<p>The process ends its \(m\)-th round at the \(m\)-th emptying event overall, so \(\tau_m\) is the \(m\)-th smallest value among all these \(S_{i,r}\).</p>
+
+		<p>Now fix \(0 \le t \le 1\). Let \(N_i(t)\) be the number of times glass \(i\) has emptied by time \(t\). Since \(t \le 1\), the event \(N_i(t) \ge r\) is exactly</p>
+		<p>\[
+			U_{i,1}+\cdots+U_{i,r} \le t,
+		\]</p>
+		<p>which has probability \(t^r/r!\). Therefore</p>
+		<p>\[
+			\Pr(N_i(t)=r)=\frac{t^r}{r!}-\frac{t^{r+1}}{(r+1)!},
+			\qquad r=0,1,2,\dots
+		\]</p>
+		<p>and the probability generating function of \(N_i(t)\) is</p>
+		<p>\[
+			G_t(s)
+			=\sum_{r \ge 0} \Pr(N_i(t)=r)s^r
+			=e^{st}-\frac{e^{st}-1}{s}.
+		\]</p>
+
+		<p>Because the glasses are independent, the total number of emptyings by time \(t\),</p>
+		<p>\[
+			N(t)=N_1(t)+\cdots+N_m(t),
+		\]</p>
+		<p>has generating function \(G_t(s)^m\). The event \(\tau_m > t\) means that fewer than \(m\) emptyings have occurred by time \(t\), so</p>
+		<p>\[
+			\Pr(\tau_m > t)
+			=\Pr(N(t) < m)
+			=\sum_{r=0}^{m-1} [s^r]\,G_t(s)^m.
+		\]</p>
+		<p>Integrating this survival probability from 0 to 1 gives</p>
+		<p>\[
+			\mathbb{E}[\tau_m]
+			=\int_0^1 \Pr(\tau_m > t)\,dt
+			=H_{2m}-H_m
+			=\sum_{k=1}^m \frac{1}{m+k},
+		\]</p>
+		<p>where \(H_n=1+\frac12+\cdots+\frac1n\) is the \(n\)-th harmonic number. Equivalently, the expected minimum on round \(k\) is</p>
+		<p>\[
+			\frac{1}{m+k},
+			\qquad k=1,2,\dots,m.
+		\]</p>
+
+		<p>Undoing the scaling, the expected amount of random-ade in the \(m\)-glass, \(m\)-round problem is</p>
+		<p>\[
+			12m\,(H_{2m}-H_m).
+		\]</p>
+		<div class="callout">
+			<p><strong>\(m\)-glass formula:</strong> \( \boxed{12m\,(H_{2m}-H_m)\text{ ounces}} \).</p>
+		</div>
+		<p>This matches the earlier cases:</p>
+		<p>\[
+			m=2:\ 24\!\left(\frac13+\frac14\right)=14,
+			\qquad
+			m=3:\ 36\!\left(\frac14+\frac15+\frac16\right)=\frac{111}{5}.
+		\]</p>
 
 		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/05/2026-05-01.html">Previous</a> | Next</p>
 		<p><a href="/blog">Back to blog</a></p>
