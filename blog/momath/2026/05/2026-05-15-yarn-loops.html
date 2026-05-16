@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>MoMath Mindbender - Yarn Loops - May 15, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>MoMath Mindbender: Yarn Loops</h1>
+		<p><em>Posted on May 15, 2026</em></p>
+
+		<h2>Source</h2>
+		<p>Monthly Mindbenders (May 2026). Variation of a classic random-pairing problem.</p>
+
+		<h2>Problem</h2>
+		<p>To keep your visiting five-year-old niece busy, you mix 50 strings of orange yarn in a box and ask her to successively grab two random ends and tie them together until there are no loose ends remaining. The result will of course be some number of loops of string.</p>
+		<p>How many, on average?</p>
+
+		<h2>Answer</h2>
+		<p><strong>On average, about \(2.9378\) loops.</strong></p>
+		<p>More exactly, the expected number is</p>
+		<p>\[
+		1+\frac13+\frac15+\cdots+\frac1{99}.
+		\]</p>
+
+		<h2>Why</h2>
+		<p>At any moment before the process finishes, every connected piece of yarn is either:</p>
+		<ul>
+			<li>an open chain, with two loose ends, or</li>
+			<li>a closed loop, with no loose ends.</li>
+		</ul>
+		<p>Only the open chains matter for the next step. Suppose there are currently \(m\) open chains left. Then there are \(2m\) loose ends in the box.</p>
+		<p>When your niece grabs two random loose ends, there are</p>
+		<p>\[
+		\binom{2m}{2}
+		\]</p>
+		<p>possible pairs in total.</p>
+		<p>How many of those pairs instantly create a new loop? Exactly \(m\): for each open chain, there is one special pair, namely its own two loose ends.</p>
+		<p>So when there are \(m\) open chains, the probability that the next tie closes a loop is</p>
+		<p>\[
+		\frac{m}{\binom{2m}{2}} = \frac{m}{m(2m-1)} = \frac1{2m-1}.
+		\]</p>
+		<p>After that tie, the number of open chains drops from \(m\) to \(m-1\), no matter what happened:</p>
+		<ul>
+			<li>if the two ends came from different chains, those two chains merge into one longer open chain;</li>
+			<li>if the two ends came from the same chain, that chain becomes a closed loop.</li>
+		</ul>
+		<p>That means the process passes through the states</p>
+		<p>\[
+		50,49,48,\dots,1
+		\]</p>
+		<p>open chains, in order.</p>
+		<p>Let \(X_m\) be the indicator for the event that a loop is created while going from \(m\) open chains to \(m-1\). Then</p>
+		<p>\[
+		\mathbb{E}[X_m] = \Pr(X_m=1) = \frac1{2m-1}.
+		\]</p>
+		<p>If \(L\) is the total number of loops at the end, then</p>
+		<p>\[
+		L = X_{50}+X_{49}+\cdots+X_1.
+		\]</p>
+		<p>By linearity of expectation,</p>
+		<p>\[
+		\mathbb{E}[L]
+		= \sum_{m=1}^{50}\mathbb{E}[X_m]
+		= \sum_{m=1}^{50}\frac1{2m-1}
+		= 1+\frac13+\frac15+\cdots+\frac1{99}.
+		\]</p>
+		<p>Numerically,</p>
+		<p>\[
+		\mathbb{E}[L] \approx 2.937774848.
+		\]</p>
+		<p>So the average number of loops is just under 3.</p>
+
+		<h2>General Form</h2>
+		<p>For \(n\) initial strings, the same reasoning gives</p>
+		<p>\[
+		\mathbb{E}[L_n] = \sum_{m=1}^{n}\frac1{2m-1}.
+		\]</p>
+		<p>This can also be written as</p>
+		<p>\[
+		\mathbb{E}[L_n] = H_{2n}-\frac12 H_n,
+		\]</p>
+		<p>where \(H_n\) is the \(n\)-th harmonic number.</p>
+
+		<p><strong>More MoMath Mindbenders:</strong> <a href="/blog/momath/2026/04/2026-04-15-disjoint-unit-disks.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+	</body>
+</html>
