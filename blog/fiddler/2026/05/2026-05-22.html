@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - May 22, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<script defer src="/analytics.js"></script>
+		<style>
+			.mindbender-visualizer {
+				margin: 14px 0 20px;
+				max-width: 760px;
+			}
+			.mindbender-controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px 12px;
+				align-items: center;
+				margin: 10px 0;
+			}
+			.mindbender-controls button {
+				padding: 6px 10px;
+				border: 1px solid #b8b8b8;
+				background: #f7f7f7;
+				cursor: pointer;
+			}
+			.mindbender-controls button[aria-pressed="true"] {
+				background: #e6eef7;
+				border-color: #7d9ab8;
+			}
+			.mindbender-readout {
+				margin: 8px 0;
+				font-size: 0.96em;
+			}
+			.mindbender-badge {
+				display: inline-block;
+				padding: 2px 6px;
+				border-radius: 6px;
+				background: #e6eef7;
+				border: 1px solid #9bb6cf;
+				font-size: 0.9em;
+			}
+			.mindbender-rotation {
+				width: min(100%, 320px);
+			}
+		</style>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: May 22, 2026</h1>
+		<p><em>Posted on May 22, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>June the ant is on a cylinder. More specifically, she is on the edge of one of the cylinder's two circular faces. Her dinner is on the edge of the opposite circular face, and all the way around on the other side of that face. The radius of the cylinder is 2 meters and its height is 2 meters.</p>
+		<p>Your job is to help June find the shortest path along the surface of the cylinder so that she can chow down as quickly as possible. What's the length of this shortest path?</p>
+
+		<h2>Main Solution</h2>
+		<p>There are three natural path types to compare:</p>
+		<ol>
+			<li>stay entirely on the curved side,</li>
+			<li>cross one flat face and then go down the side,</li>
+			<li>cross the top face, go down the side, and cross the bottom face.</li>
+		</ol>
+		<p>If June stays entirely on the curved side, we can cut the cylinder open and flatten that side into a rectangle of height \(2\) and width \(4\pi\).</p>
+		<p>The starting point and dinner are half a circumference apart, so in the flattened picture they are separated horizontally by \(2\pi\) and vertically by \(2\). The straight-line distance is therefore</p>
+		<p>\[
+		\sqrt{(2\pi)^2+2^2}=2\sqrt{\pi^2+1}\approx 6.5938.
+		\]</p>
+		<p>Now consider paths that use exactly one flat face, say the top one. If June crosses the top face from her starting point to a rim point at angle \(a\), then the top-face piece is a chord of length</p>
+		<p>\[
+		4\sin\left(\frac a2\right).
+		\]</p>
+		<p>From there she still has to reach dinner along the curved side. After unrolling that side, the remaining piece has vertical change \(2\) and horizontal change \(2(\pi-a)\), so its length is</p>
+		<p>\[
+		2\sqrt{1+(\pi-a)^2}.
+		\]</p>
+		<p>Thus the one-face family has total length</p>
+		<p>\[
+		T(a)=4\sin\left(\frac a2\right)+2\sqrt{1+(\pi-a)^2},
+		\qquad 0\le a\le \pi.
+		\]</p>
+		<p>Write \(x=\pi-a\). Then</p>
+		<p>\[
+		T(a)=4\cos\left(\frac x2\right)+2\sqrt{1+x^2},
+		\qquad 0\le x\le \pi.
+		\]</p>
+		<p>If \(0\le x\le \sqrt{8}\), then</p>
+		<p>\[
+		\cos\left(\frac x2\right)\ge 1-\frac{x^2}{8}
+		\qquad\text{and}\qquad
+		\sqrt{1+x^2}\ge 1+\frac{x^2}{4},
+		\]</p>
+		<p>so</p>
+		<p>\[
+		T(a)\ge 4\left(1-\frac{x^2}{8}\right)+2\left(1+\frac{x^2}{4}\right)=6.
+		\]</p>
+		<p>If \(\sqrt{8}\le x\le \pi\), then the side piece alone already has length</p>
+		<p>\[
+		2\sqrt{1+x^2}\ge 2\sqrt{9}=6,
+		\]</p>
+		<p>so again \(T(a)\ge 6\). Equality occurs only when \(x=0\), that is, \(a=\pi\). So the best one-face path is the diameter across the top followed by a vertical drop, with length</p>
+		<p>\[
+		T(\pi)=4+2=6.
+		\]</p>
+		<p>Finally, suppose June crosses the top face to some rim point at angle \(a\), then travels down the curved side, then crosses the bottom face symmetrically. On each circular face, the shortest route between two rim points is a chord, so each face-contribution has length</p>
+		<p>\[
+		4\sin\left(\frac a2\right).
+		\]</p>
+		<p>The remaining angular change on the curved side is \(\pi-2a\), so the side-contribution is</p>
+		<p>\[
+		\sqrt{2^2+\bigl(2(\pi-2a)\bigr)^2}=2\sqrt{1+(\pi-2a)^2}.
+		\]</p>
+		<p>That makes the total length</p>
+		<p>\[
+		L(a)=8\sin\left(\frac a2\right)+2\sqrt{1+(\pi-2a)^2},
+		\qquad 0\le a\le \frac{\pi}{2}.
+		\]</p>
+		<p>Differentiate:</p>
+		<p>\[
+		L'(a)=4\cos\left(\frac a2\right)-\frac{4(\pi-2a)}{\sqrt{1+(\pi-2a)^2}}.
+		\]</p>
+		<p>On the whole interval, this derivative is positive, so \(L(a)\) increases as soon as \(a&gt;0\). Therefore the minimum within this three-piece family occurs at \(a=0\), which is exactly the side-only path of length \(2\sqrt{\pi^2+1}\).</p>
+		<p>That identifies the mistake in the original argument: it proved only that adding matching top and bottom face segments never helps. It did <em>not</em> compare the side-only path against the one-face path, and that omitted case is better.</p>
+		<p>So the true shortest path is: cross the top along a diameter, then go straight down the side. Its length is</p>
+		<div class="mindbender-badge">\(6\text{ meters}\)</div>
+
+		<h2>General Classification</h2>
+		<p>It is useful to write the general version once. Let the cylinder have radius \(r\), height \(h\), and let the angular separation between the start and finish be \(\Delta\), where \(0\le \Delta\le \pi\).</p>
+		<p>A shortest path can be simplified so that it uses each of the three surface pieces at most once: top face, curved side, bottom face. On each piece, the shortest subpath is a geodesic: a straight segment on a flat face, or a straight segment after unrolling the side. Therefore every minimizing path must belong to one of these four families:</p>
+		<ol>
+			<li>side only,</li>
+			<li>top then side,</li>
+			<li>side then bottom,</li>
+			<li>top then side then bottom.</li>
+		</ol>
+		<p>By symmetry, the second and third families have the same minimum, so there are really only three values to compare.</p>
+		<p>For the side-only family, unrolling the curved side gives</p>
+		<p>\[
+		L_S=\sqrt{h^2+(r\Delta)^2}.
+		\]</p>
+		<p>For the top-then-side family, suppose the path crosses the top face to a rim point that is angle \(a\) from the starting point. Then the top-face piece is a chord of length \(2r\sin(a/2)\), and the remaining side piece has length \(\sqrt{h^2+(r(\Delta-a))^2}\). Thus</p>
+		<p>\[
+		L_T(a)=2r\sin\left(\frac a2\right)+\sqrt{h^2+\bigl(r(\Delta-a)\bigr)^2},
+		\qquad 0\le a\le \Delta.
+		\]</p>
+		<p>The endpoint values are</p>
+		<p>\[
+		L_T(0)=L_S
+		\qquad\text{and}\qquad
+		L_T(\Delta)=h+2r\sin\left(\frac{\Delta}{2}\right).
+		\]</p>
+		<p>Its derivative is</p>
+		<p>\[
+		L_T'(a)=r\cos\left(\frac a2\right)-\frac{r^2(\Delta-a)}{\sqrt{h^2+\bigl(r(\Delta-a)\bigr)^2}}.
+		\]</p>
+		<p>So any interior optimum in this family must satisfy</p>
+		<p>\[
+		\cos\left(\frac a2\right)=\frac{r(\Delta-a)}{\sqrt{h^2+\bigl(r(\Delta-a)\bigr)^2}}.
+		\]</p>
+		<p>That equation gives the optimal entry angle for the one-face family.</p>
+		<p>For the top-side-bottom family, symmetry gives</p>
+		<p>\[
+		L_{TSB}(a)=4r\sin\left(\frac a2\right)+\sqrt{h^2+\bigl(r(\Delta-2a)\bigr)^2},
+		\qquad 0\le a\le \frac{\Delta}{2}.
+		\]</p>
+		<p>Its derivative is</p>
+		<p>\[
+		L_{TSB}'(a)=2r\cos\left(\frac a2\right)-\frac{2r^2(\Delta-2a)}{\sqrt{h^2+\bigl(r(\Delta-2a)\bigr)^2}}.
+		\]</p>
+		<p>So any interior optimum in this family must satisfy</p>
+		<p>\[
+		\cos\left(\frac a2\right)=\frac{r(\Delta-2a)}{\sqrt{h^2+\bigl(r(\Delta-2a)\bigr)^2}}.
+		\]</p>
+		<p>This is the exact condition for the optimal matched entry/exit angle in the two-face family.</p>
+		<p>So the complete mathematical recipe for a general cylinder is:</p>
+		<ol>
+			<li>compute the side-only value \(L_S\),</li>
+			<li>minimize \(L_T(a)\) on \(0\le a\le \Delta\),</li>
+			<li>minimize \(L_{TSB}(a)\) on \(0\le a\le \Delta/2\),</li>
+			<li>take the smallest of those three values.</li>
+		</ol>
+		<p>That classification really does cover every possible shortest path. What changes from one cylinder to another is which family wins, and whether its minimizing angle is an endpoint or an interior critical point.</p>
+		<p>For the original Fiddler values \((r,h,\Delta)=(2,2,\pi)\), the one-face family is minimized at the endpoint \(a=\pi\), the two-face family is minimized at the endpoint \(a=0\), and the winner is the one-face path of length \(6\).</p>
+
+		<h2>Interactive Diagram</h2>
+		<p>Drag the picture or use the rotation slider. Switch to the shell view to see why the extra-credit path dives through the annulus, uses the inner wall, and comes back out.</p>
+		<div class="mindbender-visualizer">
+			<canvas id="ant-cylinder-canvas" width="760" height="460" style="width:100%;max-width:760px;height:auto;"></canvas>
+			<div class="mindbender-controls">
+				<button id="ant-mode-cylinder" type="button" aria-pressed="true">Cylinder</button>
+				<button id="ant-mode-shell" type="button" aria-pressed="false">Shell</button>
+				<label for="ant-rotation">Rotation</label>
+				<input id="ant-rotation" class="mindbender-rotation" type="range" min="-180" max="180" step="1" value="25">
+				<button id="ant-reset-view" type="button">Reset View</button>
+				<span id="ant-status" class="mindbender-badge">Drag to rotate</span>
+			</div>
+			<p id="ant-readout" class="mindbender-readout">Cylinder path length: \(6\), from a diameter across the top plus a vertical drop.</p>
+		</div>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>Now, June is on a hollowed-out cylinder, also known as a cylindrical shell. The shell's outer radius is 2 meters and its inner radius is 1 meter. The shell is 2 meters tall. June is on the outer edge of one of the cylinder's two flat faces. Her dinner is on the opposite face, and all the way around on the other end of that face.</p>
+		<p>Once again, your job is to help June find the shortest path along the surface of the shell so that she can chow down as quickly as possible. What's the length of this shortest path?</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>Here it can pay to use the inner curved wall, because going halfway around on radius \(1\) is cheaper than going halfway around on radius \(2\).</p>
+		<p>Let June cross the top annulus from the outer rim to the inner rim at angle \(a\), descend the inner wall, then cross the bottom annulus symmetrically. For the minimizing path, the annulus pieces stay in the direct-segment regime, so each top or bottom piece has length</p>
+		<p>\[
+		\sqrt{2^2+1^2-2\cdot 2\cdot 1\cos a}=\sqrt{5-4\cos a}.
+		\]</p>
+		<p>The inner-wall piece has vertical change \(2\) and angular change \(\pi-2a\) at radius \(1\), so its length is</p>
+		<p>\[
+		\sqrt{2^2+(\pi-2a)^2}.
+		\]</p>
+		<p>Thus</p>
+		<p>\[
+		F(a)=2\sqrt{5-4\cos a}+\sqrt{4+(\pi-2a)^2}.
+		\]</p>
+		<p>Setting \(F'(a)=0\) gives</p>
+		<p>\[
+		\frac{2\sin a}{\sqrt{5-4\cos a}}
+		=
+		\frac{\pi-2a}{\sqrt{4+(\pi-2a)^2}}.
+		\]</p>
+		<p>Solving numerically gives</p>
+		<p>\[
+		a\approx 0.45775\text{ radians}\approx 26.23^\circ.
+		\]</p>
+		<p>Plugging that in, the shortest shell-path has length</p>
+		<div class="mindbender-badge">\(F(a)\approx 5.36896\text{ meters}\)</div>
+		<p>If we do not assume symmetry in advance, the more general two-angle family is this: June crosses the top annulus from the outer rim at angle \(0\) to the inner rim at angle \(a\), descends the inner wall to angle \(b\), then crosses the bottom annulus from the inner rim at angle \(b\) to the dinner point on the outer rim at angle \(\pi\).</p>
+		<p>As long as both annulus crossings stay in the direct-segment regime, the total length is</p>
+		<p>\[
+		G(a,b)=\sqrt{5-4\cos a}+\sqrt{4+(b-a)^2}+\sqrt{5+4\cos b}.
+		\]</p>
+		<p>An interior critical point must satisfy</p>
+		<p>\[
+		\frac{\partial G}{\partial a}
+		=
+		\frac{2\sin a}{\sqrt{5-4\cos a}}
+		-
+		\frac{b-a}{\sqrt{4+(b-a)^2}}
+		=0
+		\]</p>
+		<p>and</p>
+		<p>\[
+		\frac{\partial G}{\partial b}
+		=
+		\frac{b-a}{\sqrt{4+(b-a)^2}}
+		-
+		\frac{2\sin b}{\sqrt{5+4\cos b}}
+		=0.
+		\]</p>
+		<p>So any interior optimum in this two-variable family must satisfy</p>
+		<p>\[
+		\frac{2\sin a}{\sqrt{5-4\cos a}}
+		=
+		\frac{b-a}{\sqrt{4+(b-a)^2}}
+		=
+		\frac{2\sin b}{\sqrt{5+4\cos b}}.
+		\]</p>
+		<p>This family is symmetric under \((a,b)\mapsto (\pi-b,\pi-a)\), and solving the critical-point equations numerically gives</p>
+		<p>\[
+		a\approx 0.457751785,\qquad b\approx 2.683840868=\pi-a.
+		\]</p>
+		<p>So the optimal two-variable path is exactly the symmetric one already used above. Its length is again</p>
+		<p>\[
+		G(a,b)\approx 5.368959019.
+		\]</p>
+		<p>In particular, allowing separate entry and exit angles does <em>not</em> improve on the one-variable solution; it just recovers it.</p>
+
+		<h2>Extra Credit Generalization</h2>
+		<p>There is a clean general version of the winning shell family as well. Let the shell have outer radius \(R\), inner radius \(r\), height \(h\), and angular separation \(\Delta\), with \(0\le \Delta\le \pi\).</p>
+		<p>If a shortest path chooses to use the inner wall, then it must cross the top annulus from the outer rim to the inner rim, travel down the inner wall, and cross the bottom annulus back out to the outer rim. In the symmetric family, let the entry point on the top inner rim be angle \(a\) from the starting radial line, and let the exit point on the bottom inner rim be angle \(a\) short of the destination radial line.</p>
+		<p>Each annulus crossing is a straight segment from radius \(R\) to radius \(r\), so its length is</p>
+		<p>\[
+		\sqrt{R^2+r^2-2Rr\cos a}.
+		\]</p>
+		<p>The inner-wall piece has vertical change \(h\) and angular change \(\Delta-2a\) at radius \(r\), so after unrolling the inner wall its length is</p>
+		<p>\[
+		\sqrt{h^2+\bigl(r(\Delta-2a)\bigr)^2}.
+		\]</p>
+		<p>Thus the full inner-wall family is</p>
+		<p>\[
+		F_{in}(a)=2\sqrt{R^2+r^2-2Rr\cos a}+\sqrt{h^2+\bigl(r(\Delta-2a)\bigr)^2},
+		\qquad 0\le a\le \frac{\Delta}{2}.
+		\]</p>
+		<p>Its derivative is</p>
+		<p>\[
+		F_{in}'(a)=
+		\frac{2Rr\sin a}{\sqrt{R^2+r^2-2Rr\cos a}}
+		-
+		\frac{2r^2(\Delta-2a)}{\sqrt{h^2+\bigl(r(\Delta-2a)\bigr)^2}}.
+		\]</p>
+		<p>So any interior optimum in this family must satisfy</p>
+		<p>\[
+		\frac{R\sin a}{\sqrt{R^2+r^2-2Rr\cos a}}
+		=
+		\frac{r(\Delta-2a)}{\sqrt{h^2+\bigl(r(\Delta-2a)\bigr)^2}}.
+		\]</p>
+		<p>For the Fiddler values \((R,r,h,\Delta)=(2,1,2,\pi)\), this reduces exactly to the equation above, and the numerical solution is \(a\approx 0.45775\).</p>
+		<p>The full shell classification is more complicated than the solid-cylinder case, because annulus geodesics between two outer-rim points can change form depending on the parameters: sometimes the direct chord stays in the annulus, and sometimes the shortest annulus path bends into tangent segments and an inner-circle arc. So for the shell there is no comparably tidy universal two-family threshold. The honest general recipe is the same as before: classify the admissible surface-order families, write the correct length function for each, and compare their minima.</p>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/05/2026-05-15.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+		<script>
+			(function () {
+				var canvas = document.getElementById("ant-cylinder-canvas");
+				var cylinderButton = document.getElementById("ant-mode-cylinder");
+				var shellButton = document.getElementById("ant-mode-shell");
+				var rotationInput = document.getElementById("ant-rotation");
+				var resetButton = document.getElementById("ant-reset-view");
+				var status = document.getElementById("ant-status");
+				var readout = document.getElementById("ant-readout");
+
+				if (!canvas || !cylinderButton || !shellButton || !rotationInput || !resetButton || !status || !readout) {
+					return;
+				}
+
+				var ctx = canvas.getContext("2d");
+				var TAU = 2 * Math.PI;
+				var mode = "cylinder";
+				var rotation = (25 * Math.PI) / 180;
+				var isDragging = false;
+				var lastX = 0;
+				var shellAlpha = 0.4577517892495835;
+				var view = {
+					scale: 250,
+					cameraDistance: 8,
+					centerX: canvas.width * 0.5,
+					centerY: canvas.height * 0.54
+				};
+
+				function syncControls() {
+					cylinderButton.setAttribute("aria-pressed", mode === "cylinder" ? "true" : "false");
+					shellButton.setAttribute("aria-pressed", mode === "shell" ? "true" : "false");
+					rotationInput.value = String(Math.round((rotation * 180) / Math.PI));
+					if (mode === "cylinder") {
+						readout.innerHTML = "Cylinder path length: \\(6\\), from a diameter across the top plus a vertical drop.";
+					} else {
+						readout.innerHTML = "Shell path length: \\(\\approx 5.369\\), with entry angle \\(a\\approx 0.45775\\) radians.";
+					}
+					if (window.MathJax && window.MathJax.typesetPromise) {
+						window.MathJax.typesetPromise([readout]).catch(function () {});
+					}
+				}
+
+				function rotateY(point) {
+					var c = Math.cos(rotation);
+					var s = Math.sin(rotation);
+					return {
+						x: point.x * c + point.z * s,
+						y: point.y,
+						z: -point.x * s + point.z * c
+					};
+				}
+
+				function project(point) {
+					var rotated = rotateY(point);
+					var depth = view.cameraDistance - rotated.z;
+					var scale = view.scale / depth;
+					return {
+						x: view.centerX + rotated.x * scale,
+						y: view.centerY - rotated.y * scale,
+						z: rotated.z
+					};
+				}
+
+				function sampleCircle(radius, y, segments) {
+					var points = [];
+					for (var i = 0; i <= segments; i += 1) {
+						var theta = (TAU * i) / segments;
+						points.push({ x: radius * Math.cos(theta), y: y, z: radius * Math.sin(theta) });
+					}
+					return points;
+				}
+
+				function strokePath(points, color, width, dash) {
+					if (!points.length) {
+						return;
+					}
+					ctx.save();
+					ctx.beginPath();
+					ctx.setLineDash(dash || []);
+					ctx.lineWidth = width;
+					ctx.strokeStyle = color;
+					var first = project(points[0]);
+					ctx.moveTo(first.x, first.y);
+					for (var i = 1; i < points.length; i += 1) {
+						var p = project(points[i]);
+						ctx.lineTo(p.x, p.y);
+					}
+					ctx.stroke();
+					ctx.restore();
+				}
+
+				function fillTopFace(radiusOuter, radiusInner, color) {
+					ctx.save();
+					ctx.beginPath();
+					var outer = sampleCircle(radiusOuter, 1, 96);
+					var first = project(outer[0]);
+					ctx.moveTo(first.x, first.y);
+					for (var i = 1; i < outer.length; i += 1) {
+						var p = project(outer[i]);
+						ctx.lineTo(p.x, p.y);
+					}
+					if (radiusInner > 0) {
+						var inner = sampleCircle(radiusInner, 1, 96);
+						for (var j = inner.length - 1; j >= 0; j -= 1) {
+							var q = project(inner[j]);
+							ctx.lineTo(q.x, q.y);
+						}
+					}
+					ctx.closePath();
+					ctx.fillStyle = color;
+					ctx.fill();
+					ctx.restore();
+				}
+
+				function pointOnCylinder(radius, theta, y) {
+					return { x: radius * Math.cos(theta), y: y, z: radius * Math.sin(theta) };
+				}
+
+				function linePoints(a, b, steps) {
+					var out = [];
+					for (var i = 0; i <= steps; i += 1) {
+						var t = i / steps;
+						out.push({
+							x: a.x + (b.x - a.x) * t,
+							y: a.y + (b.y - a.y) * t,
+							z: a.z + (b.z - a.z) * t
+						});
+					}
+					return out;
+				}
+
+				function helixPoints(radius, theta0, theta1, y0, y1, steps) {
+					var out = [];
+					for (var i = 0; i <= steps; i += 1) {
+						var t = i / steps;
+						var theta = theta0 + (theta1 - theta0) * t;
+						out.push(pointOnCylinder(radius, theta, y0 + (y1 - y0) * t));
+					}
+					return out;
+				}
+
+				function drawMarker(point, fill, label, dx, dy) {
+					var p = project(point);
+					ctx.save();
+					ctx.beginPath();
+					ctx.arc(p.x, p.y, 6, 0, TAU);
+					ctx.fillStyle = fill;
+					ctx.fill();
+					ctx.lineWidth = 2;
+					ctx.strokeStyle = "#ffffff";
+					ctx.stroke();
+					ctx.fillStyle = "#153852";
+					ctx.font = "14px IBM Plex Mono, monospace";
+					ctx.fillText(label, p.x + dx, p.y + dy);
+					ctx.restore();
+				}
+
+				function drawArrow(points, color) {
+					if (points.length < 2) {
+						return;
+					}
+					var a = project(points[points.length - 2]);
+					var b = project(points[points.length - 1]);
+					var angle = Math.atan2(b.y - a.y, b.x - a.x);
+					ctx.save();
+					ctx.fillStyle = color;
+					ctx.translate(b.x, b.y);
+					ctx.rotate(angle);
+					ctx.beginPath();
+					ctx.moveTo(0, 0);
+					ctx.lineTo(-12, 5);
+					ctx.lineTo(-12, -5);
+					ctx.closePath();
+					ctx.fill();
+					ctx.restore();
+				}
+
+				function drawCylinderGeometry() {
+					fillTopFace(2, 0, "rgba(175, 203, 229, 0.28)");
+					strokePath(sampleCircle(2, 1, 120), "#7d9ab8", 1.5);
+					strokePath(sampleCircle(2, -1, 120), "#7d9ab8", 1.5);
+					strokePath([pointOnCylinder(2, 0, 1), pointOnCylinder(2, 0, -1)], "#a8b8c8", 1.2, [6, 6]);
+					strokePath([pointOnCylinder(2, Math.PI, 1), pointOnCylinder(2, Math.PI, -1)], "#a8b8c8", 1.2, [6, 6]);
+				}
+
+				function drawShellGeometry() {
+					fillTopFace(2, 1, "rgba(175, 203, 229, 0.22)");
+					strokePath(sampleCircle(2, 1, 120), "#7d9ab8", 1.5);
+					strokePath(sampleCircle(2, -1, 120), "#7d9ab8", 1.5);
+					strokePath(sampleCircle(1, 1, 120), "#9aa8b6", 1.3);
+					strokePath(sampleCircle(1, -1, 120), "#9aa8b6", 1.3);
+					strokePath(sampleCircle(1, 1, 120), "#9aa8b6", 1.3);
+					strokePath(sampleCircle(1, -1, 120), "#9aa8b6", 1.3);
+				}
+
+				function drawCylinderPath() {
+					var start = pointOnCylinder(2, 0, 1);
+					var topOpposite = pointOnCylinder(2, Math.PI, 1);
+					var finish = pointOnCylinder(2, Math.PI, -1);
+					var topPath = linePoints(start, topOpposite, 36);
+					var sidePath = linePoints(topOpposite, finish, 36);
+					var fullPath = topPath.concat(sidePath.slice(1));
+
+					strokePath(topPath, "#c54b3f", 4);
+					strokePath(sidePath, "#c54b3f", 4);
+					drawArrow(fullPath, "#c54b3f");
+					drawMarker(start, "#2b5d87", "June", 10, -12);
+					drawMarker(finish, "#b8473d", "Dinner", 10, 18);
+				}
+
+				function drawShellPath() {
+					var start = pointOnCylinder(2, 0, 1);
+					var topInner = pointOnCylinder(1, shellAlpha, 1);
+					var bottomInner = pointOnCylinder(1, Math.PI - shellAlpha, -1);
+					var finish = pointOnCylinder(2, Math.PI, -1);
+					var topPath = linePoints(start, topInner, 36);
+					var innerPath = helixPoints(1, shellAlpha, Math.PI - shellAlpha, 1, -1, 100);
+					var bottomPath = linePoints(bottomInner, finish, 36);
+					var fullPath = topPath.concat(innerPath.slice(1), bottomPath.slice(1));
+
+					strokePath(topPath, "#c54b3f", 4);
+					strokePath(innerPath, "#c54b3f", 4);
+					strokePath(bottomPath, "#c54b3f", 4);
+					drawArrow(fullPath, "#c54b3f");
+					drawMarker(start, "#2b5d87", "June", 10, -12);
+					drawMarker(finish, "#b8473d", "Dinner", 10, 18);
+					drawMarker(topInner, "#6d7f90", "in", 8, -10);
+					drawMarker(bottomInner, "#6d7f90", "out", 8, 18);
+				}
+
+				function drawLegend() {
+					ctx.save();
+					ctx.fillStyle = "rgba(253, 251, 242, 0.92)";
+					ctx.strokeStyle = "#cad3dd";
+					ctx.lineWidth = 1;
+					ctx.beginPath();
+					ctx.rect(20, 20, 212, 82);
+					ctx.fill();
+					ctx.stroke();
+
+					ctx.lineWidth = 4;
+					ctx.strokeStyle = "#c54b3f";
+					ctx.beginPath();
+					ctx.moveTo(36, 48);
+					ctx.lineTo(92, 48);
+					ctx.stroke();
+					ctx.fillStyle = "#153852";
+					ctx.font = "14px IBM Plex Mono, monospace";
+					ctx.fillText("shortest path", 104, 53);
+
+					ctx.fillStyle = "#2b5d87";
+					ctx.beginPath();
+					ctx.arc(44, 76, 6, 0, TAU);
+					ctx.fill();
+					ctx.fillStyle = "#153852";
+					ctx.fillText("June starts here", 60, 81);
+					ctx.restore();
+				}
+
+				function render() {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					ctx.fillStyle = "#ffffff";
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+					if (mode === "cylinder") {
+						drawCylinderGeometry();
+						drawCylinderPath();
+					} else {
+						drawShellGeometry();
+						drawShellPath();
+					}
+					drawLegend();
+				}
+
+				function setMode(nextMode) {
+					mode = nextMode;
+					status.textContent = nextMode === "cylinder" ? "Solid cylinder view" : "Cylindrical shell view";
+					syncControls();
+					render();
+				}
+
+				function setRotationDegrees(degrees) {
+					rotation = (degrees * Math.PI) / 180;
+					render();
+				}
+
+				cylinderButton.addEventListener("click", function () {
+					setMode("cylinder");
+				});
+				shellButton.addEventListener("click", function () {
+					setMode("shell");
+				});
+				rotationInput.addEventListener("input", function () {
+					setRotationDegrees(parseFloat(rotationInput.value));
+				});
+				resetButton.addEventListener("click", function () {
+					status.textContent = "View reset";
+					setRotationDegrees(25);
+				});
+				canvas.addEventListener("pointerdown", function (event) {
+					isDragging = true;
+					lastX = event.clientX;
+					status.textContent = "Rotating";
+					canvas.setPointerCapture(event.pointerId);
+				});
+				canvas.addEventListener("pointermove", function (event) {
+					if (!isDragging) {
+						return;
+					}
+					var dx = event.clientX - lastX;
+					lastX = event.clientX;
+					rotation += dx * 0.01;
+					var degrees = Math.max(-180, Math.min(180, Math.round((rotation * 180) / Math.PI)));
+					rotation = (degrees * Math.PI) / 180;
+					rotationInput.value = String(degrees);
+					render();
+				});
+
+				function stopDragging() {
+					if (!isDragging) {
+						return;
+					}
+					isDragging = false;
+					status.textContent = "Drag to rotate";
+				}
+
+				canvas.addEventListener("pointerup", stopDragging);
+				canvas.addEventListener("pointerleave", stopDragging);
+				canvas.addEventListener("pointercancel", stopDragging);
+
+				syncControls();
+				render();
+			}());
+		</script>
+	</body>
+</html>
