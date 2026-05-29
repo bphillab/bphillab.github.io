@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - May 29, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			.code-note {
+				max-width: 760px;
+				overflow-x: auto;
+			}
+			.sheep-visualizer {
+				max-width: 760px;
+				margin: 18px 0 24px;
+			}
+			.sheep-controls {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px 12px;
+				align-items: center;
+				margin: 10px 0;
+			}
+			.sheep-controls button[aria-pressed="true"] {
+				background: #dbe7f3;
+				border-color: #68849f;
+			}
+			.sheep-readout {
+				margin: 8px 0;
+				color: var(--ink-muted);
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: May 29, 2026</h1>
+		<p><em>Posted on May 29, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>Two sheep are at two random points inside a square pen. They are munching grass and staring in two random directions. Each sheep has a field of view that's 180 degrees.</p>
+		<p>What is the probability that they both see each other?</p>
+
+		<h2>Main Solution</h2>
+		<p>The sheep positions are almost a distraction. Once the two positions are fixed, each sheep has exactly one direction it needs to see: the direction from itself to the other sheep.</p>
+		<p>A 180-degree field of view covers half of all possible directions. Since the sheep's facing direction is random, the probability that the first sheep sees the second is</p>
+		<p>\[
+			\frac{1}{2}.
+		\]</p>
+		<p>The same is true for the second sheep. Their facing directions are independent, so the probability that both events happen is</p>
+		<p>\[
+			\frac{1}{2}\cdot\frac{1}{2}=\frac{1}{4}.
+		\]</p>
+		<p>This argument does not depend on the square at all. The only excluded case is that the two sheep stand in exactly the same point, which has probability zero.</p>
+		<div class="callout">
+			<p><strong>Answer:</strong> \( \boxed{\frac{1}{4}} \), or \(25\%\).</p>
+		</div>
+
+		<h2>Interactive Diagram</h2>
+		<p>Randomize the positions and directions to see how the 180-degree views behave. A green segment means the two sheep see each other, orange means exactly one sees the other, and red means neither does.</p>
+		<div class="sheep-visualizer">
+			<canvas id="sheep-canvas" width="760" height="520" style="width:100%;max-width:760px;height:auto;" aria-label="Interactive sheep field of view diagram"></canvas>
+			<div class="sheep-controls">
+				<button id="sheep-two" type="button" aria-pressed="true">Two sheep</button>
+				<button id="sheep-three" type="button" aria-pressed="false">Three sheep</button>
+				<button id="sheep-randomize" type="button">Randomize</button>
+			</div>
+			<p id="sheep-readout" class="sheep-readout">Both sheep see each other exactly when each one faces into the half-plane containing the other.</p>
+		</div>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>Now, three sheep are at three random points inside a square pen. They are munching grass and staring in three random directions. As before, each sheep has a field of view that's 180 degrees.</p>
+		<p>What is the probability that all three sheep see each other?</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>Now the shape of the triangle formed by the three sheep matters.</p>
+		<p>Fix the three positions for a moment, and call the triangle's angles \(A\), \(B\), and \(C\). At the vertex with angle \(A\), the sheep needs its 180-degree view to contain the two rays pointing toward the other two sheep.</p>
+		<p>Those two rays are separated by angle \(A\). A randomly oriented semicircle contains both rays exactly when its center direction lies in an interval of angular length \(\pi-A\). Since the center direction is uniform on an interval of length \(2\pi\), that sheep succeeds with probability</p>
+		<p>\[
+			\frac{\pi-A}{2\pi}.
+		\]</p>
+		<p>The same reasoning at the other two vertices gives conditional probability</p>
+		<p>\[
+			\frac{(\pi-A)(\pi-B)(\pi-C)}{(2\pi)^3}.
+		\]</p>
+		<p>So the extra-credit answer is the average of this expression over the random triangle made by three independent uniform points in the square:</p>
+		<p>\[
+			\mathbb{E}\left[
+				\frac{(\pi-A)(\pi-B)(\pi-C)}{(2\pi)^3}
+			\right].
+		\]</p>
+		<p>This is the exact reduction. Unlike the two-sheep version, it is not shape-independent: choosing three random points in a disk gives a slightly different number than choosing them in a square.</p>
+
+		<h3>Numerical Evaluation</h3>
+		<p>I evaluated the six-dimensional square integral directly. For points \(P_1=(x_1,y_1)\), \(P_2=(x_2,y_2)\), and \(P_3=(x_3,y_3)\), compute the three triangle angles, plug them into the expression above, and average over \([0,1]^6\).</p>
+		<p>A numerical evaluation of this six-dimensional average gives</p>
+		<p>\[
+			0.027206\ldots
+		\]</p>
+		<p>or about \(2.7206\%\).</p>
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> approximately \( \boxed{0.027206} \), or \( \boxed{2.7206\%} \).</p>
+		</div>
+
+		<p>Here is a compact version of the computation:</p>
+		<pre class="code-note"><code>function angle(p, q, r) {
+  const ux = q[0] - p[0], uy = q[1] - p[1];
+  const vx = r[0] - p[0], vy = r[1] - p[1];
+  const dot = ux * vx + uy * vy;
+  const len = Math.hypot(ux, uy) * Math.hypot(vx, vy);
+  return Math.acos(Math.max(-1, Math.min(1, dot / len)));
+}
+
+function trial() {
+  const p = [Math.random(), Math.random()];
+  const q = [Math.random(), Math.random()];
+  const r = [Math.random(), Math.random()];
+  const A = angle(p, q, r);
+  const B = angle(q, p, r);
+  const C = Math.PI - A - B;
+  return ((Math.PI - A) * (Math.PI - B) * (Math.PI - C)) /
+    Math.pow(2 * Math.PI, 3);
+}</code></pre>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/05/2026-05-22.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+		<script>
+			(function () {
+				var canvas = document.getElementById("sheep-canvas");
+				var twoButton = document.getElementById("sheep-two");
+				var threeButton = document.getElementById("sheep-three");
+				var randomizeButton = document.getElementById("sheep-randomize");
+				var readout = document.getElementById("sheep-readout");
+
+				if (!canvas || !twoButton || !threeButton || !randomizeButton || !readout) {
+					return;
+				}
+
+				var ctx = canvas.getContext("2d");
+				var sheepCount = 2;
+				var sheep = [];
+				var colors = ["#2b5d87", "#b8473d", "#4d7c43"];
+
+				function randomSheep() {
+					return {
+						x: 0.12 + Math.random() * 0.76,
+						y: 0.12 + Math.random() * 0.76,
+						angle: Math.random() * Math.PI * 2
+					};
+				}
+
+				function resetSheep() {
+					sheep = [];
+					for (var i = 0; i < sheepCount; i += 1) {
+						sheep.push(randomSheep());
+					}
+					render();
+				}
+
+				function sees(a, b) {
+					var dx = b.x - a.x;
+					var dy = b.y - a.y;
+					var fx = Math.cos(a.angle);
+					var fy = Math.sin(a.angle);
+					return fx * dx + fy * dy >= 0;
+				}
+
+				function layoutPoint(p) {
+					var size = 420;
+					var left = (canvas.width - size) / 2;
+					var top = 42;
+					return {
+						x: left + p.x * size,
+						y: top + p.y * size
+					};
+				}
+
+				function drawPen() {
+					var size = 420;
+					var left = (canvas.width - size) / 2;
+					var top = 42;
+					ctx.fillStyle = "#fbf9ee";
+					ctx.fillRect(left, top, size, size);
+					ctx.strokeStyle = "#6d7c86";
+					ctx.lineWidth = 3;
+					ctx.strokeRect(left, top, size, size);
+				}
+
+				function drawView(p, index) {
+					var q = layoutPoint(p);
+					var radius = 560;
+					ctx.save();
+					ctx.beginPath();
+					ctx.moveTo(q.x, q.y);
+					ctx.arc(q.x, q.y, radius, p.angle - Math.PI / 2, p.angle + Math.PI / 2);
+					ctx.closePath();
+					ctx.fillStyle = colors[index] + "22";
+					ctx.fill();
+					ctx.restore();
+				}
+
+				function drawConnections() {
+					for (var i = 0; i < sheep.length; i += 1) {
+						for (var j = i + 1; j < sheep.length; j += 1) {
+							var a = layoutPoint(sheep[i]);
+							var b = layoutPoint(sheep[j]);
+							var ij = sees(sheep[i], sheep[j]);
+							var ji = sees(sheep[j], sheep[i]);
+							ctx.beginPath();
+							ctx.moveTo(a.x, a.y);
+							ctx.lineTo(b.x, b.y);
+							ctx.strokeStyle = ij && ji ? "#287a3e" : (ij || ji ? "#c7831c" : "#a33a2a");
+							ctx.lineWidth = 4;
+							ctx.setLineDash(ij && ji ? [] : [8, 6]);
+							ctx.stroke();
+							ctx.setLineDash([]);
+						}
+					}
+				}
+
+				function drawSheep(p, index) {
+					var q = layoutPoint(p);
+					var fx = Math.cos(p.angle);
+					var fy = Math.sin(p.angle);
+					ctx.beginPath();
+					ctx.arc(q.x, q.y, 13, 0, Math.PI * 2);
+					ctx.fillStyle = colors[index];
+					ctx.fill();
+					ctx.strokeStyle = "#ffffff";
+					ctx.lineWidth = 3;
+					ctx.stroke();
+
+					ctx.beginPath();
+					ctx.moveTo(q.x, q.y);
+					ctx.lineTo(q.x + fx * 38, q.y + fy * 38);
+					ctx.strokeStyle = "#1f2c36";
+					ctx.lineWidth = 3;
+					ctx.stroke();
+
+					ctx.fillStyle = "#1f2c36";
+					ctx.font = "700 15px IBM Plex Mono, monospace";
+					ctx.fillText(String(index + 1), q.x + 17, q.y - 14);
+				}
+
+				function updateReadout() {
+					if (sheepCount === 2) {
+						var both = sees(sheep[0], sheep[1]) && sees(sheep[1], sheep[0]);
+						readout.textContent = both
+							? "In this sample, the two sheep both see each other."
+							: "In this sample, the two sheep do not both see each other.";
+						return;
+					}
+
+					var all = true;
+					for (var i = 0; i < sheep.length; i += 1) {
+						for (var j = 0; j < sheep.length; j += 1) {
+							if (i !== j && !sees(sheep[i], sheep[j])) {
+								all = false;
+							}
+						}
+					}
+					readout.textContent = all
+						? "In this sample, all three sheep see each other."
+						: "In this sample, at least one directed view is missing.";
+				}
+
+				function render() {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					ctx.fillStyle = "#ffffff";
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+					drawPen();
+					for (var i = 0; i < sheep.length; i += 1) {
+						drawView(sheep[i], i);
+					}
+					drawConnections();
+					for (var j = 0; j < sheep.length; j += 1) {
+						drawSheep(sheep[j], j);
+					}
+					updateReadout();
+				}
+
+				function setMode(nextCount) {
+					sheepCount = nextCount;
+					twoButton.setAttribute("aria-pressed", nextCount === 2 ? "true" : "false");
+					threeButton.setAttribute("aria-pressed", nextCount === 3 ? "true" : "false");
+					resetSheep();
+				}
+
+				twoButton.addEventListener("click", function () {
+					setMode(2);
+				});
+				threeButton.addEventListener("click", function () {
+					setMode(3);
+				});
+				randomizeButton.addEventListener("click", resetSheep);
+
+				resetSheep();
+			}());
+		</script>
+	</body>
+</html>
