@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - June 5, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			.code-note {
+				max-width: 760px;
+				overflow-x: auto;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: June 5, 2026</h1>
+		<p><em>Posted on June 5, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>Three game show contestants must work together to win a prize. They are shown a large bag that's initially empty, and then they see three red hats and two white hats placed into the bag. At this point, the contestants are blindfolded. Each contestant then picks a hat at random from the bag and places it on their head.</p>
+		<p>One at a time, their blindfolds are removed and they can see the hats on the others' heads, but not the hat on their own head. If they can, with absolute certainty, identify the color of the hat on their own head, then the game is over and all three contestants win a prize. Otherwise, they skip their turn, at which point the next contestant has their blindfold removed and the process continues. If all three contestants skip their turn, then no prize is won.</p>
+		<p>Will the contestants always win the prize? If so, why? If not, why not?</p>
+
+		<h2>Main Solution</h2>
+		<p>Yes. The contestants always win.</p>
+		<p>Call the contestants \(A\), \(B\), and \(C\), in the order they take their turns. If \(A\) sees two white hats, then \(A\) immediately knows their own hat is red, because there are only two white hats total.</p>
+		<p>So if \(A\) skips, everyone learns that \(A\) did not see two white hats. In other words, at least one of \(B\) and \(C\) is wearing red.</p>
+		<p>Now \(B\) takes a turn. If \(B\) sees two white hats, then \(B\) knows their own hat is red. If \(B\) does not know and skips, that skip is also public information.</p>
+		<p>At that point, \(C\) can always determine their own color:</p>
+		<ul>
+			<li>If \(C\) sees two white hats, then \(C\)'s hat must be red.</li>
+			<li>If \(C\) sees one red hat and one white hat, then \(C\)'s hat must be red. If \(C\)'s hat were white, then either \(A\) or \(B\) would have seen two white hats and already won.</li>
+			<li>If \(C\) sees two red hats, then \(C\)'s hat must be red. If \(C\)'s hat were white, then \(B\), after seeing \(A\)'s red hat and \(C\)'s white hat together with \(A\)'s skip, would have known their own hat was red.</li>
+		</ul>
+		<p>So in every possible draw, someone knows their hat color by the time \(C\)'s turn arrives.</p>
+		<div class="callout">
+			<p><strong>Answer:</strong> \( \boxed{\text{Yes}} \). The public information from the skips is enough to force a win.</p>
+		</div>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>Now, there are four game show contestants who must work together. They are shown a large bag that's initially empty, and then they see \(R\) red hats, \(W\) white hats, and \(B\) blue hats placed into the bag, such that \(R\), \(W\), and \(B\) are each less than or equal to 4. Otherwise, the game is played as before.</p>
+		<p>For some triples \((R,W,B)\), the contestants can always win. Among these, what is the greatest value of \(R+W+B\)?</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>The greatest possible value is 7.</p>
+		<p>One way to achieve 7 is with</p>
+		<p>\[
+			(R,W,B)=(4,3,0).
+		\]</p>
+		<p>This is the two-color version with four red hats and three white hats. It always works. For example, if anyone sees three white hats, that person immediately knows their own hat is red, because there are only three white hats total. If not, the successive skips still carry information: a skip says that the previous contestant did not see a configuration that forced their own color. Repeating that public elimination guarantees that someone is certain by the fourth turn.</p>
+		<p>The same maximum is also achieved by permutations of \((4,3,0)\) and by permutations of \((4,2,1)\).</p>
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> \( \boxed{7} \).</p>
+		</div>
+
+		<h3>Finite-State Check</h3>
+		<p>Because \(R\), \(W\), and \(B\) are each at most 4, this is a small finite epistemic problem. A possible world is just an assignment of four hat colors to the four contestants, subject to the supply limits. On each turn, keep only the worlds still consistent with all previous skips. The current contestant knows their own hat exactly when all still-possible worlds matching the hats they can see have the same color in their own position.</p>
+		<p>Running that check over every triple \((R,W,B)\) with entries from 0 to 4 gives no always-winning triples with total 8 or more. The always-winning triples with total 7 are exactly the permutations of</p>
+		<p>\[
+			(4,3,0)\quad\text{and}\quad(4,2,1).
+		\]</p>
+		<p>Here is the compact verifier I used:</p>
+		<pre class="code-note"><code>const colors = ["R", "W", "B"];
+
+function states(counts) {
+  const out = [];
+  function rec(state) {
+    if (state.length === 4) {
+      out.push(state.join(""));
+      return;
+    }
+    for (const color of colors) {
+      const used = state.filter((x) => x === color).length;
+      if (used < counts[color]) {
+        state.push(color);
+        rec(state);
+        state.pop();
+      }
+    }
+  }
+  rec([]);
+  return out;
+}
+
+function view(state, player) {
+  return [...state].map((color, i) => i === player ? "?" : color).join("");
+}
+
+function knownColor(possible, player, visible) {
+  const ownColors = new Set(
+    possible
+      .filter((state) => view(state, player) === visible)
+      .map((state) => state[player])
+  );
+  return ownColors.size === 1 ? [...ownColors][0] : null;
+}
+
+function alwaysWins(counts) {
+  const allStates = states(counts);
+
+  for (const trueState of allStates) {
+    let possible = allStates.slice();
+    let won = false;
+
+    for (let player = 0; player < 4; player += 1) {
+      const color = knownColor(possible, player, view(trueState, player));
+      if (color !== null) {
+        won = true;
+        break;
+      }
+
+      possible = possible.filter((state) =>
+        knownColor(possible, player, view(state, player)) === null
+      );
+    }
+
+    if (!won) return false;
+  }
+
+  return true;
+}
+
+let best = 0;
+let bestTriples = [];
+
+for (let R = 0; R <= 4; R += 1) {
+  for (let W = 0; W <= 4; W += 1) {
+    for (let B = 0; B <= 4; B += 1) {
+      const total = R + W + B;
+      if (total < 4 || !alwaysWins({ R, W, B })) continue;
+
+      if (total > best) {
+        best = total;
+        bestTriples = [];
+      }
+      if (total === best) bestTriples.push([R, W, B]);
+    }
+  }
+}
+
+console.log(best, bestTriples);</code></pre>
+		<p>That search reports maximum total \(7\), with representatives \((4,3,0)\) and \((4,2,1)\).</p>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/05/2026-05-29.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+	</body>
+</html>
