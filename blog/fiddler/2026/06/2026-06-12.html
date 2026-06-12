@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - June 12, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			.diagram {
+				margin: 18px 0;
+				max-width: 760px;
+			}
+			.diagram svg {
+				max-width: 100%;
+				height: auto;
+				border: 1px solid #e0e0e0;
+				background: #fff;
+			}
+			.diagram figcaption {
+				color: #555;
+				font-size: 0.95em;
+				margin-top: 6px;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: June 12, 2026</h1>
+		<p><em>Posted on June 12, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>Semicircle Island is shaped like a perfect semicircle (or semidisk, technically), with a radius of 1 mile. It doesn't have any permanent residents, but it's a very popular destination for surfers.</p>
+		<p>Rumor has it that a big wave is headed toward the island. This thin, straight wall of water never changes speed or direction. It will first make contact with the island at 10 a.m. and it will last be in contact with the island at 10:10 a.m.</p>
+		<p>What is the longest possible stretch of land that is directly under the wave at 10:05 a.m.?</p>
+
+		<h2>Main Solution</h2>
+		<p>Put the island in coordinates as</p>
+		<p>\[
+			x^2+y^2\le 1,\qquad y\ge 0.
+		\]</p>
+		<p>For a fixed wave direction, the wave is a moving line. At 10:05, halfway between first and last contact, that line is halfway between the two supporting lines of the semidisk perpendicular to the wave's motion.</p>
+		<p>By symmetry, let the wave's normal vector be</p>
+		<p>\[
+			n=(\sin\phi,\cos\phi),\qquad 0\le \phi\le \frac{\pi}{2}.
+		\]</p>
+		<figure class="diagram">
+			<svg viewBox="0 0 520 340" role="img" aria-labelledby="projection-diagram-title projection-diagram-desc">
+				<title id="projection-diagram-title">Wave lines crossing a semicircle island</title>
+				<desc id="projection-diagram-desc">A semicircle island with three parallel wave lines: first contact, midpoint, and last contact. The normal vector points perpendicular to the wave lines.</desc>
+				<defs>
+					<marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+						<path d="M 0 0 L 8 4 L 0 8 z" fill="#2b5c9e"></path>
+					</marker>
+				</defs>
+				<g transform="translate(220 230) scale(130 -130)">
+					<path d="M -1 0 A 1 1 0 0 0 1 0 Z" fill="#dff0df" stroke="#2f6b3f" stroke-width="0.018" vector-effect="non-scaling-stroke"></path>
+					<line x1="-1.714" y1="0.253" x2="1.492" y2="-0.881" stroke="#999" stroke-width="0.014" stroke-dasharray="0.05 0.035" vector-effect="non-scaling-stroke"></line>
+					<line x1="-1.270" y1="1.509" x2="1.936" y2="0.375" stroke="#999" stroke-width="0.014" stroke-dasharray="0.05 0.035" vector-effect="non-scaling-stroke"></line>
+					<line x1="-1.492" y1="0.881" x2="1.714" y2="-0.253" stroke="#2b5c9e" stroke-width="0.018" vector-effect="non-scaling-stroke"></line>
+					<line x1="-0.778" y1="0.629" x2="1" y2="0" stroke="#d1495b" stroke-width="0.038" stroke-linecap="round" vector-effect="non-scaling-stroke"></line>
+					<circle cx="-1" cy="0" r="0.025" fill="#555" vector-effect="non-scaling-stroke"></circle>
+					<circle cx="0.333" cy="0.943" r="0.025" fill="#555" vector-effect="non-scaling-stroke"></circle>
+					<circle cx="1" cy="0" r="0.025" fill="#d1495b" vector-effect="non-scaling-stroke"></circle>
+					<circle cx="-0.778" cy="0.629" r="0.025" fill="#d1495b" vector-effect="non-scaling-stroke"></circle>
+				</g>
+				<line x1="360" y1="325" x2="418" y2="162" stroke="#2b5c9e" stroke-width="3" marker-end="url(#arrowhead)"></line>
+				<text x="382" y="295" fill="#2b5c9e" font-size="14">wave moves</text>
+				<text x="382" y="311" fill="#2b5c9e" font-size="14">10:00 to 10:10</text>
+				<text x="424" y="158" fill="#2b5c9e" font-size="14">n</text>
+				<text x="42" y="177" fill="#666" font-size="14">first contact, 10:00</text>
+				<text x="42" y="194" fill="#666" font-size="13">t = -sin phi</text>
+				<text x="315" y="51" fill="#666" font-size="14">last contact, 10:10</text>
+				<text x="315" y="68" fill="#666" font-size="13">t = 1</text>
+				<text x="300" y="151" fill="#2b5c9e" font-size="14">halfway, 10:05</text>
+				<text x="300" y="168" fill="#2b5c9e" font-size="13">t = c</text>
+				<text x="323" y="237" fill="#d1495b" font-size="14">land under wave</text>
+				<text x="79" y="250" fill="#555" font-size="13">(-1, 0)</text>
+				<text x="345" y="250" fill="#555" font-size="13">(1, 0)</text>
+			</svg>
+			<figcaption>The maximizing direction is shown here, with \(\sin\phi=1/3\). The gray lines are first and last contact; the blue line is halfway between them at 10:05. The arrow for \(n\) points from the 10:00 line toward the 10:10 line, showing the wave's direction of motion. The red segment is the land directly under the wave.</figcaption>
+		</figure>
+		<p>A line perpendicular to \(n\) can be written as</p>
+		<p>\[
+			n\cdot(x,y)=t.
+		\]</p>
+		<p>As the wave moves, \(n\) stays fixed and only \(t\) changes. So first contact and last contact happen at the smallest and largest possible values of \(n\cdot(x,y)\) among all points \((x,y)\) on the island.</p>
+		<p>The largest possible value is \(1\). This is because \(n\) is a unit vector, so the farthest point of the unit circle in direction \(n\) is exactly \(n\) itself, and</p>
+		<p>\[
+			n\cdot n=1.
+		\]</p>
+		<p>That point is on the upper circular arc, so it belongs to the semicircle island.</p>
+		<p>The smallest possible value occurs on the flat side \(y=0\). On that side,</p>
+		<p>\[
+			n\cdot(x,0)=x\sin\phi.
+		\]</p>
+		<p>Since the flat side runs from \(x=-1\) to \(x=1\), the smallest value is reached at \((-1,0)\), giving</p>
+		<p>\[
+			n\cdot(-1,0)=-\sin\phi.
+		\]</p>
+		<p>At 10:05, the wave is halfway between these two projection values, so the midpoint line has equation</p>
+		<p>\[
+			n\cdot (x,y)=c,\qquad c=\frac{1-\sin\phi}{2}.
+		\]</p>
+		<p>Now the problem has become a chord-length problem: for each possible direction \(\phi\), compute the length of the chord cut out by this midpoint line, then choose the direction that makes that length as large as possible.</p>
+		<p>The full chord of the unit disk at distance \(c\) from the origin has length</p>
+		<p>\[
+			2\sqrt{1-c^2}=\sqrt{3+2\sin\phi-\sin^2\phi}.
+		\]</p>
+		<p>But the island is only the upper half of the disk. This full chord lies entirely in the semidisk exactly when it does not dip below the diameter \(y=0\). Writing \(s=\sin\phi\), that condition reduces to</p>
+		<p>\[
+			s\le \frac{1}{3}.
+		\]</p>
+		<p>On that interval, the chord length is</p>
+		<p>\[
+			L(s)=\sqrt{3+2s-s^2},
+		\]</p>
+		<p>which is increasing for \(0\le s\le 1/3\). Therefore the best full-chord case occurs at \(s=1/3\), giving</p>
+		<p>\[
+			L=\sqrt{3+\frac{2}{3}-\frac{1}{9}}=\sqrt{\frac{32}{9}}=\frac{4\sqrt{2}}{3}.
+		\]</p>
+		<p>For \(s&gt;1/3\), the line is clipped by the flat side of the island, and the resulting segment is shorter. So this is the global maximum.</p>
+		<div class="callout">
+			<p><strong>Answer:</strong> \( \boxed{\frac{4\sqrt{2}}{3}} \) miles, about \(1.886\) miles.</p>
+		</div>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>Another wave is approaching the island, but no one knows which direction it's coming from; for the moment, all directions are equally likely.</p>
+		<p>On average, what is the length of the stretch of land directly under the wave halfway between when the wave first and last makes contact with the island?</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>The same setup gives the length as a function of \(\phi\). Let \(s=\sin\phi\), \(c=(1-s)/2\), and</p>
+		<p>\[
+			a=\sqrt{1-c^2}.
+		\]</p>
+		<p>Here \(a\) is half the corresponding chord length in the full unit disk. If \(0\le s\le 1/3\), the whole chord is inside the semidisk, so</p>
+		<p>\[
+			L(\phi)=2a.
+		\]</p>
+		<p>If \(1/3&lt;s\le 1\), the flat side \(y=0\) cuts the chord, and the length becomes</p>
+		<p>\[
+			L(\phi)=a+c\cot\phi.
+		\]</p>
+		<p>Because directions are uniform and the semidisk is symmetric left-to-right, it is enough to average over \(0\le\phi\le\pi/2\) with density \(2/\pi\). Thus</p>
+		<p>\[
+			\mathbb{E}[L]=\frac{2}{\pi}\left(
+				\int_0^{\arcsin(1/3)} 2a\,d\phi+
+				\int_{\arcsin(1/3)}^{\pi/2} (a+c\cot\phi)\,d\phi
+			\right),
+		\]</p>
+		<p>where \(c=(1-\sin\phi)/2\) and \(a=\sqrt{1-c^2}\). Numerically, this is</p>
+		<p>\[
+			\mathbb{E}[L]\approx 1.304439455.
+		\]</p>
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> \( \boxed{1.304439455\ldots} \) miles.</p>
+		</div>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/06/2026-06-05.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+	</body>
+</html>
