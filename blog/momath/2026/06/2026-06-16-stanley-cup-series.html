@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>MoMath Mindbender - Stanley Cup Series - June 16, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			table {
+				border-collapse: collapse;
+				margin: 14px 0 18px;
+				font-size: 0.95em;
+			}
+			th, td {
+				border: 1px solid #ccc;
+				padding: 5px 10px;
+				text-align: center;
+			}
+			th {
+				background: #f0f0f0;
+			}
+			td.tied { background: #e8f4e8; }
+			td.behind { background: #fdf0f0; }
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>MoMath Mindbender: Stanley Cup Series</h1>
+		<p><em>Posted on June 16, 2026</em></p>
+
+		<h2>Source</h2>
+		<p>Monthly Mindbenders (June 2026). A Markov chain problem with a surprising invariant.</p>
+
+		<h2>Problem</h2>
+		<p>Your favorite team is in the Stanley Cup Finals, a best-of-7 series (first to win 4 games). Against this opponent, your team wins each game with probability \(\frac{1}{3}\), <em>unless</em> your team is strictly behind in the series (fewer wins than losses so far), in which case your team wins with probability \(\frac{2}{3}\).</p>
+		<p>What is the probability that your team wins the series?</p>
+		<p><strong>Simpler version:</strong> What if it were best-of-3 (first to win 2 games)?</p>
+		<p><strong>Extra challenge:</strong> What if it were best-of-77 (first to win 39 games)?</p>
+
+		<h2>Answer</h2>
+		<p><strong>All three variants have the same answer: \(\dfrac{1}{3}\).</strong></p>
+		<p>In fact, the probability is \(\frac{1}{3}\) for any best-of-\((2n-1)\) series, regardless of \(n\).</p>
+
+		<h2>Why</h2>
+
+		<h3>Best-of-3</h3>
+		<p>Represent each state as (your wins, opponent wins). Your team is <em>behind</em> when your wins are strictly fewer than your losses, so it wins the next game with probability \(\frac{2}{3}\); otherwise with probability \(\frac{1}{3}\).</p>
+		<p>Working backward from the terminal states:</p>
+		<table>
+			<tr><th>State</th><th>Status</th><th>P(win series)</th></tr>
+			<tr><td>(1,1)</td><td class="tied">Tied</td><td>\(\frac{1}{3}\)</td></tr>
+			<tr><td>(1,0)</td><td>Ahead</td><td>\(\frac{1}{3}(1)+\frac{2}{3}\cdot\frac{1}{3}=\frac{5}{9}\)</td></tr>
+			<tr><td>(0,1)</td><td class="behind">Behind</td><td>\(\frac{2}{3}\cdot\frac{1}{3}+\frac{1}{3}(0)=\frac{2}{9}\)</td></tr>
+			<tr><td>(0,0)</td><td class="tied">Tied</td><td>\(\frac{1}{3}\cdot\frac{5}{9}+\frac{2}{3}\cdot\frac{2}{9}=\frac{9}{27}=\frac{1}{3}\)</td></tr>
+		</table>
+
+		<h3>Best-of-7</h3>
+		<p>The same backward induction over all 15 non-terminal states. The tied states (shaded green) all equal \(\frac{1}{3}\):</p>
+		<table>
+			<tr><th>State</th><th>Status</th><th>P(win series)</th></tr>
+			<tr><td>(3,3)</td><td class="tied">Tied</td><td>\(\frac{1}{3}\)</td></tr>
+			<tr><td>(3,2)</td><td>Ahead</td><td>\(\frac{5}{9}\)</td></tr>
+			<tr><td>(2,3)</td><td class="behind">Behind</td><td>\(\frac{2}{9}\)</td></tr>
+			<tr><td>(3,1)</td><td>Ahead</td><td>\(\frac{19}{27}\)</td></tr>
+			<tr><td>(2,2)</td><td class="tied">Tied</td><td>\(\frac{1}{3}\)</td></tr>
+			<tr><td>(1,3)</td><td class="behind">Behind</td><td>\(\frac{4}{27}\)</td></tr>
+			<tr><td>(3,0)</td><td>Ahead</td><td>\(\frac{65}{81}\)</td></tr>
+			<tr><td>(2,1)</td><td>Ahead</td><td>\(\frac{37}{81}\)</td></tr>
+			<tr><td>(1,2)</td><td class="behind">Behind</td><td>\(\frac{22}{81}\)</td></tr>
+			<tr><td>(0,3)</td><td class="behind">Behind</td><td>\(\frac{8}{81}\)</td></tr>
+			<tr><td>(2,0)</td><td>Ahead</td><td>\(\frac{139}{243}\)</td></tr>
+			<tr><td>(1,1)</td><td class="tied">Tied</td><td>\(\frac{1}{3}\)</td></tr>
+			<tr><td>(0,2)</td><td class="behind">Behind</td><td>\(\frac{52}{243}\)</td></tr>
+			<tr><td>(1,0)</td><td>Ahead</td><td>\(\frac{301}{729}\)</td></tr>
+			<tr><td>(0,1)</td><td class="behind">Behind</td><td>\(\frac{214}{729}\)</td></tr>
+			<tr><td>(0,0)</td><td class="tied">Tied</td><td>\(\frac{1}{3}\)</td></tr>
+		</table>
+		<p>Every tied state has probability exactly \(\frac{1}{3}\). Since the series starts at \((0,0)\), the answer is \(\frac{1}{3}\).</p>
+
+		<h2>The Invariant</h2>
+		<p>The pattern is no coincidence. There is an elegant invariant that explains all three variants at once.</p>
+
+		<div class="callout">
+			<p><strong>Claim.</strong> For any state \((a, b)\) with \(a \geq b\) (your team not behind),
+			\[
+				P(a,b) + 2\,P(b,a) = 1.
+			\]
+			</p>
+		</div>
+
+		<p>This implies that every tied state has probability \(\frac{1}{3}\): setting \(a=b=k\) gives \(3\,P(k,k)=1\).</p>
+
+		<p><strong>Proof by backward induction.</strong></p>
+		<p><em>Base case.</em> When \(a = n\) (your team just won the series), \(P(n,b)=1\) and \(P(b,n)=0\), so \(1 + 2(0) = 1\). ✓</p>
+		<p><em>Inductive step for tied states \((k,k)\).</em> Let \(u = P(k+1,k)\) and \(v = P(k,k+1)\). Since \(k+1 > k\), the identity gives \(u + 2v = 1\), so \(u = 1 - 2v\). Then</p>
+		<p>\[
+			P(k,k) = \tfrac{1}{3}\,u + \tfrac{2}{3}\,v = \tfrac{1}{3}(1-2v) + \tfrac{2}{3}\,v = \tfrac{1}{3}.
+		\]</p>
+		<p>The \(v\) terms cancel exactly because the two transition probabilities (\(\frac{1}{3}\) and \(\frac{2}{3}\)) are precisely the weights needed. ✓</p>
+		<p><em>Inductive step for ahead states \((a,b)\) with \(a > b\).</em> Your team is not behind, so it wins the next game with probability \(\frac{1}{3}\); your opponent is not behind from its perspective (it is behind), so from \((b,a)\) your team wins with probability \(\frac{2}{3}\).</p>
+		<p>\[
+			P(a,b) = \tfrac{1}{3}P(a+1,b) + \tfrac{2}{3}P(a,b+1),
+		\]</p>
+		<p>\[
+			P(b,a) = \tfrac{2}{3}P(b+1,a) + \tfrac{1}{3}P(b,a+1).
+		\]</p>
+		<p>Adding \(P(a,b) + 2P(b,a)\):</p>
+		<p>\[
+			= \tfrac{1}{3}P(a{+}1,b) + \tfrac{2}{3}P(b,a{+}1) + \tfrac{2}{3}P(a,b{+}1) + \tfrac{4}{3}P(b{+}1,a).
+		\]</p>
+		<p>By induction applied to \((a,b+1)\) (with \(a \geq b+1\)):</p>
+		<p>\[
+			P(a,b+1)+2P(b+1,a)=1 \implies \tfrac{2}{3}P(a,b{+}1)+\tfrac{4}{3}P(b{+}1,a) = \tfrac{2}{3}.
+		\]</p>
+		<p>So the sum becomes:</p>
+		<p>\[
+			P(a,b)+2P(b,a) = \tfrac{1}{3}P(a{+}1,b)+\tfrac{2}{3}P(b,a{+}1) + \tfrac{2}{3}.
+		\]</p>
+		<p>By induction applied to \((a+1, b)\) (with \(a+1 > b\)):</p>
+		<p>\[
+			P(a+1,b)+2P(b,a+1)=1 \implies \tfrac{1}{3}P(a{+}1,b)+\tfrac{2}{3}P(b,a{+}1) = \tfrac{1}{3}.
+		\]</p>
+		<p>Therefore \(P(a,b)+2P(b,a) = \frac{1}{3}+\frac{2}{3} = 1\). ✓</p>
+
+		<h2>General Form</h2>
+		<p>For any best-of-\((2n-1)\) series — best-of-3, best-of-7, best-of-77, or any odd length — the probability is the same:</p>
+		<p>\[
+			P(\text{win series}) = \frac{1}{3}.
+		\]</p>
+		<p>The "rubber band" effect (winning with \(\frac{2}{3}\) when behind) never manages to push the overall winning probability above the base rate of \(\frac{1}{3}\). It merely keeps the game competitive enough to preserve that exact value.</p>
+
+		<p><strong>More MoMath Mindbenders:</strong> <a href="/blog/momath/2026/05/2026-05-15-yarn-loops.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+	</body>
+</html>
