@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - June 19, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: June 19, 2026</h1>
+		<p><em>Posted on June 19, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>A calculator is suspected to be "tanked": instead of generating numbers uniformly on \([0,1]\), it only generates numbers uniformly on \([0,a]\) for some unknown \(0 &lt; a &lt; 1\). The value of \(a\) is equally likely to be anything in \([0,1]\) — a uniform prior.</p>
+		<p>The calculator produces a single number: exactly \(0.5\). Based on this result, what is the expected value of \(a\)?</p>
+
+		<h2>Main Solution</h2>
+		<p>This is a Bayesian update. Write the prior as \(f(a) = 1\) for \(a \in [0,1]\). Given a tanked calculator with parameter \(a\), each number is drawn uniformly on \([0,a]\), so the likelihood of observing \(x = 0.5\) is</p>
+		<p>\[
+			f(x = 0.5 \mid a) = \begin{cases} \dfrac{1}{a} & a \ge 0.5, \\ 0 & a &lt; 0.5. \end{cases}
+		\]</p>
+		<p>Numbers below \(a\) are impossible, so the observation immediately rules out \(a &lt; 0.5\). By Bayes' theorem, the posterior is</p>
+		<p>\[
+			f(a \mid x = 0.5) \propto \frac{1}{a} \cdot 1 = \frac{1}{a}, \qquad a \in [0.5, 1].
+		\]</p>
+		<p>Normalizing:</p>
+		<p>\[
+			\int_{0.5}^{1} \frac{1}{a}\,da = \ln(1) - \ln(0.5) = \ln 2.
+		\]</p>
+		<p>So the posterior density is \(f(a \mid x = 0.5) = \dfrac{1}{a \ln 2}\) on \([0.5, 1]\). The posterior mean is</p>
+		<p>\[
+			\mathbb{E}[a \mid x = 0.5]
+			= \int_{0.5}^{1} a \cdot \frac{1}{a \ln 2}\,da
+			= \frac{1}{\ln 2} \int_{0.5}^{1} 1\,da
+			= \frac{0.5}{\ln 2}
+			= \frac{1}{2\ln 2}.
+		\]</p>
+		<p>The key intuition is that the posterior density \(1/a\) over-weights small values of \(a\), since a smaller \(a\) makes the observation \(x = 0.5\) more surprising (less likely) — wait, actually the opposite: a smaller \(a\) just above \(0.5\) makes \(0.5\) more probable per unit length. But the averaging over \(a\) cancels perfectly, giving a flat integrand and a mean exactly halfway through \([0.5, 1]\).</p>
+		<div class="callout">
+			<p><strong>Answer:</strong> \(\displaystyle\boxed{\frac{1}{2\ln 2}}\), approximately \(0.7213\).</p>
+		</div>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>A second calculator is also suspected to be tanked, again with \(a\) uniform on \([0,1]\). A friend generates one number but won't reveal it exactly — only that it lies somewhere between \(0\) and \(0.5\). On average, what is \(a\) for this second calculator?</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>Now the observation is the event \(E = \{x \in (0, 0.5)\}\) rather than a specific value. The likelihood of this event given \(a\) is</p>
+		<p>\[
+			P(E \mid a) = \begin{cases} 1 & a \le 0.5, \\ \dfrac{0.5}{a} & a &gt; 0.5. \end{cases}
+		\]</p>
+		<p>If the tanked range \([0,a]\) fits entirely inside \([0, 0.5]\), then every draw lands in \((0, 0.5)\) with certainty. If \(a &gt; 0.5\), the draw is uniform on \([0,a]\) and falls in \((0, 0.5)\) with probability \(0.5/a\).</p>
+		<p>The posterior is proportional to \(P(E \mid a)\) times the flat prior:</p>
+		<p>\[
+			f(a \mid E) \propto \begin{cases} 1 & a \in (0, 0.5], \\ \dfrac{0.5}{a} & a \in (0.5, 1]. \end{cases}
+		\]</p>
+		<p>Normalizing constant:</p>
+		<p>\[
+			C = \int_0^{0.5} 1\,da + \int_{0.5}^{1} \frac{0.5}{a}\,da
+			= 0.5 + 0.5\bigl[\ln(1) - \ln(0.5)\bigr]
+			= 0.5 + 0.5\ln 2
+			= \frac{1 + \ln 2}{2}.
+		\]</p>
+		<p>The posterior mean is</p>
+		<p>\[
+			\mathbb{E}[a \mid E]
+			= \frac{1}{C}\left[\int_0^{0.5} a\,da + \int_{0.5}^{1} a \cdot \frac{0.5}{a}\,da\right]
+			= \frac{1}{C}\left[\frac{a^2}{2}\bigg|_0^{0.5} + 0.5 \cdot 0.5\right]
+			= \frac{1}{C}\left[0.125 + 0.25\right]
+			= \frac{0.375}{C}.
+		\]</p>
+		<p>Substituting \(C = (1 + \ln 2)/2\):</p>
+		<p>\[
+			\mathbb{E}[a \mid E]
+			= \frac{0.375}{\tfrac{1+\ln 2}{2}}
+			= \frac{0.75}{1 + \ln 2}
+			= \frac{3}{4(1 + \ln 2)}.
+		\]</p>
+		<p>Comparing to the main answer \(1/(2\ln 2) \approx 0.721\): here the expected \(a\) is pulled below \(0.5\) because the friend's observation is consistent with \(a \le 0.5\) (where it would hold with certainty), so the posterior puts significant mass on small values of \(a\).</p>
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> \(\displaystyle\boxed{\frac{3}{4(1+\ln 2)}}\), approximately \(0.4430\).</p>
+		</div>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/06/2026-06-12.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+	</body>
+</html>
