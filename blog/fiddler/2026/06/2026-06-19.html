@@ -30,7 +30,7 @@
 		<p><em>Posted on June 19, 2026</em></p>
 
 		<h2>Problem</h2>
-		<p>A calculator is suspected to be "tanked": instead of generating numbers uniformly on \([0,1]\), it only generates numbers uniformly on \([0,a]\) for some unknown \(0 &lt; a &lt; 1\). The value of \(a\) is equally likely to be anything in \([0,1]\) — a uniform prior.</p>
+		<p>A calculator is suspected to be "tanked": instead of generating numbers uniformly on \([0,1]\), it only generates numbers uniformly on \([0,a]\) for some unknown \(0 &lt; a &lt; 1\). The value of \(a\) is equally likely to be anything in \([0,1]\) - a uniform prior.</p>
 		<p>The calculator produces a single number: exactly \(0.5\). Based on this result, what is the expected value of \(a\)?</p>
 
 		<h2>Main Solution</h2>
@@ -58,6 +58,7 @@
 		<div class="callout">
 			<p><strong>Answer:</strong> \(\displaystyle\boxed{\frac{1}{2\ln 2}}\), approximately \(0.7213\).</p>
 		</div>
+		<p><em>This is the continuous, single-observation analogue of the <a href="https://en.wikipedia.org/wiki/German_tank_problem">German tank problem</a>, which estimates the upper bound of a uniform distribution from observed samples. The bounded prior on \(a\) is essential: with an unbounded prior the posterior mean would diverge for a single observation.</em></p>
 
 		<h2>This Week's Extra Credit</h2>
 		<p>A second calculator is also suspected to be tanked, again with \(a\) uniform on \([0,1]\). A friend generates one number but won't reveal it exactly — only that it lies somewhere between \(0\) and \(0.5\). On average, what is \(a\) for this second calculator?</p>
@@ -99,6 +100,44 @@
 			<p><strong>Extra credit answer:</strong> \(\displaystyle\boxed{\frac{3}{4(1+\ln 2)}}\), approximately \(0.4430\).</p>
 		</div>
 
+		<h2>Interactive: Main Problem</h2>
+		<p>Set a true value of <em>a</em> and number of draws, generate samples from [0, <em>a</em>], and see the posterior for <em>a</em> update.</p>
+		<div style="display:flex;gap:32px;flex-wrap:wrap;margin-bottom:12px;">
+			<div>
+				<label for="true-a">True <em>a</em>: <strong id="true-a-val">0.70</strong></label><br>
+				<input type="range" id="true-a" min="0.01" max="1" step="0.01" value="0.70" style="width:200px">
+			</div>
+			<div>
+				<label for="num-draws">Draws (k): <strong id="num-draws-val">5</strong></label><br>
+				<input type="range" id="num-draws" min="1" max="20" step="1" value="5" style="width:200px">
+			</div>
+		</div>
+		<button id="generate-btn" style="margin-bottom:12px;">Generate draws</button>
+		<div id="draws-output" style="font-family:monospace;font-size:0.9em;margin-bottom:8px;"></div>
+		<canvas id="posterior-canvas" width="600" height="280" style="display:block;border:1px solid #e0e0e0;max-width:100%;"></canvas>
+		<div id="stats-output" style="margin-top:8px;font-size:0.95em;"></div>
+
+		<h2>Interactive: Extra Credit</h2>
+		<p>Set true <em>a</em>, a threshold <em>L</em>, and number of draws. The simulator generates k draws from [0, <em>a</em>] but only reveals how many fell below <em>L</em> - generalising the extra credit to adjustable thresholds and multiple observations.</p>
+		<div style="display:flex;gap:32px;flex-wrap:wrap;margin-bottom:12px;">
+			<div>
+				<label for="ec-true-a">True <em>a</em>: <strong id="ec-true-a-val">0.70</strong></label><br>
+				<input type="range" id="ec-true-a" min="0.01" max="1" step="0.01" value="0.70" style="width:200px">
+			</div>
+			<div>
+				<label for="ec-threshold">Threshold <em>L</em>: <strong id="ec-threshold-val">0.50</strong></label><br>
+				<input type="range" id="ec-threshold" min="0.01" max="0.99" step="0.01" value="0.50" style="width:200px">
+			</div>
+			<div>
+				<label for="ec-num-draws">Draws (k): <strong id="ec-num-draws-val">5</strong></label><br>
+				<input type="range" id="ec-num-draws" min="1" max="20" step="1" value="5" style="width:200px">
+			</div>
+		</div>
+		<button id="ec-generate-btn" style="margin-bottom:12px;">Generate draws</button>
+		<div id="ec-draws-output" style="font-family:monospace;font-size:0.9em;margin-bottom:8px;"></div>
+		<canvas id="ec-posterior-canvas" width="600" height="280" style="display:block;border:1px solid #e0e0e0;max-width:100%;"></canvas>
+		<div id="ec-stats-output" style="margin-top:8px;font-size:0.95em;"></div>
+
 		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/06/2026-06-12.html">Previous</a> | Next</p>
 		<p><a href="/blog">Back to blog</a></p>
 
@@ -108,5 +147,306 @@
 				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
 			</ul>
 		</footer>
+	<script>
+	(function () {
+		const trueAInput    = document.getElementById('true-a');
+		const numDrawsInput = document.getElementById('num-draws');
+		const trueAVal      = document.getElementById('true-a-val');
+		const numDrawsVal   = document.getElementById('num-draws-val');
+		const generateBtn   = document.getElementById('generate-btn');
+		const drawsOutput   = document.getElementById('draws-output');
+		const statsOutput   = document.getElementById('stats-output');
+		const canvas        = document.getElementById('posterior-canvas');
+		const ctx           = canvas.getContext('2d');
+
+		trueAInput.addEventListener('input', function () {
+			trueAVal.textContent = parseFloat(trueAInput.value).toFixed(2);
+		});
+		numDrawsInput.addEventListener('input', function () {
+			numDrawsVal.textContent = numDrawsInput.value;
+		});
+
+		generateBtn.addEventListener('click', function () {
+			const trueA = parseFloat(trueAInput.value);
+			const k     = parseInt(numDrawsInput.value);
+
+			const draws = Array.from({length: k}, function () { return Math.random() * trueA; });
+			const m     = Math.max.apply(null, draws);
+
+			// Normalising constant: ∫_m^1 a^{-k} da
+			var C;
+			if (k === 1) {
+				C = -Math.log(m);
+			} else {
+				C = (Math.pow(m, 1 - k) - 1) / (k - 1);
+			}
+
+			// Posterior mean: ∫_m^1 a^{1-k} da / C
+			var postMean;
+			if (k === 2) {
+				postMean = -Math.log(m) / C;
+			} else {
+				postMean = (1 - Math.pow(m, 2 - k)) / ((2 - k) * C);
+			}
+
+			drawsOutput.textContent =
+				'draws: [' + draws.map(function (d) { return d.toFixed(4); }).join(', ') + ']' +
+				'    max m = ' + m.toFixed(4);
+
+			statsOutput.innerHTML =
+				'Posterior mean of <em>a</em>: <strong>' + postMean.toFixed(4) + '</strong>' +
+				'&ensp;|&ensp;True <em>a</em>: <strong>' + trueA.toFixed(4) + '</strong>';
+
+			drawPosterior(m, k, C, trueA, postMean);
+		});
+
+		function drawPosterior(m, k, C, trueA, postMean) {
+			var W = canvas.width, H = canvas.height;
+			var padL = 50, padR = 20, padT = 20, padB = 40;
+			var plotW = W - padL - padR;
+			var plotH = H - padT - padB;
+
+			ctx.clearRect(0, 0, W, H);
+
+			function density(a) {
+				return (a >= m && a <= 1) ? Math.pow(a, -k) / C : 0;
+			}
+			var maxDens = density(m); // a^{-k}/C is maximised at a = m
+
+			function xc(a) { return padL + a * plotW; }
+			function yc(d) { return padT + plotH - (d / maxDens) * plotH; }
+
+			// Axes
+			ctx.strokeStyle = '#333';
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			ctx.moveTo(padL, padT);
+			ctx.lineTo(padL, padT + plotH);
+			ctx.lineTo(padL + plotW, padT + plotH);
+			ctx.stroke();
+
+			// X-axis ticks and labels
+			ctx.fillStyle = '#333';
+			ctx.font = '12px sans-serif';
+			ctx.textAlign = 'center';
+			for (var tick = 0; tick <= 10; tick++) {
+				var a = tick / 10;
+				ctx.beginPath();
+				ctx.moveTo(xc(a), padT + plotH);
+				ctx.lineTo(xc(a), padT + plotH + 4);
+				ctx.stroke();
+				if (tick % 2 === 0) {
+					ctx.fillText(a.toFixed(1), xc(a), padT + plotH + 18);
+				}
+			}
+			ctx.fillText('a', padL + plotW / 2, padT + plotH + 35);
+
+			// Posterior density (filled)
+			var steps = 600;
+			ctx.fillStyle = 'rgba(70,130,180,0.25)';
+			ctx.strokeStyle = 'steelblue';
+			ctx.lineWidth = 2;
+			ctx.beginPath();
+			ctx.moveTo(xc(m), yc(0));
+			for (var i = 0; i <= steps; i++) {
+				var ai = m + (1 - m) * i / steps;
+				ctx.lineTo(xc(ai), yc(density(ai)));
+			}
+			ctx.lineTo(xc(1), yc(0));
+			ctx.closePath();
+			ctx.fill();
+			ctx.stroke();
+
+			// Vertical: max draw m (grey dashed)
+			ctx.save();
+			ctx.setLineDash([4, 4]);
+			ctx.strokeStyle = '#999';
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			ctx.moveTo(xc(m), padT);
+			ctx.lineTo(xc(m), padT + plotH);
+			ctx.stroke();
+			ctx.restore();
+
+			// Vertical: posterior mean (blue)
+			ctx.strokeStyle = 'steelblue';
+			ctx.lineWidth = 2;
+			ctx.beginPath();
+			ctx.moveTo(xc(postMean), padT);
+			ctx.lineTo(xc(postMean), padT + plotH);
+			ctx.stroke();
+
+			// Vertical: true a (red)
+			ctx.strokeStyle = '#cc0033';
+			ctx.lineWidth = 2;
+			ctx.beginPath();
+			ctx.moveTo(xc(trueA), padT);
+			ctx.lineTo(xc(trueA), padT + plotH);
+			ctx.stroke();
+
+			// Legend
+			var lx = padL + plotW - 165, ly = padT + 8;
+			ctx.font = '12px sans-serif';
+			ctx.textAlign = 'left';
+
+			ctx.strokeStyle = '#cc0033'; ctx.lineWidth = 2;
+			ctx.beginPath(); ctx.moveTo(lx, ly + 6); ctx.lineTo(lx + 22, ly + 6); ctx.stroke();
+			ctx.fillStyle = '#333'; ctx.fillText('true a', lx + 26, ly + 10);
+
+			ctx.strokeStyle = 'steelblue'; ctx.lineWidth = 2;
+			ctx.beginPath(); ctx.moveTo(lx, ly + 22); ctx.lineTo(lx + 22, ly + 22); ctx.stroke();
+			ctx.fillText('posterior mean', lx + 26, ly + 26);
+
+			ctx.save();
+			ctx.setLineDash([4, 4]);
+			ctx.strokeStyle = '#999'; ctx.lineWidth = 1;
+			ctx.beginPath(); ctx.moveTo(lx, ly + 38); ctx.lineTo(lx + 22, ly + 38); ctx.stroke();
+			ctx.restore();
+			ctx.fillText('max draw m', lx + 26, ly + 42);
+		}
+	})();
+
+	(function () {
+		var ecTrueAInput     = document.getElementById('ec-true-a');
+		var ecThresholdInput = document.getElementById('ec-threshold');
+		var ecNumDrawsInput  = document.getElementById('ec-num-draws');
+		var ecTrueAVal       = document.getElementById('ec-true-a-val');
+		var ecThresholdVal   = document.getElementById('ec-threshold-val');
+		var ecNumDrawsVal    = document.getElementById('ec-num-draws-val');
+		var ecGenerateBtn    = document.getElementById('ec-generate-btn');
+		var ecDrawsOutput    = document.getElementById('ec-draws-output');
+		var ecStatsOutput    = document.getElementById('ec-stats-output');
+		var ecCanvas         = document.getElementById('ec-posterior-canvas');
+		var ecCtx            = ecCanvas.getContext('2d');
+
+		ecTrueAInput.addEventListener('input', function () {
+			ecTrueAVal.textContent = parseFloat(ecTrueAInput.value).toFixed(2);
+		});
+		ecThresholdInput.addEventListener('input', function () {
+			ecThresholdVal.textContent = parseFloat(ecThresholdInput.value).toFixed(2);
+		});
+		ecNumDrawsInput.addEventListener('input', function () {
+			ecNumDrawsVal.textContent = ecNumDrawsInput.value;
+		});
+
+		ecGenerateBtn.addEventListener('click', function () {
+			var trueA = parseFloat(ecTrueAInput.value);
+			var L     = parseFloat(ecThresholdInput.value);
+			var k     = parseInt(ecNumDrawsInput.value);
+
+			var draws = Array.from({length: k}, function () { return Math.random() * trueA; });
+			var j = draws.filter(function (d) { return d < L; }).length;
+
+			// Likelihood:
+			//   a ≤ L: 1 if j==k (all draws guaranteed below L), else 0
+			//   a > L: (L/a)^j * ((a-L)/a)^(k-j)
+			// C(k,j) cancels in the normalising constant.
+			function lik(a) {
+				if (a <= L) {
+					return j === k ? 1 : 0;
+				}
+				var pB = L / a, pA = (a - L) / a;
+				return Math.pow(pB, j) * Math.pow(pA, k - j);
+			}
+
+			var N = 1000, da = 1 / N;
+			var liks = [], i;
+			for (i = 0; i < N; i++) { liks.push(lik((i + 0.5) * da)); }
+			var sumLik = liks.reduce(function (s, v) { return s + v; }, 0) * da;
+
+			if (sumLik === 0) {
+				ecDrawsOutput.textContent = 'Posterior is degenerate for these inputs.';
+				return;
+			}
+
+			var posterior = liks.map(function (v) { return v / sumLik; });
+			var grid = Array.from({length: N}, function (_, idx) { return (idx + 0.5) * da; });
+			var postMean = grid.reduce(function (s, a, idx) { return s + a * posterior[idx]; }, 0) * da;
+
+			ecDrawsOutput.textContent =
+				j + ' of ' + k + ' draw' + (k !== 1 ? 's' : '') +
+				' fell below L = ' + L.toFixed(2) + ', ' + (k - j) + ' above';
+
+			ecStatsOutput.innerHTML =
+				'Posterior mean of <em>a</em>: <strong>' + postMean.toFixed(4) + '</strong>' +
+				'&ensp;|&ensp;True <em>a</em>: <strong>' + trueA.toFixed(4) + '</strong>';
+
+			drawECPosterior(grid, posterior, L, trueA, postMean);
+		});
+
+		function drawECPosterior(grid, posterior, L, trueA, postMean) {
+			var W = ecCanvas.width, H = ecCanvas.height;
+			var padL = 50, padR = 20, padT = 20, padB = 40;
+			var plotW = W - padL - padR, plotH = H - padT - padB;
+
+			ecCtx.clearRect(0, 0, W, H);
+
+			var maxDens = Math.max.apply(null, posterior);
+			function xc(a) { return padL + a * plotW; }
+			function yc(d)  { return padT + plotH - (d / maxDens) * plotH; }
+
+			// Axes
+			ecCtx.strokeStyle = '#333'; ecCtx.lineWidth = 1;
+			ecCtx.beginPath();
+			ecCtx.moveTo(padL, padT);
+			ecCtx.lineTo(padL, padT + plotH);
+			ecCtx.lineTo(padL + plotW, padT + plotH);
+			ecCtx.stroke();
+
+			ecCtx.fillStyle = '#333'; ecCtx.font = '12px sans-serif'; ecCtx.textAlign = 'center';
+			for (var tick = 0; tick <= 10; tick++) {
+				var ta = tick / 10;
+				ecCtx.beginPath();
+				ecCtx.moveTo(xc(ta), padT + plotH);
+				ecCtx.lineTo(xc(ta), padT + plotH + 4);
+				ecCtx.stroke();
+				if (tick % 2 === 0) { ecCtx.fillText(ta.toFixed(1), xc(ta), padT + plotH + 18); }
+			}
+			ecCtx.fillText('a', padL + plotW / 2, padT + plotH + 35);
+
+			// Posterior density
+			ecCtx.fillStyle = 'rgba(70,130,180,0.25)';
+			ecCtx.strokeStyle = 'steelblue'; ecCtx.lineWidth = 2;
+			ecCtx.beginPath();
+			ecCtx.moveTo(xc(grid[0]), yc(0));
+			for (var i = 0; i < grid.length; i++) { ecCtx.lineTo(xc(grid[i]), yc(posterior[i])); }
+			ecCtx.lineTo(xc(grid[grid.length - 1]), yc(0));
+			ecCtx.closePath();
+			ecCtx.fill(); ecCtx.stroke();
+
+			// Threshold L (grey dashed)
+			ecCtx.save();
+			ecCtx.setLineDash([4, 4]); ecCtx.strokeStyle = '#999'; ecCtx.lineWidth = 1;
+			ecCtx.beginPath(); ecCtx.moveTo(xc(L), padT); ecCtx.lineTo(xc(L), padT + plotH); ecCtx.stroke();
+			ecCtx.restore();
+
+			// Posterior mean (blue)
+			ecCtx.strokeStyle = 'steelblue'; ecCtx.lineWidth = 2;
+			ecCtx.beginPath(); ecCtx.moveTo(xc(postMean), padT); ecCtx.lineTo(xc(postMean), padT + plotH); ecCtx.stroke();
+
+			// True a (red)
+			ecCtx.strokeStyle = '#cc0033'; ecCtx.lineWidth = 2;
+			ecCtx.beginPath(); ecCtx.moveTo(xc(trueA), padT); ecCtx.lineTo(xc(trueA), padT + plotH); ecCtx.stroke();
+
+			// Legend
+			var lx = padL + plotW - 165, ly = padT + 8;
+			ecCtx.font = '12px sans-serif'; ecCtx.textAlign = 'left';
+
+			ecCtx.strokeStyle = '#cc0033'; ecCtx.lineWidth = 2;
+			ecCtx.beginPath(); ecCtx.moveTo(lx, ly + 6); ecCtx.lineTo(lx + 22, ly + 6); ecCtx.stroke();
+			ecCtx.fillStyle = '#333'; ecCtx.fillText('true a', lx + 26, ly + 10);
+
+			ecCtx.strokeStyle = 'steelblue'; ecCtx.lineWidth = 2;
+			ecCtx.beginPath(); ecCtx.moveTo(lx, ly + 22); ecCtx.lineTo(lx + 22, ly + 22); ecCtx.stroke();
+			ecCtx.fillText('posterior mean', lx + 26, ly + 26);
+
+			ecCtx.save();
+			ecCtx.setLineDash([4, 4]); ecCtx.strokeStyle = '#999'; ecCtx.lineWidth = 1;
+			ecCtx.beginPath(); ecCtx.moveTo(lx, ly + 38); ecCtx.lineTo(lx + 22, ly + 38); ecCtx.stroke();
+			ecCtx.restore();
+			ecCtx.fillText('threshold L', lx + 26, ly + 42);
+		}
+	})();
+	</script>
 	</body>
 </html>
