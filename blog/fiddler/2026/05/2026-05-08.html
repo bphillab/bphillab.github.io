@@ -285,11 +285,90 @@
 		<p>Integrating this survival probability from 0 to 1 gives</p>
 		<p>\[
 			\mathbb{E}[\tau_m]
-			=\int_0^1 \Pr(\tau_m > t)\,dt
-			=H_{2m}-H_m
-			=\sum_{k=1}^m \frac{1}{m+k},
+			= \int_0^1 \Pr(\tau_m > t)\,dt
+			= \sum_{r=0}^{m-1} \int_0^1 [s^r]\,G_t(s)^m\,dt.
 		\]</p>
-		<p>where \(H_n=1+\frac12+\cdots+\frac1n\) is the \(n\)-th harmonic number. Equivalently, the expected minimum on round \(k\) is</p>
+		<p>The four steps below evaluate each integral in this sum, establishing that</p>
+		<p>\[
+			\int_0^1 [s^r]\,G_t(s)^m\,dt = \frac{1}{m+r+1}
+			\qquad (0 \le r \le m-1).
+		\]</p>
+		<p>Summing over \(r = 0, \ldots, m-1\) then gives</p>
+		<p>\[
+			\mathbb{E}[\tau_m]
+			= \sum_{r=0}^{m-1}\frac{1}{m+r+1}
+			= \frac{1}{m+1}+\frac{1}{m+2}+\cdots+\frac{1}{2m}
+			= H_{2m}-H_m,
+		\]</p>
+		<p>where \(H_n = 1+\tfrac{1}{2}+\cdots+\tfrac{1}{n}\) is the \(n\)-th harmonic number.</p>
+
+		<h3>Step 1: Integrate over \(t\) before extracting coefficients</h3>
+		<p>Write \(G_t(s) = \dfrac{1+(s-1)e^{st}}{s}\), so</p>
+		<p>\[
+			G_t(s)^m
+			= s^{-m}\bigl(1+(s-1)e^{st}\bigr)^m
+			= s^{-m}\sum_{j=0}^{m}\binom{m}{j}(s-1)^j e^{jst}.
+		\]</p>
+		<p>Extracting the coefficient of \(s^r\) and integrating over \(t \in [0,1]\),</p>
+		<p>\[
+			\int_0^1 [s^r]\,G_t(s)^m\,dt
+			= \sum_{j=0}^{m}\binom{m}{j}\int_0^1 [s^{r+m}]\!\left((s-1)^j e^{jst}\right)dt.
+		\]</p>
+		<p>The \(j=0\) term is \([s^{r+m}]\,1 = 0\). For \(j \ge 1\), integrate \(e^{jst}\) first:</p>
+		<p>\[
+			\int_0^1 e^{jst}\,dt = \frac{e^{js}-1}{js}.
+		\]</p>
+		<p>The \(-1\) produces a factor of \((s-1)^j\), a polynomial of degree \(j \le m &lt; r+m+1\), whose \([s^{r+m+1}]\) coefficient is zero. Setting \(w := (s-1)e^s\),</p>
+		<p>\[
+			\int_0^1 [s^r]\,G_t(s)^m\,dt
+			= [s^{r+m+1}]\,\Phi(s),
+			\qquad
+			\Phi(s) := \sum_{j=1}^{m}\frac{\binom{m}{j}}{j}\,w^j.
+		\]</p>
+
+		<h3>Step 2: Differentiate \(\Phi\)</h3>
+		<p>The factors of \(1/j\) collapse under differentiation. Since \(\tfrac{d}{ds}w^j = jw^{j-1}w'\),</p>
+		<p>\[
+			\Phi'(s)
+			= w'\sum_{j=1}^{m}\binom{m}{j}w^{j-1}
+			= \frac{w'}{w}\bigl[(1+w)^m - 1\bigr].
+		\]</p>
+		<p>With \(w = (s-1)e^s\) we have \(w' = se^s\), so \(w'/w = s/(s-1)\), giving</p>
+		<p>\[
+			\Phi'(s)
+			= \frac{s}{s-1}\Bigl[\bigl(1+(s-1)e^s\bigr)^m - 1\Bigr].
+		\]</p>
+
+		<h3>Step 3: Read off the coefficients</h3>
+		<p>Let \(A := 1+(s-1)e^s\). Expanding directly,</p>
+		<p>\[
+			A = \sum_{k \ge 2}\frac{k-1}{k!}\,s^k
+			= \tfrac{1}{2}s^2 + \tfrac{1}{3}s^3 + \cdots,
+		\]</p>
+		<p>so \(A = O(s^2)\) and \(A^m = O(s^{2m})\). Also \(\dfrac{s}{s-1} = -\displaystyle\sum_{k \ge 1}s^k = O(s)\), so \(\dfrac{s}{s-1}\,A^m = O(s^{2m+1})\) contributes nothing to \(\Phi'(s)\) at degree \(p \le 2m-1\). Consequently, for every \(1 \le p \le 2m-1\),</p>
+		<p>\[
+			[s^p]\,\Phi'(s)
+			= [s^p]\!\left(-\frac{s}{s-1}\right)
+			= [s^p]\sum_{k \ge 1}s^k
+			= 1.
+		\]</p>
+
+		<h3>Step 4: Assemble</h3>
+		<p>Since \([s^N]\,\Phi = \tfrac{1}{N}[s^{N-1}]\,\Phi'\), taking \(N = r+m+1\) gives \(p = r+m\). As \(r\) ranges over \(\{0,\ldots,m-1\}\), \(p\) ranges over \(\{m,\ldots,2m-1\}\), precisely where the coefficient equals 1. Thus</p>
+		<p>\[
+			\int_0^1 [s^r]\,G_t(s)^m\,dt
+			= [s^{r+m+1}]\,\Phi
+			= \frac{1}{r+m+1}\,[s^{r+m}]\,\Phi'
+			= \frac{1}{m+r+1}.
+		\]</p>
+		<p>Summing over \(r = 0,\ldots,m-1\),</p>
+		<p>\[
+			\mathbb{E}[\tau_m]
+			= \sum_{r=0}^{m-1}\frac{1}{m+r+1}
+			= H_{2m}-H_m.
+			\qquad\square
+		\]</p>
+		<p>Equivalently, the expected minimum on round \(k\) is</p>
 		<p>\[
 			\frac{1}{m+k},
 			\qquad k=1,2,\dots,m.
