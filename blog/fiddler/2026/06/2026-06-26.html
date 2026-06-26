@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - June 26, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: June 26, 2026</h1>
+		<p><em>Posted on June 26, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>I'm redoing my kitchen floor using rhombus-shaped tiles composed of two congruent equilateral triangles. How many distinct ways can I tile the outlined region, which consists of 24 equilateral triangles arranged in a regular hexagon?</p>
+
+		<h2>Main Solution</h2>
+		<p>A regular hexagon of side \(n\) consists of \(6n^2\) equilateral triangles. The kitchen hexagon has side \(n=2\) (since \(6\cdot 4=24\)). Each rhombus covers exactly 2 adjacent triangles, so any tiling uses exactly 12 tiles.</p>
+
+		<h3>The Bijection with Plane Partitions</h3>
+		<p>Rhombus tilings of a regular hexagon of side \(n\) are in bijection with <em>plane partitions fitting in an \(n\times n\times n\) box</em>: integer matrices \(\pi\) of size \(n\times n\) with \(0\le \pi_{ij}\le n\) that are weakly decreasing along each row and column.</p>
+		<p>The key insight is geometric: the three orientations of a rhombus (horizontal, left-leaning, right-leaning) correspond to the top face, left face, and right face of a unit cube in an isometric projection. A valid tiling assembles into a coherent stack of unit cubes fitting inside an \(n\times n\times n\) box — exactly the data of a plane partition. Every tiling looks like a 3D corner-view of stacked cubes.</p>
+
+		<h3>MacMahon's Formula</h3>
+		<p>In 1896, MacMahon derived the exact count of plane partitions in an \(a\times b\times c\) box:</p>
+		<p>\[
+			\prod_{i=1}^{a}\prod_{j=1}^{b} \frac{i+j+c-1}{i+j-1}.
+		\]</p>
+		<p>For a regular hexagon of side \(n\), we set \(a=b=c=n\), giving</p>
+		<p>\[
+			M(n) = \prod_{i=1}^{n}\prod_{j=1}^{n} \frac{i+j+n-1}{i+j-1}.
+		\]</p>
+
+		<h3>Computing \(M(2)\)</h3>
+		<p>With \(n=2\), the product runs over \((i,j)\in\{1,2\}^2\):</p>
+		<p>\[
+			M(2)
+			= \frac{3}{1}\cdot\frac{4}{2}\cdot\frac{4}{2}\cdot\frac{5}{3}
+			= 3\cdot 2\cdot 2\cdot\frac{5}{3}
+			= 20.
+		\]</p>
+		<div class="callout">
+			<p><strong>Answer:</strong> \(\boxed{20}\) distinct tilings.</p>
+		</div>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>How many distinct ways can I tile the patio, which consists of 54 equilateral triangles arranged in a regular hexagon?</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>The patio hexagon has side \(n=3\) (since \(6\cdot 9=54\)). The product runs over \((i,j)\in\{1,2,3\}^2\):</p>
+		<p>\[
+			M(3)
+			= \frac{4}{1}\cdot\frac{5}{2}\cdot\frac{6}{3}
+			  \cdot\frac{5}{2}\cdot\frac{6}{3}\cdot\frac{7}{4}
+			  \cdot\frac{6}{3}\cdot\frac{7}{4}\cdot\frac{8}{5}.
+		\]</p>
+		<p>Collecting numerator and denominator:</p>
+		<p>\[
+			M(3) = \frac{4\cdot 5\cdot 6\cdot 5\cdot 6\cdot 7\cdot 6\cdot 7\cdot 8}{1\cdot 2\cdot 3\cdot 2\cdot 3\cdot 4\cdot 3\cdot 4\cdot 5}
+			= \frac{313{,}600}{320} = 980.
+		\]</p>
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> \(\boxed{980}\) distinct tilings.</p>
+		</div>
+
+		<h2>Generalization</h2>
+		<p>The same formula gives the tiling count for any regular hexagon of side \(n\):</p>
+		<table style="border-collapse:collapse;margin:12px 0;">
+			<thead>
+				<tr>
+					<th style="padding:4px 16px 4px 0;text-align:left;">Side \(n\)</th>
+					<th style="padding:4px 16px 4px 0;text-align:left;">Triangles</th>
+					<th style="padding:4px 0;text-align:left;">Tilings \(M(n)\)</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr><td style="padding:2px 16px 2px 0;">1</td><td style="padding:2px 16px 2px 0;">6</td><td style="padding:2px 0;">2</td></tr>
+				<tr><td style="padding:2px 16px 2px 0;">2</td><td style="padding:2px 16px 2px 0;">24</td><td style="padding:2px 0;">20</td></tr>
+				<tr><td style="padding:2px 16px 2px 0;">3</td><td style="padding:2px 16px 2px 0;">54</td><td style="padding:2px 0;">980</td></tr>
+				<tr><td style="padding:2px 16px 2px 0;">4</td><td style="padding:2px 16px 2px 0;">96</td><td style="padding:2px 0;">232,848</td></tr>
+				<tr><td style="padding:2px 16px 2px 0;">5</td><td style="padding:2px 16px 2px 0;">150</td><td style="padding:2px 0;">700,742,050</td></tr>
+			</tbody>
+		</table>
+		<p>The count grows rapidly — each additional ring of the hexagon multiplies the tiling count by a combinatorial factor that grows super-polynomially in \(n\).</p>
+
+		<h2>Interactive: MacMahon's Formula</h2>
+		<p>Adjust \(n\) to see the product of fractions and the resulting tiling count.</p>
+		<div style="margin-bottom:12px;">
+			<label for="hex-n">Side length <em>n</em>: <strong id="hex-n-val">2</strong></label><br>
+			<input type="range" id="hex-n" min="1" max="6" step="1" value="2" style="width:200px">
+		</div>
+		<div id="hex-output" style="font-size:0.95em;margin-bottom:8px;"></div>
+		<canvas id="hex-canvas" width="600" height="200" style="display:block;border:1px solid #e0e0e0;max-width:100%;"></canvas>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/06/2026-06-19.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+	<script>
+	(function () {
+		var nInput = document.getElementById('hex-n');
+		var nVal   = document.getElementById('hex-n-val');
+		var output = document.getElementById('hex-output');
+		var canvas = document.getElementById('hex-canvas');
+		var ctx    = canvas.getContext('2d');
+
+		function macmahonBigInt(n) {
+			var num = BigInt(1), den = BigInt(1);
+			for (var i = 1; i <= n; i++) {
+				for (var j = 1; j <= n; j++) {
+					num *= BigInt(i + j + n - 1);
+					den *= BigInt(i + j - 1);
+				}
+			}
+			return num / den;
+		}
+
+		function commaFormat(s) {
+			return s.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+		}
+
+		function drawProductGrid(n) {
+			var W = canvas.width, H = canvas.height;
+			ctx.clearRect(0, 0, W, H);
+
+			var terms = [];
+			for (var i = 1; i <= n; i++) {
+				for (var j = 1; j <= n; j++) {
+					terms.push({num: i + j + n - 1, den: i + j - 1});
+				}
+			}
+
+			var count = terms.length;
+			var cellW = Math.min(68, Math.floor((W - 130) / count));
+			var totalW = count * cellW;
+			var startX = Math.max(8, Math.floor((W - totalW - 100) / 2));
+			var midY = Math.floor(H / 2);
+
+			ctx.font = '14px monospace';
+			ctx.textAlign = 'center';
+
+			for (var t = 0; t < count; t++) {
+				var x = startX + t * cellW + Math.floor(cellW / 2);
+
+				ctx.fillStyle = '#1a5276';
+				ctx.fillText(terms[t].num, x, midY - 10);
+
+				ctx.strokeStyle = '#666';
+				ctx.lineWidth = 1;
+				ctx.beginPath();
+				ctx.moveTo(x - cellW * 0.37, midY - 2);
+				ctx.lineTo(x + cellW * 0.37, midY - 2);
+				ctx.stroke();
+
+				ctx.fillStyle = '#922b21';
+				ctx.fillText(terms[t].den, x, midY + 18);
+
+				if (t < count - 1) {
+					ctx.fillStyle = '#555';
+					ctx.font = '15px monospace';
+					ctx.fillText('\xd7', x + Math.floor(cellW / 2), midY + 4);
+					ctx.font = '14px monospace';
+				}
+			}
+
+			var result = commaFormat(macmahonBigInt(n).toString());
+			var eqX = startX + totalW + 4;
+			ctx.fillStyle = '#333';
+			ctx.textAlign = 'left';
+			ctx.font = '14px monospace';
+			ctx.fillText('= ' + result, eqX, midY + 4);
+
+			ctx.fillStyle = '#aaa';
+			ctx.font = '11px sans-serif';
+			ctx.textAlign = 'center';
+			ctx.fillText('n = ' + n + ' — ' + count + ' factor' + (count !== 1 ? 's' : ''), W / 2, H - 10);
+		}
+
+		function update() {
+			var n = parseInt(nInput.value);
+			nVal.textContent = n;
+			var result = commaFormat(macmahonBigInt(n).toString());
+			output.innerHTML =
+				'<strong>M(' + n + ') = ' + result + '</strong>' +
+				'&ensp;&mdash;&ensp;hexagon has ' + (6 * n * n) + ' triangles, tiled by ' + (3 * n * n) + ' rhombuses.';
+			drawProductGrid(n);
+		}
+
+		nInput.addEventListener('input', update);
+		update();
+	})();
+	</script>
+	</body>
+</html>
