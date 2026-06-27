@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html lang="en">
+	<head>
+		<title>MoMath Mindbender - Random Chords - June 27, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+    		<ul>
+        		<li><a href="/">Home</a></li>
+	        		<li><a href="/about">About</a></li>
+        		<li><a href="/cv">CV</a></li>
+        		<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+    		</ul>
+		</nav>
+
+		<h1>MoMath Mindbender: Random Chords on a Circle</h1>
+		<p><em>Posted on June 27, 2026</em></p>
+
+		<h2>Source</h2>
+		<p>Monthly Mindbenders (June 2026). A beautiful application of linearity of expectation.</p>
+
+		<h2>Problem</h2>
+		<p>Choose a random point on a circle (uniformly over the full circle), then choose a second random point, and join both points to make a chord. Do this 100 more times to get 100 random chords on the circle. What is the expected number of intersection points?</p>
+
+		<h2>Answer</h2>
+		<p>\[\boxed{1650}\]</p>
+
+		<h2>Why</h2>
+
+		<h3>Step 1: When do two chords intersect?</h3>
+		<p>Two chords intersect <em>inside</em> the circle if and only if their four endpoints <em>alternate</em> around the circle. Label chord 1's endpoints \(A, B\) and chord 2's endpoints \(C, D\). Going around the circle, the chords cross exactly when the cyclic order is \(A, C, B, D\) or \(A, D, B, C\) — that is, when \(C\) and \(D\) lie on <em>opposite</em> arcs cut out by \(A\) and \(B\).</p>
+
+		<h3>Step 2: Probability that two random chords intersect</h3>
+		<p>Given four i.i.d. uniform points on a circle labeled \(A, B, C, D\), there are exactly three ways to pair them into two chords:</p>
+		<ul>
+			<li>\(\{A,B\}\) and \(\{C,D\}\)</li>
+			<li>\(\{A,C\}\) and \(\{B,D\}\)</li>
+			<li>\(\{A,D\}\) and \(\{B,C\}\)</li>
+		</ul>
+		<p>For any fixed positions of the four points on the circle, exactly one of these three pairings produces crossing chords. Since the four points are i.i.d. uniform, any permutation of the labels is equally likely, so each pairing is equally likely to be the crossing one. In particular, the pairing \(\{A,B\},\{C,D\}\) is the crossing one with probability \(\frac{1}{3}\):</p>
+		<p>\[P(\text{two given chords cross}) = \frac{1}{3}.\]</p>
+
+		<p><strong>Direct integration:</strong> Fix chord 1 with endpoints \(A, B\), splitting the circle into arcs of fractional length \(t\) and \(1-t\) where \(t \sim \mathrm{Uniform}(0,1)\). Chord 2 crosses chord 1 iff its two endpoints land on <em>opposite</em> arcs. Given \(t\), this probability is \(2t(1-t)\). Averaging over \(t\):</p>
+		<p>\[\int_0^1 2t(1-t)\,dt = 2\left[\frac{t^2}{2} - \frac{t^3}{3}\right]_0^1 = 2\!\left(\frac{1}{2} - \frac{1}{3}\right) = \frac{1}{3}.\]</p>
+
+		<h3>Step 3: Linearity of expectation</h3>
+		<p>With 100 chords, there are \(\binom{100}{2} = 4950\) pairs of chords. Because the endpoints are chosen continuously, the probability that three or more chords share a common point is zero, so each intersection point arises from exactly one pair. By linearity of expectation:</p>
+		<p>\[E[\text{\# intersection points}] = \binom{100}{2} \times \frac{1}{3} = \frac{4950}{3} = \boxed{1650}.\]</p>
+
+		<h2>Generalization</h2>
+		<p>For \(n\) random chords, the expected number of intersection points is</p>
+		<p>\[\binom{n}{2} \cdot \frac{1}{3} = \frac{n(n-1)}{6}.\]</p>
+		<p>This is exactly one-third of the maximum possible intersections \(\binom{n}{2}\). The factor of \(\frac{1}{3}\) is pure geometry: among the three ways to pair four uniform circle points into two chords, exactly one produces a crossing.</p>
+
+		<p><strong>More MoMath Mindbenders:</strong> <a href="/blog/momath/2026/06/2026-06-16-stanley-cup-series.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+    		<ul>
+        		<li><a href="mailto:bphillab@gmail.com">email</a></li>
+        		<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+	</body>
+</html>
