@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - July 2, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			.diagram {
+				margin: 18px 0;
+				max-width: 760px;
+			}
+			.diagram canvas {
+				display: block;
+				border: 1px solid #e0e0e0;
+				max-width: 100%;
+				background: #fff;
+			}
+			.controls {
+				display: flex;
+				gap: 10px;
+				flex-wrap: wrap;
+				align-items: end;
+				margin: 10px 0 12px;
+			}
+			.control-group {
+				margin-right: 10px;
+			}
+			.control-group label {
+				display: block;
+				margin-bottom: 3px;
+			}
+			.control-group input[type="number"] {
+				width: 80px;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: July 2, 2026</h1>
+		<p><em>Posted on July 2, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>When designing her new nation's flag, Retsy Boss wanted to compactly arrange some stars. These stars were positioned along a square grid, but she only wanted to include stars whose centers were at most two units away from some point on the plane.</p>
+		<p>For example, if she had centered the circle on a star itself, then she could have placed a total of 13 stars on the flag.</p>
+		<p>What is the greatest number of stars Retsy could have placed on the flag?</p>
+
+		<h2>Main Solution</h2>
+		<p>The stars are lattice points, and Retsy is choosing all lattice points inside some circle of radius 2. Centering the circle at a lattice point gives the familiar 13 points:</p>
+		<p>\[
+			x^2+y^2\le 4.
+		\]</p>
+		<p>But the best center is not a lattice point. Put the center at</p>
+		<p>\[
+			\left(\frac{\sqrt7-2}{2},\frac12\right).
+		\]</p>
+		<p>Then the circle of radius 2 contains the following 14 lattice points:</p>
+		<p>\[
+			\begin{aligned}
+			&(-1,-1),(-1,0),(-1,1),(-1,2),\\
+			&(0,-1),(0,0),(0,1),(0,2),\\
+			&(1,-1),(1,0),(1,1),(1,2),\\
+			&(2,0),(2,1).
+			\end{aligned}
+		\]</p>
+		<p>The two leftmost corner points \((-1,-1)\) and \((-1,2)\) lie exactly on the circle, since</p>
+		<p>\[
+			\left(1+\frac{\sqrt7-2}{2}\right)^2+\left(\frac32\right)^2
+			=\left(\frac{\sqrt7}{2}\right)^2+\frac94
+			=4.
+		\]</p>
+		<p>All the other listed points are closer than 2.</p>
+
+		<h3>Why 14 Is Best Possible</h3>
+		<p>It is enough to consider the vertical position of the circle's center modulo the grid. By symmetry, let that vertical offset be \(t\), where \(0\le t\le 1/2\).</p>
+		<p>If \(t=0\), the circle can meet five rows of lattice points. The possible row counts are at most</p>
+		<p>\[
+			5+3+3+1+1=13,
+		\]</p>
+		<p>which is exactly the centered-on-a-star example.</p>
+		<p>If \(0&lt;t\le 1/2\), the circle can meet only four rows. The two rows nearest the center each have horizontal width less than 4, so they contain at most four lattice points apiece. The two farther rows have vertical offsets \(1+t\) and \(2-t\). Their available horizontal half-widths are</p>
+		<p>\[
+			a=\sqrt{4-(1+t)^2},\qquad b=\sqrt{4-(2-t)^2}.
+		\]</p>
+		<p>For any fixed horizontal center, the number of integer \(x\)-coordinates in the two intervals \([h-a,h+a]\) and \([h-b,h+b]\) is at most six. This is a small one-dimensional check: by reducing \(h\) modulo 1 and using symmetry, it is enough to check \(0\le h\le 1/2\); within that interval the count can only change when one of \(h\pm a\) or \(h\pm b\) is an integer. Between those breakpoints the count is constant, and at the breakpoints the maximum is still six. Hence</p>
+		<p>\[
+			4+4+6=14.
+		\]</p>
+		<p>The construction above reaches this bound, so the maximum is 14.</p>
+		<div class="callout">
+			<p><strong>Answer:</strong> \(\boxed{14}\) stars.</p>
+		</div>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>After 250 years, the nation has commissioned Retsy Boss VIII to design a new flag with one star for each of the nation's current 58 states. As an homage to the original flag design, Retsy wants to select 58 stars from the square grid that are all at most some distance \(R\) from a point on the plane.</p>
+		<p>What is the minimum distance \(R\) that Retsy can use?</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>The optimal center is</p>
+		<p>\[
+			\left(\frac18,\frac12\right),
+		\]</p>
+		<p>up to the usual symmetries of the square grid. With this center, the 58 nearest lattice points fit in rows of sizes</p>
+		<p>\[
+			5,7,8,9,9,8,7,5.
+		\]</p>
+		<p>Those row counts sum to</p>
+		<p>\[
+			5+7+8+9+9+8+7+5=58.
+		\]</p>
+		<p>The farthest included points are</p>
+		<p>\[
+			(-4,0),\;(-4,1),\;(4,-1),\;(4,2).
+		\]</p>
+		<p>For example,</p>
+		<p>\[
+			\left(-4-\frac18\right)^2+\left(0-\frac12\right)^2
+			=\left(\frac{33}{8}\right)^2+\left(\frac12\right)^2
+			=\frac{1089}{64}+\frac{16}{64}
+			=\frac{1105}{64}.
+		\]</p>
+		<p>So these 58 stars all fit inside a circle of radius</p>
+		<p>\[
+			R=\sqrt{\frac{1105}{64}}=\frac{\sqrt{1105}}8.
+		\]</p>
+		<h3>Where This Came From</h3>
+		<p>This extra-credit answer came from an exact finite search. For any fixed center, the important quantity is the 58th-smallest squared distance from that center to a lattice point. As the center moves, the order of those distances can only change along perpendicular bisectors between lattice points. So, in one fundamental square of the lattice, it is enough to check the vertices and edges of the resulting order-58 Voronoi diagram.</p>
+		<p>Equivalently: an optimum occurs where the 58th boundary is pinned by at least two lattice points, unless it can be slid slightly to improve the radius. Enumerating those candidate centers gives the minimum at \((1/8,1/2)\), with squared radius \(1105/64\). The next possible lattice point outside this circle is already at squared distance \(1233/64\), so this configuration is isolated from accidental rounding issues.</p>
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> \(\displaystyle\boxed{\frac{\sqrt{1105}}8}\), approximately \(4.15519\).</p>
+		</div>
+
+		<h2>Interactive: Lattice Stars</h2>
+		<p>Set a radius, drag the center of the circle, and count how many lattice stars fall inside. The buttons load the two arrangements used above.</p>
+		<div class="controls">
+			<div class="control-group">
+				<label for="radius-input">Radius</label>
+				<input id="radius-input" type="number" min="0.25" max="6" step="0.01" value="2">
+			</div>
+			<div class="control-group">
+				<label for="radius-slider">Adjust radius</label>
+				<input id="radius-slider" type="range" min="0.25" max="6" step="0.01" value="2" style="width:220px">
+			</div>
+			<button id="main-btn">14-star circle</button>
+			<button id="extra-btn">58-star circle</button>
+		</div>
+		<div id="diagram-caption" style="font-size:0.95em;margin-bottom:8px;"></div>
+		<figure class="diagram">
+			<canvas id="stars-canvas" width="640" height="520"></canvas>
+		</figure>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/06/2026-06-26.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+	<script>
+	(function () {
+		var canvas = document.getElementById('stars-canvas');
+		var ctx = canvas.getContext('2d');
+		var caption = document.getElementById('diagram-caption');
+		var mainBtn = document.getElementById('main-btn');
+		var extraBtn = document.getElementById('extra-btn');
+		var radiusInput = document.getElementById('radius-input');
+		var radiusSlider = document.getElementById('radius-slider');
+		var dragging = false;
+
+		var view = {
+			xMin: -7,
+			xMax: 7,
+			yMin: -6,
+			yMax: 7,
+			pad: 34
+		};
+		var state = {
+			cx: (Math.sqrt(7) - 2) / 2,
+			cy: 0.5,
+			r: 2,
+			caption: 'Drag the blue center. Radius 2 can capture 14 stars.'
+		};
+
+		function syncRadiusControls() {
+			var value = state.r.toFixed(2);
+			radiusInput.value = value;
+			radiusSlider.value = value;
+		}
+
+		function metrics() {
+			var W = canvas.width, H = canvas.height;
+			var sx = (W - 2 * view.pad) / (view.xMax - view.xMin);
+			var sy = (H - 2 * view.pad) / (view.yMax - view.yMin);
+			var scale = Math.min(sx, sy);
+			return {
+				W: W,
+				H: H,
+				scale: scale,
+				ox: W / 2 - scale * (view.xMin + view.xMax) / 2,
+				oy: H / 2 + scale * (view.yMin + view.yMax) / 2
+			};
+		}
+
+		function draw() {
+			var m = metrics();
+			ctx.clearRect(0, 0, m.W, m.H);
+
+			function px(x) { return m.ox + m.scale * x; }
+			function py(y) { return m.oy - m.scale * y; }
+
+			ctx.strokeStyle = '#e3e3e3';
+			ctx.lineWidth = 1;
+			for (var x = view.xMin; x <= view.xMax; x++) {
+				ctx.beginPath();
+				ctx.moveTo(px(x), py(view.yMin));
+				ctx.lineTo(px(x), py(view.yMax));
+				ctx.stroke();
+			}
+			for (var y = view.yMin; y <= view.yMax; y++) {
+				ctx.beginPath();
+				ctx.moveTo(px(view.xMin), py(y));
+				ctx.lineTo(px(view.xMax), py(y));
+				ctx.stroke();
+			}
+
+			ctx.strokeStyle = '#2b5c9e';
+			ctx.lineWidth = 2;
+			ctx.beginPath();
+			ctx.arc(px(state.cx), py(state.cy), state.r * m.scale, 0, Math.PI * 2);
+			ctx.stroke();
+
+			var count = 0;
+			var xStart = Math.floor(state.cx - state.r - 1);
+			var xEnd = Math.ceil(state.cx + state.r + 1);
+			var yStart = Math.floor(state.cy - state.r - 1);
+			var yEnd = Math.ceil(state.cy + state.r + 1);
+			for (var i = xStart; i <= xEnd; i++) {
+				for (var j = yStart; j <= yEnd; j++) {
+					var d2 = Math.pow(i - state.cx, 2) + Math.pow(j - state.cy, 2);
+					var inside = d2 <= state.r * state.r + 1e-9;
+					if (inside) count++;
+					if (i < view.xMin || i > view.xMax || j < view.yMin || j > view.yMax) continue;
+					ctx.fillStyle = inside ? '#d1495b' : '#bbb';
+					ctx.beginPath();
+					ctx.arc(px(i), py(j), inside ? 5 : 3, 0, Math.PI * 2);
+					ctx.fill();
+				}
+			}
+
+			ctx.fillStyle = '#2b5c9e';
+			ctx.beginPath();
+			ctx.arc(px(state.cx), py(state.cy), 5, 0, Math.PI * 2);
+			ctx.fill();
+
+			ctx.fillStyle = '#333';
+			ctx.font = '14px sans-serif';
+			ctx.fillText('center = (' + state.cx.toFixed(3) + ', ' + state.cy.toFixed(3) + ')', 18, 24);
+			ctx.fillText('radius = ' + state.r.toFixed(3), 18, 44);
+			ctx.fillText('selected stars = ' + count, 18, 64);
+			caption.textContent = state.caption;
+		}
+
+		function canvasToGrid(event) {
+			var rect = canvas.getBoundingClientRect();
+			var m = metrics();
+			var xCanvas = (event.clientX - rect.left) * (canvas.width / rect.width);
+			var yCanvas = (event.clientY - rect.top) * (canvas.height / rect.height);
+			return {
+				x: (xCanvas - m.ox) / m.scale,
+				y: (m.oy - yCanvas) / m.scale
+			};
+		}
+
+		function setCenterFromEvent(event) {
+			var p = canvasToGrid(event);
+			state.cx = Math.max(view.xMin, Math.min(view.xMax, p.x));
+			state.cy = Math.max(view.yMin, Math.min(view.yMax, p.y));
+			state.caption = 'Custom center and radius.';
+			draw();
+		}
+
+		function setRadius(value) {
+			var r = parseFloat(value);
+			if (!isFinite(r)) return;
+			state.r = Math.max(0.25, Math.min(6, r));
+			state.caption = 'Custom center and radius.';
+			syncRadiusControls();
+			draw();
+		}
+
+		function loadMain() {
+			state.cx = (Math.sqrt(7) - 2) / 2;
+			state.cy = 0.5;
+			state.r = 2;
+			state.caption = 'Radius 2, shifted off the grid, captures 14 stars.';
+			syncRadiusControls();
+			draw();
+		}
+
+		function loadExtra() {
+			state.cx = 1 / 8;
+			state.cy = 1 / 2;
+			state.r = Math.sqrt(1105) / 8;
+			state.caption = 'Radius sqrt(1105)/8 captures exactly 58 stars.';
+			syncRadiusControls();
+			draw();
+		}
+
+		radiusInput.addEventListener('input', function () { setRadius(radiusInput.value); });
+		radiusSlider.addEventListener('input', function () { setRadius(radiusSlider.value); });
+		canvas.addEventListener('pointerdown', function (event) {
+			dragging = true;
+			canvas.setPointerCapture(event.pointerId);
+			setCenterFromEvent(event);
+		});
+		canvas.addEventListener('pointermove', function (event) {
+			if (dragging) setCenterFromEvent(event);
+		});
+		canvas.addEventListener('pointerup', function () { dragging = false; });
+		canvas.addEventListener('pointercancel', function () { dragging = false; });
+		mainBtn.addEventListener('click', loadMain);
+		extraBtn.addEventListener('click', loadExtra);
+		syncRadiusControls();
+		draw();
+	})();
+	</script>
+	</body>
+</html>
