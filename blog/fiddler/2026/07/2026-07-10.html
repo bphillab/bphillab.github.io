@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - July 10, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			.controls {
+				display: flex;
+				gap: 24px;
+				flex-wrap: wrap;
+				margin: 10px 0 12px;
+			}
+			.control-group label {
+				display: block;
+				margin-bottom: 4px;
+			}
+			canvas {
+				display: block;
+				border: 1px solid #e0e0e0;
+				max-width: 100%;
+				background: #fff;
+			}
+			table {
+				border-collapse: collapse;
+				margin: 12px 0;
+			}
+			td, th {
+				padding: 4px 14px 4px 0;
+				text-align: left;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: July 10, 2026</h1>
+		<p><em>Posted on July 10, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>The Tour de Fiddler is back. This time, the model for a cyclist's speed is</p>
+		<p>\[
+			v=\frac{P}{m\sin\theta+10},
+		\]</p>
+		<p>where \(P\) is pedaling power, \(m\) is mass, and \(\theta\) is the road's angle of inclination.</p>
+		<p>This is a simplified model inspired by \(P=Fv\): the \(m\sin\theta\) term represents the uphill gravitational load, while the constant \(10\) acts like a baseline resistance term, absorbing things like rolling resistance, drivetrain losses, drag, and unit conversions into one toy-model parameter.</p>
+		<p>Cycling roads are marked by their gradient \(g\), which is slope expressed as rise over run. Thus a 45-degree incline has \(g=1\), or a 100 percent gradient.</p>
+		<p>Consider two riders:</p>
+		<ul>
+			<li>A climber with power \(300\) and mass \(60\).</li>
+			<li>A sprinter with power \(325\) and mass \(80\).</li>
+		</ul>
+		<p>At what gradient will the climber and sprinter cycle at the same speed?</p>
+
+		<h2>Main Solution</h2>
+		<p>Let \(s=\sin\theta\). Equal speed means</p>
+		<p>\[
+			\frac{300}{60s+10}=\frac{325}{80s+10}.
+		\]</p>
+		<p>Cross-multiplying gives</p>
+		<p>\[
+			300(80s+10)=325(60s+10).
+		\]</p>
+		<p>So</p>
+		<p>\[
+			24000s+3000=19500s+3250,
+		\]</p>
+		<p>and therefore</p>
+		<p>\[
+			4500s=250,\qquad s=\frac1{18}.
+		\]</p>
+		<p>The question asks for the gradient \(g\), not \(\sin\theta\). Since</p>
+		<p>\[
+			g=\tan\theta=\frac{\sin\theta}{\sqrt{1-\sin^2\theta}},
+		\]</p>
+		<p>we get</p>
+		<p>\[
+			g=\frac{1/18}{\sqrt{1-1/18^2}}
+			=\frac{1}{\sqrt{323}}.
+		\]</p>
+		<div class="callout">
+			<p><strong>Answer:</strong> \(\displaystyle\boxed{\frac1{\sqrt{323}}}\), about \(0.05564\), or \(5.56\%\).</p>
+		</div>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>The climber and the sprinter are racing up a perfectly sinusoidal hill. They go from the base, where the gradient is 0 percent, to the peak, where the gradient is again 0 percent.</p>
+		<p>For them to reach the top at the same time, what should the maximum gradient of the hill be?</p>
+		<p>The formula for \(v\) is for speed along the ground, so when the ground is inclined, the same road speed covers less horizontal distance per unit time.</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>Let \(x\) be horizontal distance and let the hill's gradient be</p>
+		<p>\[
+			g(x)=G\sin\left(\frac{\pi x}{L}\right),\qquad 0\le x\le L,
+		\]</p>
+		<p>where \(G\) is the maximum gradient. This has zero gradient at the base and the peak, and maximum gradient \(G\) halfway up.</p>
+		<p>The angle satisfies</p>
+		<p>\[
+			\sin\theta=\frac{g}{\sqrt{1+g^2}},
+			\qquad
+			\cos\theta=\frac{1}{\sqrt{1+g^2}}.
+		\]</p>
+		<p>The cyclist's speed along the ground is \(v\), so their horizontal speed is \(v\cos\theta\). Thus the time to cover a horizontal bit \(dx\) is</p>
+		<p>\[
+			dt=\frac{dx}{v\cos\theta}
+			=\frac{\sqrt{1+g^2}}{v}\,dx.
+		\]</p>
+		<p>Substituting the speed formula, a rider with mass \(m\) and power \(P\) takes total time</p>
+		<p>\[
+			T=\frac1P\int_0^L \left(mg(x)+10\sqrt{1+g(x)^2}\right)\,dx.
+		\]</p>
+		<p>Define</p>
+		<p>\[
+			A=\int_0^L g(x)\,dx,\qquad
+			B=\int_0^L \sqrt{1+g(x)^2}\,dx.
+		\]</p>
+		<p>Then</p>
+		<p>\[
+			T_{\text{climber}}=\frac{60A+10B}{300},
+			\qquad
+			T_{\text{sprinter}}=\frac{80A+10B}{325}.
+		\]</p>
+		<p>Set these equal:</p>
+		<p>\[
+			325(60A+10B)=300(80A+10B).
+		\]</p>
+		<p>This simplifies to</p>
+		<p>\[
+			250B=4500A,\qquad \frac BA=18.
+		\]</p>
+		<p>For the sinusoidal gradient,</p>
+		<p>\[
+			A=\int_0^L G\sin\left(\frac{\pi x}{L}\right)\,dx
+			=\frac{2GL}{\pi}.
+		\]</p>
+		<p>Also, using \(u=\pi x/L\),</p>
+		<p>\[
+			B=\frac{L}{\pi}\int_0^\pi \sqrt{1+G^2\sin^2 u}\,du.
+		\]</p>
+		<p>So the maximum gradient \(G\) must solve</p>
+		<p>\[
+			\frac{\int_0^\pi \sqrt{1+G^2\sin^2 u}\,du}{2G}=18.
+		\]</p>
+		<p>This equation does not simplify to an elementary closed form, but it is a one-variable equation and is easy to solve numerically. Its solution is</p>
+		<p>\[
+			G\approx 0.0874330021.
+		\]</p>
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> approximately \(\boxed{0.08743}\), or \(\boxed{8.743\%}\).</p>
+		</div>
+
+		<h2>Interactive: Tour de Fiddler</h2>
+		<p>Adjust the road gradient or the sinusoidal hill's maximum gradient to compare the riders.</p>
+		<div class="controls">
+			<div class="control-group">
+				<label for="gradient-slider">Constant gradient: <strong id="gradient-val">5.56%</strong></label>
+				<input id="gradient-slider" type="range" min="0" max="0.2" step="0.001" value="0.05564" style="width:240px">
+			</div>
+			<div class="control-group">
+				<label for="hill-slider">Maximum hill gradient: <strong id="hill-val">8.74%</strong></label>
+				<input id="hill-slider" type="range" min="0.01" max="0.2" step="0.001" value="0.08743" style="width:240px">
+			</div>
+		</div>
+		<div id="speed-output"></div>
+		<canvas id="tour-canvas" width="640" height="300"></canvas>
+		<div id="time-output" style="margin-top:8px;"></div>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/07/2026-07-02.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+	<script>
+	(function () {
+		var gradientSlider = document.getElementById('gradient-slider');
+		var hillSlider = document.getElementById('hill-slider');
+		var gradientVal = document.getElementById('gradient-val');
+		var hillVal = document.getElementById('hill-val');
+		var speedOutput = document.getElementById('speed-output');
+		var timeOutput = document.getElementById('time-output');
+		var canvas = document.getElementById('tour-canvas');
+		var ctx = canvas.getContext('2d');
+
+		function sinFromGradient(g) {
+			return g / Math.sqrt(1 + g * g);
+		}
+
+		function speed(P, m, g) {
+			return P / (m * sinFromGradient(g) + 10);
+		}
+
+		function hillIntegrals(G) {
+			var n = 1200;
+			var du = Math.PI / n;
+			var integral = 0;
+			for (var k = 0; k <= n; k++) {
+				var u = k * du;
+				var weight = (k === 0 || k === n) ? 1 : (k % 2 === 0 ? 2 : 4);
+				integral += weight * Math.sqrt(1 + G * G * Math.sin(u) * Math.sin(u));
+			}
+			var bOverL = integral * du / (3 * Math.PI);
+			var aOverL = 2 * G / Math.PI;
+			return {a: aOverL, b: bOverL};
+		}
+
+		function drawHill(G) {
+			var W = canvas.width, H = canvas.height;
+			var padL = 48, padR = 18, padT = 22, padB = 42;
+			var plotW = W - padL - padR;
+			var plotH = H - padT - padB;
+			ctx.clearRect(0, 0, W, H);
+
+			ctx.strokeStyle = '#333';
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			ctx.moveTo(padL, padT + plotH);
+			ctx.lineTo(padL + plotW, padT + plotH);
+			ctx.stroke();
+			ctx.fillStyle = '#333';
+			ctx.font = '12px sans-serif';
+			ctx.fillText('base', padL, H - 14);
+			ctx.fillText('peak', padL + plotW - 28, H - 14);
+
+			var heightScale = plotH / Math.max(0.05, 2 * G / Math.PI);
+			ctx.strokeStyle = '#2b5c9e';
+			ctx.lineWidth = 2;
+			ctx.beginPath();
+			for (var i = 0; i <= 240; i++) {
+				var x = i / 240;
+				var y = G * (1 - Math.cos(Math.PI * x)) / Math.PI;
+				var px = padL + x * plotW;
+				var py = padT + plotH - y * heightScale;
+				if (i === 0) ctx.moveTo(px, py);
+				else ctx.lineTo(px, py);
+			}
+			ctx.stroke();
+
+			ctx.strokeStyle = '#d1495b';
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			for (var j = 0; j <= 240; j++) {
+				var xg = j / 240;
+				var gradient = G * Math.sin(Math.PI * xg);
+				var pxg = padL + xg * plotW;
+				var pyg = padT + plotH - (gradient / Math.max(0.2, G)) * plotH * 0.72;
+				if (j === 0) ctx.moveTo(pxg, pyg);
+				else ctx.lineTo(pxg, pyg);
+			}
+			ctx.stroke();
+
+			ctx.fillStyle = '#2b5c9e';
+			ctx.fillText('hill profile', padL + 10, padT + 16);
+			ctx.fillStyle = '#d1495b';
+			ctx.fillText('gradient shape', padL + 10, padT + 32);
+		}
+
+		function update() {
+			var g = parseFloat(gradientSlider.value);
+			var G = parseFloat(hillSlider.value);
+			gradientVal.textContent = (100 * g).toFixed(2) + '%';
+			hillVal.textContent = (100 * G).toFixed(2) + '%';
+
+			var vc = speed(300, 60, g);
+			var vs = speed(325, 80, g);
+			var faster = Math.abs(vc - vs) < 0.001 ? 'tie' : (vc > vs ? 'climber faster' : 'sprinter faster');
+			speedOutput.innerHTML =
+				'<table><thead><tr><th>Rider</th><th>Speed on constant grade</th></tr></thead><tbody>' +
+				'<tr><td>Climber</td><td>' + vc.toFixed(3) + '</td></tr>' +
+				'<tr><td>Sprinter</td><td>' + vs.toFixed(3) + '</td></tr>' +
+				'</tbody></table>' +
+				'<p><strong>' + faster + '</strong> at this constant gradient.</p>';
+
+			var parts = hillIntegrals(G);
+			var tc = (60 * parts.a + 10 * parts.b) / 300;
+			var ts = (80 * parts.a + 10 * parts.b) / 325;
+			var diffPct = 100 * (tc - ts) / ((tc + ts) / 2);
+			timeOutput.innerHTML =
+				'Sinusoidal hill relative times, per unit horizontal length: ' +
+				'climber <strong>' + tc.toFixed(5) + '</strong>, sprinter <strong>' + ts.toFixed(5) + '</strong>. ' +
+				'Difference: <strong>' + diffPct.toFixed(3) + '%</strong>.';
+			drawHill(G);
+		}
+
+		gradientSlider.addEventListener('input', update);
+		hillSlider.addEventListener('input', update);
+		update();
+	})();
+	</script>
+	</body>
+</html>
