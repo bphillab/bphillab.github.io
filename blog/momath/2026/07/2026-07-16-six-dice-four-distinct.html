@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>MoMath Mindbender - Six Dice, Four Distinct Numbers - July 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			table {
+				border-collapse: collapse;
+				margin: 12px 0;
+			}
+			td, th {
+				padding: 4px 14px 4px 0;
+				text-align: left;
+			}
+			.dice-row {
+				display: flex;
+				gap: 10px;
+				align-items: center;
+				margin: 12px 0;
+				flex-wrap: wrap;
+			}
+			.die {
+				width: 48px;
+				height: 48px;
+				border: 2px solid #555;
+				border-radius: 8px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 24px;
+				font-weight: bold;
+				background: #fff;
+				transition: background 0.15s;
+			}
+			.die.highlight {
+				background: #e8f4fd;
+				border-color: #2b5c9e;
+			}
+			button {
+				padding: 8px 18px;
+				font-size: 15px;
+				cursor: pointer;
+				border: 1px solid #888;
+				border-radius: 4px;
+				background: #f4f4f4;
+			}
+			button:hover { background: #e8e8e8; }
+			#sim-stats {
+				margin: 10px 0;
+				font-family: monospace;
+				font-size: 14px;
+			}
+			progress {
+				width: 220px;
+				height: 14px;
+				vertical-align: middle;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>MoMath Mindbender: Six Dice, Four Distinct Numbers</h1>
+		<p><em>Posted on July 16, 2026</em></p>
+
+		<h2>Source</h2>
+		<p>Monthly Mindbenders (July 2026). A counting problem using integer partitions and the inclusion-exclusion principle.</p>
+
+		<h2>Problem</h2>
+		<p>If you roll six dice, you could get the same number on every die, or (in contrast) all different numbers. What is the probability of getting exactly four distinct numbers?</p>
+
+		<h2>Answer</h2>
+		<p>\[\boxed{\dfrac{325}{648}} \approx 50.15\%\]</p>
+
+		<h2>Solution</h2>
+
+		<h3>Step 1: Count all outcomes</h3>
+		<p>Each die has 6 faces and rolls independently, so the total number of outcomes is</p>
+		<p>\[6^6 = 46{,}656.\]</p>
+
+		<h3>Step 2: Classify the favorable outcomes by multiplicity pattern</h3>
+		<p>For exactly 4 distinct values to appear across 6 dice, the counts of each value must be a partition of 6 into exactly 4 positive parts. The only such integer partitions are:</p>
+		<table>
+			<thead><tr><th>Pattern</th><th>Description</th></tr></thead>
+			<tbody>
+				<tr><td>\((3,1,1,1)\)</td><td>One value appears three times; three values appear once each</td></tr>
+				<tr><td>\((2,2,1,1)\)</td><td>Two values appear twice; two values appear once each</td></tr>
+			</tbody>
+		</table>
+
+		<h3>Step 3: Count pattern \((3,1,1,1)\)</h3>
+		<p>There are four choices to make:</p>
+		<ol>
+			<li>Choose which 4 of the 6 die faces are present: \(\dbinom{6}{4} = 15\)</li>
+			<li>Choose which of those 4 faces is the triple: \(4\)</li>
+			<li>Choose which 3 of the 6 dice show the tripled face: \(\dbinom{6}{3} = 20\)</li>
+			<li>Assign the remaining 3 faces to the remaining 3 dice (one each): \(3! = 6\)</li>
+		</ol>
+		<p>\[15 \times 4 \times 20 \times 6 = 7{,}200\]</p>
+
+		<h3>Step 4: Count pattern \((2,2,1,1)\)</h3>
+		<p>Similarly:</p>
+		<ol>
+			<li>Choose which 4 faces appear: \(\dbinom{6}{4} = 15\)</li>
+			<li>Choose which 2 of those 4 faces are the doubled ones: \(\dbinom{4}{2} = 6\)</li>
+			<li>Choose which 2 dice show the first doubled face: \(\dbinom{6}{2} = 15\)</li>
+			<li>Choose which 2 of the remaining 4 dice show the second doubled face: \(\dbinom{4}{2} = 6\)</li>
+			<li>Assign the remaining 2 singleton faces to the last 2 dice: \(2! = 2\)</li>
+		</ol>
+		<p>\[15 \times 6 \times 15 \times 6 \times 2 = 16{,}200\]</p>
+
+		<h3>Step 5: Combine and simplify</h3>
+		<p>Total favorable outcomes:</p>
+		<p>\[7{,}200 + 16{,}200 = 23{,}400\]</p>
+		<p>Probability:</p>
+		<p>\[\frac{23{,}400}{46{,}656} = \frac{325}{648} \approx 0.5015\]</p>
+
+		<div class="callout">
+			<p><strong>Answer:</strong> \(\displaystyle\frac{325}{648} \approx \boxed{50.15\%}\)</p>
+			<p>Remarkably, getting exactly 4 distinct numbers is the single most likely outcome — it is more probable than any other value of distinct counts.</p>
+		</div>
+
+		<h3>Aside: all distinct-count probabilities</h3>
+		<p>For completeness, here are the probabilities for every possible number of distinct values when rolling 6 dice. The count for each \(k\) is \(\binom{6}{k}\) (choose which \(k\) faces appear) times \(k!\,S(6,k)\) (surjections from 6 dice onto those \(k\) faces), where \(S(6,k)\) is a Stirling number of the second kind.</p>
+		<table>
+			<thead><tr><th>Distinct values \(k\)</th><th>\(S(6,k)\)</th><th>Outcomes</th><th>Probability</th></tr></thead>
+			<tbody>
+				<tr><td>1</td><td>1</td><td>6</td><td>\(\approx 0.013\%\)</td></tr>
+				<tr><td>2</td><td>31</td><td>930</td><td>\(\approx 1.99\%\)</td></tr>
+				<tr><td>3</td><td>90</td><td>10,800</td><td>\(\approx 23.15\%\)</td></tr>
+				<tr><td>4</td><td>65</td><td><strong>23,400</strong></td><td>\(\mathbf{325/648 \approx 50.15\%}\)</td></tr>
+				<tr><td>5</td><td>15</td><td>10,800</td><td>\(\approx 23.15\%\)</td></tr>
+				<tr><td>6</td><td>1</td><td>720</td><td>\(\approx 1.54\%\)</td></tr>
+			</tbody>
+		</table>
+		<p>The totals sum to \(6+930+10800+23400+10800+720 = 46{,}656 = 6^6\) ✓</p>
+		<p>The symmetry between \(k=3\) and \(k=5\) (both 10,800 outcomes) is a pleasant coincidence of the numbers; it does not persist for other dice counts.</p>
+
+		<h2>Interactive: Roll the Dice</h2>
+		<p>Click <strong>Roll once</strong> to see a single roll of 6 dice. Use <strong>Roll 10,000×</strong> to run a simulation and compare to the theoretical probability.</p>
+		<div class="dice-row" id="dice-display">
+			<div class="die" id="d0">—</div>
+			<div class="die" id="d1">—</div>
+			<div class="die" id="d2">—</div>
+			<div class="die" id="d3">—</div>
+			<div class="die" id="d4">—</div>
+			<div class="die" id="d5">—</div>
+			<span id="roll-result" style="margin-left:8px;font-weight:bold;"></span>
+		</div>
+		<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+			<button id="btn-roll">Roll once</button>
+			<button id="btn-sim">Roll 10,000×</button>
+			<button id="btn-reset">Reset</button>
+		</div>
+		<div id="sim-stats"></div>
+
+		<p><strong>More MoMath Mindbenders:</strong> <a href="/blog/momath/2026/06/2026-06-27-random-chords.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+	<script>
+	(function () {
+		var faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+		var diceEls = [0,1,2,3,4,5].map(function(i){ return document.getElementById('d'+i); });
+		var resultEl = document.getElementById('roll-result');
+		var statsEl = document.getElementById('sim-stats');
+
+		var totalRolls = 0;
+		var countByDistinct = [0,0,0,0,0,0,0]; // index = distinct count (1-6)
+
+		function rollDice() {
+			return [0,1,2,3,4,5].map(function(){ return Math.floor(Math.random()*6); });
+		}
+
+		function distinctCount(roll) {
+			return new Set(roll).size;
+		}
+
+		function showRoll(roll) {
+			var d = distinctCount(roll);
+			var seen = {};
+			roll.forEach(function(v){ seen[v] = (seen[v]||0)+1; });
+			diceEls.forEach(function(el, i) {
+				el.textContent = faces[roll[i]];
+				el.className = 'die' + (d === 4 ? ' highlight' : '');
+			});
+			resultEl.textContent = d + ' distinct value' + (d===1?'':'s') + (d===4 ? ' ✓' : '');
+			resultEl.style.color = d === 4 ? '#2b5c9e' : '#555';
+		}
+
+		function updateStats() {
+			if (totalRolls === 0) { statsEl.innerHTML = ''; return; }
+			var exact4 = countByDistinct[4];
+			var simProb = exact4 / totalRolls;
+			var theory = 325/648;
+			var rows = '';
+			for (var k = 1; k <= 6; k++) {
+				var pct = totalRolls > 0 ? (100*countByDistinct[k]/totalRolls).toFixed(2) : '—';
+				rows += '<tr' + (k===4?' style="font-weight:bold;background:#f0f6ff"':'') + '>'
+					+ '<td>'+k+'</td>'
+					+ '<td>'+countByDistinct[k]+'</td>'
+					+ '<td>'+pct+'%</td>'
+					+ '</tr>';
+			}
+			statsEl.innerHTML =
+				'<p>Rolls: <strong>' + totalRolls + '</strong> &nbsp;|&nbsp; '
+				+ 'Got exactly 4 distinct: <strong>' + exact4 + '</strong> &nbsp;|&nbsp; '
+				+ 'Simulated: <strong>' + (100*simProb).toFixed(2) + '%</strong> &nbsp;|&nbsp; '
+				+ 'Theory: <strong>' + (100*theory).toFixed(4) + '%</strong></p>'
+				+ '<table><thead><tr><th>Distinct</th><th>Count</th><th>Simulated %</th></tr></thead><tbody>'
+				+ rows + '</tbody></table>';
+		}
+
+		document.getElementById('btn-roll').addEventListener('click', function() {
+			var roll = rollDice();
+			showRoll(roll);
+			totalRolls++;
+			countByDistinct[distinctCount(roll)]++;
+			updateStats();
+		});
+
+		document.getElementById('btn-sim').addEventListener('click', function() {
+			for (var i = 0; i < 10000; i++) {
+				var roll = rollDice();
+				totalRolls++;
+				countByDistinct[distinctCount(roll)]++;
+			}
+			var lastRoll = rollDice();
+			totalRolls++;
+			countByDistinct[distinctCount(lastRoll)]++;
+			showRoll(lastRoll);
+			updateStats();
+		});
+
+		document.getElementById('btn-reset').addEventListener('click', function() {
+			totalRolls = 0;
+			countByDistinct = [0,0,0,0,0,0,0];
+			diceEls.forEach(function(el){ el.textContent='—'; el.className='die'; });
+			resultEl.textContent = '';
+			statsEl.innerHTML = '';
+		});
+	})();
+	</script>
+	</body>
+</html>
