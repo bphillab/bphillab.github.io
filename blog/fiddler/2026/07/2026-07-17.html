@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>This Week's Fiddler - July 17, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			.controls {
+				display: flex;
+				gap: 24px;
+				flex-wrap: wrap;
+				margin: 10px 0 12px;
+			}
+			.control-group label {
+				display: block;
+				margin-bottom: 4px;
+			}
+			canvas {
+				display: block;
+				border: 1px solid #e0e0e0;
+				max-width: 100%;
+				background: #fff;
+			}
+			table {
+				border-collapse: collapse;
+				margin: 12px 0;
+			}
+			td, th {
+				padding: 4px 14px 4px 0;
+				text-align: left;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: July 17, 2026</h1>
+		<p><em>Posted on July 17, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>Congratulations to Fiddler Nation for making it to the semifinals of the World Cup! All four teams that made it this far are equally matched in that they each possess the same total amount of “energy.” In advance of each semifinal game, teams must independently decide how much of their energy to allocate to the match; all remaining energy goes toward the finals. The team that spends more energy in any given game will win. The semifinals and finals occur so close in time that teams can’t recuperate any of their energy in between.</p>
+		<p>You’ve heard that the managers for the other three teams are abysmal and have no idea how to allocate their teams’ energy. Each of the other managers will independently pick a random percentage between 0 and 100 and allocate that portion of their team’s energy to the semifinal game; the rest of that team’s energy will go toward the final.</p>
+		<p>Since you’re the cleverest manager of the bunch, you can choose an optimal strategy that will maximize Fiddler Nation’s probability of winning the World Cup. What is this optimal probability?</p>
+
+		<h2>Main Solution</h2>
+		<p>Let Fiddler Nation allocate a fraction \(x\) of its energy to the semifinal and \(1-x\) to the final. To win the World Cup, we must win both the semifinal and the final.</p>
+		<p>In the semifinal, our opponent is an "abysmal" manager who picks a random fraction \(X \sim U(0, 1)\). We win the semifinal if \(x > X\), which happens with probability \(x\).</p>
+		<p>If we win, we face the winner of the other semifinal in the final. Both teams in the other semifinal were abysmal, picking \(Y_1, Y_2 \sim U(0, 1)\) respectively. The winner of that match used an amount of energy \(W = \max(Y_1, Y_2)\) and thus has \(1-W\) energy remaining for the final. The CDF of \(W\) is \(P(W \le w) = w^2\), so the CDF of the remaining energy \(R = 1-W\) is:</p>
+		<p>\[
+			F_R(r) = P(1-W \le r) = P(W \ge 1-r) = 1 - (1-r)^2 = 2r - r^2.
+		\]</p>
+		<p>We win the final if our remaining energy \(1-x\) is greater than the opponent's remaining energy \(R\). Since the other semifinal is independent of ours, the total probability of winning is:</p>
+		<p>\[
+			P(x) = P(X < x) \cdot P(R < 1-x) = x \cdot (2(1-x) - (1-x)^2) = x(1-x^2) = x - x^3.
+		\]</p>
+		<p>To maximize this, we take the derivative and set it to zero: \(1 - 3x^2 = 0\), which gives \(x = 1/\sqrt{3}\). The optimal probability is:</p>
+		<p>\[
+			P = \frac{1}{\sqrt{3}} \left(1 - \frac{1}{3}\right) = \frac{2}{3\sqrt{3}} \approx 0.3849.
+		\]</p>
+		<div class="callout">
+			<p><strong>Answer:</strong> \(\displaystyle\boxed{\frac{2}{3\sqrt{3}}}\), approximately \(0.3849\).</p>
+		</div>
+
+		<h2>This Week's Extra Credit</h2>
+		<p>Fiddler Nation is in the quarterfinals. Eight teams total. Each abysmal manager picks a random percentage of their <em>remaining</em> energy for each match. FN must draw up its strategy \((x, y, z)\) in advance, where \(x+y+z=1\).</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>For Fiddler Nation to win, it must win three consecutive matches. Let our allocations be \(x, y, z\).</p>
+		<ol>
+			<li><strong>Quarterfinal:</strong> Opponent spent \(X_{QF} \sim U(0, 1)\). \(P(\text{win QF}) = x\).</li>
+			<li><strong>Semifinal:</strong> Opponent won their QF. They spent \(M = \max(U_1, U_2)\) in QF and thus had \(1-M\) left. Crucially, they now spend a <em>random fraction</em> \(U_3\) of that remaining energy: \(X_{SF} = U_3(1-M)\). To find the CDF \(F_{SF}(s)\), we integrate:
+				\[
+					F_{SF}(s) = \int_0^1 P(U_3(1-m) \le s) 2m \, dm = \int_0^{1-s} \frac{s}{1-m} 2m \, dm + \int_{1-s}^1 2m \, dm
+				\]
+				The first term evaluates to \(2s(s - 1 - \ln s)\) and the second to \(2s - s^2\). Adding them yields \(F_{SF}(s) = s^2 - 2s \ln s\). (The \(\ln s\) appears because the managers only spend a fraction of their remaining energy, rather than the whole thing as in the main problem's final).
+			</li>
+			<li><strong>Final:</strong> Opponent won their QF and SF. To find the distribution of their remaining energy \(Z\), we first find the joint PDF of a QF winner's SF allocation (\(X\)) and Final allocation (\(Z\)). Since their total remaining energy after QF (\(X+Z\)) has density \(2(1-(x+z))\), and they pick a random fraction for SF, the joint density is \(f(x, z) = \frac{2(1-x-z)}{x+z}\).
+				<br><br>
+				A team wins the SF if their \(X\) is greater than their opponent's. The CDF of \(Z\) for the winner of the SF is:
+				\[
+					F_Z(z) = 4 \int_0^z \int_0^{1-z'} \frac{1-x-z'}{x+z'} (x^2 - 2x \ln x) \, dx \, dz'
+				\]
+				This double integral represents the probability that a team has \(Z \le z\) and that they were the one who spent more energy in the SF match. (The factor of 4 comes from the two possible winners and the factor of 2 in the joint density). We evaluated this numerically to find the optimal strategy.
+			</li>
+		</ol>
+		<p>The total winning probability is \(P = x \cdot (y^2 - 2y \ln y) \cdot F_Z(z)\). Numerically optimizing this yields:</p>
+		<p>\[
+			x \approx 0.5197, \quad y \approx 0.2296, \quad z \approx 0.2507.
+		\]</p>
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> approximately \(\boxed{0.2816}\).</p>
+		</div>
+
+		<h2>Interactive: World Cup Strategy</h2>
+		<p>Adjust your energy allocation to see your probability of winning. Note: the sliders for the Extra Credit will automatically balance so that \(x+y+z=100\%\).</p>
+		
+		<h3>Main Problem (Semifinals)</h3>
+		<div class="controls">
+			<div class="control-group">
+				<label for="x-slider-main">Semifinal allocation (\(x\)): <strong id="x-val-main">57.7%</strong></label>
+				<input id="x-slider-main" type="range" min="0" max="1" step="0.001" value="0.57735" style="width:240px">
+			</div>
+			<div class="control-group">
+				<p>Final allocation: <strong id="f-val-main">42.3%</strong></p>
+				<p>Win Probability: <strong id="p-val-main">38.49%</strong></p>
+			</div>
+		</div>
+
+		<h3>Extra Credit (Quarterfinals)</h3>
+		<div class="controls">
+			<div class="control-group">
+				<label for="x-slider-ec">QF allocation (\(x\)): <strong id="x-val-ec">52.0%</strong></label>
+				<input id="x-slider-ec" type="range" min="0" max="1" step="0.001" value="0.51966" style="width:240px">
+			</div>
+			<div class="control-group">
+				<label for="y-slider-ec">SF allocation (\(y\)): <strong id="y-val-ec">23.0%</strong></label>
+				<input id="y-slider-ec" type="range" min="0" max="1" step="0.001" value="0.22964" style="width:240px">
+			</div>
+			<div class="control-group">
+				<p>Final allocation (\(z\)): <strong id="z-val-ec">25.0%</strong></p>
+				<p>Win Probability: <strong id="p-val-ec">28.16%</strong></p>
+			</div>
+		</div>
+
+		<canvas id="strategy-canvas" width="640" height="300"></canvas>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/07/2026-07-10.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+	<script>
+	(function () {
+		var xSliderMain = document.getElementById('x-slider-main');
+		var xValMain = document.getElementById('x-val-main');
+		var fValMain = document.getElementById('f-val-main');
+		var pValMain = document.getElementById('p-val-main');
+
+		var xSliderEc = document.getElementById('x-slider-ec');
+		var ySliderEc = document.getElementById('y-slider-ec');
+		var xValEc = document.getElementById('x-val-ec');
+		var yValEc = document.getElementById('y-val-ec');
+		var zValEc = document.getElementById('z-val-ec');
+		var pValEc = document.getElementById('p-val-ec');
+
+		var canvas = document.getElementById('strategy-canvas');
+		var ctx = canvas.getContext('2d');
+
+		var F3_DATA = [
+			0.000000, 0.060556, 0.114201, 0.163162, 0.208400, 0.250506, 0.289895, 0.326879, 0.361704, 0.394570,
+			0.425644, 0.455068, 0.482964, 0.509440, 0.534590, 0.558497, 0.581238, 0.602881, 0.623488, 0.643115,
+			0.661814, 0.679634, 0.696618, 0.712809, 0.728243, 0.742957, 0.756984, 0.770355, 0.783101, 0.795248,
+			0.806824, 0.817853, 0.828357, 0.838361, 0.847884, 0.856948, 0.865571, 0.873771, 0.881566, 0.888973,
+			0.896008, 0.902686, 0.909021, 0.915028, 0.920721, 0.926112, 0.931214, 0.936038, 0.940597, 0.944902,
+			0.948962, 0.952790, 0.956394, 0.959784, 0.962970, 0.965961, 0.968765, 0.971391, 0.973847, 0.976141,
+			0.978280, 0.980272, 0.982124, 0.983842, 0.985434, 0.986907, 0.988265, 0.989516, 0.990665, 0.991717,
+			0.992680, 0.993557, 0.994353, 0.995075, 0.995726, 0.996311, 0.996835, 0.997302, 0.997717, 0.998082,
+			0.998403, 0.998682, 0.998924, 0.999131, 0.999308, 0.999457, 0.999581, 0.999682, 0.999765, 0.999830,
+			0.999881, 0.999920, 0.999949, 0.999969, 0.999983, 0.999991, 0.999996, 0.999999, 1.000000, 1.000000,
+			1.000000
+		];
+
+		function getF3(z) {
+			if (z <= 0) return 0;
+			if (z >= 1) return 1;
+			var idx = z * 100;
+			var i = Math.floor(idx);
+			var f = idx - i;
+			if (i >= 100) return F3_DATA[100];
+			return F3_DATA[i] * (1 - f) + F3_DATA[i + 1] * f;
+		}
+
+		function updateMain() {
+			var x = parseFloat(xSliderMain.value);
+			xValMain.textContent = (x * 100).toFixed(1) + '%';
+			fValMain.textContent = ((1 - x) * 100).toFixed(1) + '%';
+			var p = x * (1 - x * x);
+			pValMain.textContent = (p * 100).toFixed(2) + '%';
+			draw();
+		}
+
+		function updateEc() {
+			var x = parseFloat(xSliderEc.value);
+			var y = parseFloat(ySliderEc.value);
+			if (x + y > 1) {
+				var diff = x + y - 1;
+				// Adjust the one that wasn't just moved? No, simple clamping for now.
+				// But let's try to make it feel better.
+				if (this === xSliderEc) y = 1 - x;
+				else x = 1 - y;
+				xSliderEc.value = x;
+				ySliderEc.value = y;
+			}
+			var z = 1 - x - y;
+			xValEc.textContent = (x * 100).toFixed(1) + '%';
+			yValEc.textContent = (y * 100).toFixed(1) + '%';
+			zValEc.textContent = (z * 100).toFixed(1) + '%';
+
+			var p = x * (y <= 0 ? 0 : (y * y - 2 * y * Math.log(y))) * getF3(z);
+			pValEc.textContent = (p * 100).toFixed(2) + '%';
+			draw();
+		}
+
+		function draw() {
+			var W = canvas.width, H = canvas.height;
+			ctx.clearRect(0, 0, W, H);
+
+			// Draw CDFs
+			ctx.strokeStyle = '#ccc';
+			ctx.setLineDash([5, 5]);
+			ctx.beginPath();
+			ctx.moveTo(0, H - 20);
+			ctx.lineTo(W, H - 20);
+			ctx.stroke();
+			ctx.setLineDash([]);
+
+			function plot(fn, color, label) {
+				ctx.strokeStyle = color;
+				ctx.beginPath();
+				for (var i = 0; i <= W; i++) {
+					var val = fn(i / W);
+					var py = H - 20 - val * (H - 40);
+					if (i === 0) ctx.moveTo(i, py);
+					else ctx.lineTo(i, py);
+				}
+				ctx.stroke();
+				ctx.fillStyle = color;
+				ctx.fillText(label, 10, H - 20 - fn(0.05) * (H - 40) - 5);
+			}
+
+			plot(function(s) { return s; }, '#2b5c9e', 'QF Opponent CDF');
+			plot(function(s) { return s <= 0 ? 0 : (s * s - 2 * s * Math.log(s)); }, '#d1495b', 'SF Opponent CDF');
+			plot(getF3, '#8e44ad', 'Final Opponent CDF');
+			
+			ctx.fillStyle = '#333';
+			ctx.font = '12px sans-serif';
+			ctx.fillText('Opponent spent energy (horizontal) vs win probability (vertical)', 10, 20);
+		}
+
+		xSliderMain.addEventListener('input', updateMain);
+		xSliderEc.addEventListener('input', updateEc);
+		ySliderEc.addEventListener('input', updateEc);
+		
+		updateMain();
+		updateEc();
+	})();
+	</script>
+	</body>
+</html>
