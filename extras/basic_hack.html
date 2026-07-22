@@ -1,0 +1,49 @@
+<?php
+
+$blank=$_GET['blank'];
+$goto=$_POST['goto'];
+
+print <<<EOF
+<html>
+<head>
+    <title>KOL URL Hacking Frameset</title>
+    <script language="JavaScript">
+        function go(){
+            URL = document.myForm.theURL.value;
+            parent.adv.location=URL;
+        }
+    </script>
+</head>
+<body>
+EOF;
+
+if (!$blank){
+
+print <<<EOF
+<br>
+<form name="myForm">
+    Goto: <input type="text" name="theURL" size="50">
+    <input type="button" value="Go" onClick="go()">
+</form>
+<br>
+<iframe src="$PHP_SELF?blank=1" width="600" height="500" name="adv">
+</iframe>
+EOF;
+
+} else {
+
+print <<<EOF
+<br>
+<b>Blank result - awaiting input...</b>
+<br>
+<br>
+waiting for url input. don't forget the http://www.kingdomofloathing.com/ part!
+EOF;
+
+} // end $blank
+
+print <<<EOF
+</body>
+</html>
+EOF;
+?>
