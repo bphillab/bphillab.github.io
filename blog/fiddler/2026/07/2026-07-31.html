@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>This Week's Fiddler - July 31, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			canvas {
+				display: block;
+				border: 1px solid #e0e0e0;
+				max-width: 100%;
+				background: #fff;
+				margin: 20px 0;
+				cursor: grab;
+			}
+			canvas:active {
+				cursor: grabbing;
+			}
+			#randomize-btn {
+				padding: 8px 16px;
+				font-size: 16px;
+				cursor: pointer;
+			}
+			#sim-stats {
+				margin-left: 12px;
+				font-family: monospace;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: July 31, 2026</h1>
+		<p><em>Posted on July 31, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>A long vertical cylinder has three narrow open rings, each of which wraps around seven-eighths of the cylinder (leaving a one-eighth "gap"). The rings are evenly spaced vertically, but are otherwise randomly rotated about the cylinder's central axis.</p>
+		<p><strong>Fiddler:</strong> For some orientations of the rings, there exists at least one vertical line down the cylinder's surface that passes through each ring's gap. What is the probability that at least one such vertical line exists?</p>
+		<p><strong>Extra Credit:</strong> Instead of requiring a vertical line down the cylinder's surface, now any helix down the surface is allowed. What is the probability that there exists at least one such helix that can pass through each ring's gap?</p>
+
+		<h2>Main Solution</h2>
+		<p>Let the circumference of the cylinder be \(1\). Let each gap have a length \(f\) (in the problem, \(f = 1/8\)). Let \(y_0, y_1, y_2 \in [0, 1)\) be the center positions of the three gaps, chosen independently and uniformly at random.</p>
+		<p>A vertical line at position \(x\) passes through all three gaps if and only if there exist offsets \(\epsilon_i \in [-f/2, f/2]\) such that for each ring \(i\):</p>
+		<p>\[ y_i + \epsilon_i \equiv x \pmod 1 \]</p>
+		<p>This requirement can be expressed as a system of two independent equations by eliminating \(x\):</p>
+		<p>\[
+		\begin{aligned}
+			y_0 - y_1 &\equiv \epsilon_1 - \epsilon_0 \pmod 1 \\
+			y_1 - y_2 &\equiv \epsilon_2 - \epsilon_1 \pmod 1
+		\end{aligned}
+		\]</p>
+		<p>Let \(D_1 = y_0 - y_1\) and \(D_2 = y_1 - y_2\). Since the \(y_i\) are independent and uniform, the pair \((D_1, D_2)\) is uniformly distributed on the unit square (the torus \([0, 1) \times [0, 1)\)). The probability of a vertical line existing is the area of the region in the \((D_1, D_2)\) plane reachable by the error terms \(\Delta_1 = \epsilon_1 - \epsilon_0\) and \(\Delta_2 = \epsilon_2 - \epsilon_1\).</p>
+		<p>Given \(|\epsilon_i| \le f/2\), the possible values for \((\Delta_1, \Delta_2)\) form a hexagon defined by the constraints:</p>
+		<ul>
+			<li>\(-f \le \Delta_1 \le f\)</li>
+			<li>\(-f \le \Delta_2 \le f\)</li>
+			<li>\(-f \le \Delta_1 + \Delta_2 \le f\) (since \(\Delta_1 + \Delta_2 = \epsilon_2 - \epsilon_0\))</li>
+		</ul>
+		<p>The area of this hexagon is \(3f^2\). For \(f = 1/8\):</p>
+		<p>\[ P = 3 \times \left(\frac{1}{8}\right)^2 = \frac{3}{64} = 0.046875. \]</p>
+
+
+		<div class="callout">
+			<p><strong>Answer:</strong> \(\displaystyle\boxed{\frac{3}{64}}\), or \(0.046875\).</p>
+		</div>
+
+		<h2>Extra Credit Solution</h2>
+		<p>For the extra credit, any helix is allowed. A helix is defined by a linear path \(x(z) = x_{start} + \alpha z \pmod 1\). The helix passes through all three gaps if there exist \(x_{start}\) and \(\alpha\) such that:</p>
+		<p>\[ y_i + \epsilon_i \equiv x_{start} + i\alpha \pmod 1 \]</p>
+		<p>for \(i = 0, 1, 2\). By eliminating the two degrees of freedom (\(x_{start}\) and \(\alpha\)), we are left with a single linear constraint on the centers and offsets:</p>
+		<p>\[
+			y_0 - 2y_1 + y_2 \equiv 2\epsilon_1 - \epsilon_0 - \epsilon_2 \pmod 1
+		\]</p>
+		<p>Let \(D = y_0 - 2y_1 + y_2 \pmod 1\). Since the coefficients \((1, -2, 1)\) are integers with a GCD of \(1\), \(D\) is uniformly distributed on the circle \([0, 1)\). A helix exists if \(D\) falls within the range of the error term \(E = 2\epsilon_1 - \epsilon_0 - \epsilon_2\). Given \(\epsilon_i \in [-f/2, f/2]\), the range of \(E\) is \([-2f, 2f]\).</p>
+		<p>The length of this interval (and thus the probability) is \(4f\). For \(f = 1/8\):</p>
+		<p>\[ P = 4 \times \frac{1}{8} = \frac{1}{2}. \]</p>
+
+		<h3>Degrees of Freedom and Probability</h3>
+		<p>Note the relationship between the two solutions. In the 3-ring case:</p>
+		<ul>
+			<li>A <strong>vertical path</strong> has 1 degree of freedom, leaving \(3-1 = 2\) constraints. This results in a 2D region (a hexagon) with area \(\propto f^2\).</li>
+			<li>A <strong>helix path</strong> has 2 degrees of freedom, leaving \(3-2 = 1\) constraint. This results in a 1D region (an interval) with length \(\propto f^1\).</li>
+		</ul>
+		<p>In general, adding flexibility to the path reduces the "effective dimensionality" of the random collision required, significantly increasing the probability of success.</p>
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> \(\displaystyle\boxed{\frac{1}{2}}\).</p>
+		</div>
+
+		<h2>Interactive Simulation</h2>
+		<p>Click "Randomize" to rotate the rings. <strong>Click and drag the cylinder to rotate the view.</strong> The solid red line shows a vertical solution (if one exists), and the dashed green line shows the "best fit" helix (grey if no solution exists). The simulation also runs 10,000 trials to estimate the overall probabilities.</p>
+		<div class="controls">
+			<button id="randomize-btn">Randomize Rings</button>
+			<span id="sim-stats"></span>
+		</div>
+		<canvas id="cylinder-canvas" width="400" height="400"></canvas>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/07/2026-07-17.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+		<script>
+		(function() {
+			const canvas = document.getElementById('cylinder-canvas');
+			const ctx = canvas.getContext('2d');
+			const btn = document.getElementById('randomize-btn');
+			const stats = document.getElementById('sim-stats');
+			
+			let rotations = [Math.random(), Math.random(), Math.random()];
+			const g = 1/8;
+			let viewAngle = 0;
+			let isDragging = false;
+			let lastMouseX = 0;
+
+			function draw() {
+				const W = canvas.width;
+				const H = canvas.height;
+				ctx.clearRect(0, 0, W, H);
+
+				const cx = W / 2;
+				const r = 80;
+				const h = 300;
+				const yStart = 50;
+
+				function project(theta) {
+					const angle = theta * 2 * Math.PI + viewAngle;
+					return {
+						x: cx + r * Math.cos(angle),
+						z: Math.sin(angle) // positive is back
+					};
+				}
+
+				// 1. Draw back parts of rings
+				for (let i = 0; i < 3; i++) {
+					drawRingPart(i, true);
+				}
+
+				// 2. Draw paths (split by depth)
+				drawPaths(true);
+
+				// Draw mostly opaque cylinder body
+				const grad = ctx.createLinearGradient(cx - r, 0, cx + r, 0);
+				grad.addColorStop(0, 'rgba(240, 240, 240, 0.85)');
+				grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.85)');
+				grad.addColorStop(1, 'rgba(240, 240, 240, 0.85)');
+				ctx.fillStyle = grad;
+				ctx.fillRect(cx - r, yStart, 2 * r, h);
+
+				// Cylinder side edges
+				ctx.strokeStyle = '#bbb';
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(cx - r, yStart);
+				ctx.lineTo(cx - r, yStart + h);
+				ctx.moveTo(cx + r, yStart);
+				ctx.lineTo(cx + r, yStart + h);
+				ctx.stroke();
+
+				drawPaths(false);
+
+				// 3. Draw front parts of rings
+				for (let i = 0; i < 3; i++) {
+					drawRingPart(i, false);
+				}
+
+				function drawRingPart(i, isBack) {
+					const y = yStart + (i + 0.5) * (h / 3);
+					const rot = rotations[i];
+					
+					ctx.lineWidth = 8;
+					
+					// We need to draw segments of the ring that are in front/back
+					// and not in the gap.
+					const segments = 100;
+					ctx.lineCap = 'round';
+					
+					for (let s = 0; s < segments; s++) {
+						const t1 = s / segments;
+						const t2 = (s + 1) / segments;
+						
+						// Check if in gap
+						const midT = (t1 + t2) / 2;
+						let diff = Math.abs(midT - rot);
+						if (diff > 0.5) diff = 1 - diff;
+						if (diff < g/2) continue;
+
+						const p1 = project(t1);
+						const p2 = project(t2);
+
+						if ((isBack && p1.z >= 0 && p2.z >= 0) || (!isBack && p1.z <= 0 && p2.z <= 0)) {
+							ctx.strokeStyle = '#2b5c9e';
+							ctx.beginPath();
+							ctx.moveTo(p1.x, y);
+							ctx.lineTo(p2.x, y);
+							ctx.stroke();
+						} else if ((p1.z > 0 && p2.z < 0) || (p1.z < 0 && p2.z > 0)) {
+							// Segment crosses front/back boundary
+							// For simplicity, just draw if the midpoint is on the correct side
+							const midZ = (p1.z + p2.z) / 2;
+							if ((isBack && midZ >= 0) || (!isBack && midZ <= 0)) {
+								ctx.strokeStyle = '#2b5c9e';
+								ctx.beginPath();
+								ctx.moveTo(p1.x, y);
+								ctx.lineTo(p2.x, y);
+								ctx.stroke();
+							}
+						}
+						
+						// Back ghost ring
+						if (isBack) {
+							ctx.strokeStyle = '#eee';
+							ctx.lineWidth = 1;
+							ctx.beginPath();
+							ctx.moveTo(p1.x, y);
+							ctx.lineTo(p2.x, y);
+							ctx.stroke();
+							ctx.lineWidth = 8;
+						}
+					}
+				}
+
+				function drawPaths(isBack) {
+					// Vertical line
+					let possibleX = findVerticalIntersection();
+					if (possibleX !== null) {
+						ctx.setLineDash([]);
+						ctx.strokeStyle = '#d1495b';
+						ctx.lineWidth = 3;
+						drawCylinderPath(u => possibleX, isBack);
+					}
+
+					// Helix
+					const D = rotations[0] - 2 * rotations[1] + rotations[2];
+					const diff = D - Math.round(D);
+					const eps = diff / 4;
+					let hx0 = rotations[0] - eps;
+					let hx1 = rotations[1] + eps;
+					hx0 = (hx0 % 1 + 1) % 1;
+					let hDist = hx1 - hx0;
+					hDist = ((hDist + 0.5) % 1 + 1) % 1 - 0.5;
+					hx1 = hx0 + hDist;
+					const slope = 3 * hDist;
+					const u0 = 1/6;
+
+					const helixValid = Math.abs(diff) <= 2 * g;
+					ctx.setLineDash([5, 5]);
+					ctx.strokeStyle = helixValid ? '#2d6a4f' : '#aaa';
+					ctx.lineWidth = 2;
+					drawCylinderPath(u => hx0 + slope * (u - u0), isBack);
+					ctx.setLineDash([]);
+				}
+
+				function drawCylinderPath(getX, isBack) {
+					const segments = 200;
+					ctx.beginPath();
+					let started = false;
+					for (let i = 0; i <= segments; i++) {
+						const u = i / segments;
+						const xVal = getX(u);
+						const p = project(xVal);
+						const yPos = yStart + u * h;
+
+						if ((isBack && p.z >= 0) || (!isBack && p.z <= 0)) {
+							if (!started) {
+								ctx.moveTo(p.x, yPos);
+								started = true;
+							} else {
+								ctx.lineTo(p.x, yPos);
+							}
+						} else {
+							started = false;
+						}
+					}
+					ctx.stroke();
+				}
+			}
+
+			function findVerticalIntersection() {
+				for (let x = 0; x < 1; x += 0.005) {
+					let all = true;
+					for (let i = 0; i < 3; i++) {
+						let diff = Math.abs(x - rotations[i]);
+						if (diff > 0.5) diff = 1 - diff;
+						if (diff > g/2) { all = false; break; }
+					}
+					if (all) return x;
+				}
+				return null;
+			}
+
+			function runSim() {
+				let vCount = 0;
+				let hCount = 0;
+				const N = 10000;
+				for (let i = 0; i < N; i++) {
+					let r = [Math.random(), Math.random(), Math.random()];
+					let x = [...r].sort((a, b) => a - b);
+					let g1 = x[1] - x[0], g2 = x[2] - x[1], g3 = 1 - (x[2] - x[0]);
+					if (Math.max(g1, g2, g3) >= 1 - g) vCount++;
+					
+					let D = (r[0] - 2*r[1] + r[2]) % 1;
+					if (D < 0) D += 1;
+					if (D <= 2*g || D >= 1 - 2*g) hCount++;
+				}
+				stats.textContent = ` Sim (10k trials): Vertical: ${(vCount/N*100).toFixed(2)}%, Helix: ${(hCount/N*100).toFixed(2)}%`;
+			}
+
+			canvas.addEventListener('mousedown', (e) => {
+				isDragging = true;
+				lastMouseX = e.clientX;
+			});
+
+			window.addEventListener('mousemove', (e) => {
+				if (!isDragging) return;
+				const deltaX = e.clientX - lastMouseX;
+				viewAngle += deltaX * 0.01;
+				lastMouseX = e.clientX;
+				draw();
+			});
+
+			window.addEventListener('mouseup', () => {
+				isDragging = false;
+			});
+			
+			// Touch events
+			canvas.addEventListener('touchstart', (e) => {
+				isDragging = true;
+				lastMouseX = e.touches[0].clientX;
+				e.preventDefault();
+			}, {passive: false});
+
+			window.addEventListener('touchmove', (e) => {
+				if (!isDragging) return;
+				const deltaX = e.touches[0].clientX - lastMouseX;
+				viewAngle += deltaX * 0.01;
+				lastMouseX = e.touches[0].clientX;
+				draw();
+			}, {passive: false});
+
+			window.addEventListener('touchend', () => {
+				isDragging = false;
+			});
+
+			btn.addEventListener('click', () => {
+				rotations = [Math.random(), Math.random(), Math.random()];
+				draw();
+				runSim();
+			});
+
+			draw();
+			runSim();
+		})();
+		</script>
+	</body>
+</html>
