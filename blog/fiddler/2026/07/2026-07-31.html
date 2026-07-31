@@ -185,6 +185,7 @@
 					drawRingPart(i, false);
 				}
 
+
 				function drawRingPart(i, isBack) {
 					const y = yStart + (i + 0.5) * (h / 3);
 					const rot = rotations[i];
@@ -293,9 +294,10 @@
 							started = false;
 						}
 					}
-					ctx.stroke();
-				}
+ 				ctx.stroke();
 			}
+		}
+
 
 			function findVerticalIntersection() {
 				for (let x = 0; x < 1; x += 0.005) {
