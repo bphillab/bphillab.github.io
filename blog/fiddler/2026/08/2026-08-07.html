@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>This Week's Fiddler - August 7, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			canvas {
+				display: block;
+				border: 1px solid #e0e0e0;
+				max-width: 100%;
+				background: #fff;
+				margin: 20px 0;
+			}
+			#sim-btn {
+				padding: 8px 16px;
+				font-size: 16px;
+				cursor: pointer;
+			}
+			#sim-stats {
+				margin-top: 10px;
+				font-family: monospace;
+				white-space: pre-wrap;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: August 7, 2026</h1>
+		<p><em>Posted on August 7, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>The Fiddler Baseball League consists of exactly two teams of equal skill: the Algebraists and the Geometers. Over the course of a season, these two teams play each other 162 times. Each team has an equal chance of winning each game, and the results of games are independent of one another.</p>
+		<p><strong>Fiddler:</strong> At the end of the season, on average, how many games would you expect the team with the better record to have won?</p>
+		<p><strong>Extra Credit:</strong> After some expansion, the Fiddler Baseball League now boasts 30 teams. Over the course of a season, each team plays each other team five times. (Thus, each team plays a total of 145 games.) As before, each team has an equal chance of winning each game, and the results of games are independent of one another. At the end of the season, on average, how many games would you expect the team with the best record to have won?</p>
+
+		<h2>Main Solution</h2>
+		<p>Let \(W\) be the number of games the Algebraists win. Since every game is an independent coin flip, \(W \sim \text{Binomial}(162, 1/2)\), and the Geometers win the remaining \(162 - W\) games. The team with the better record has won</p>
+		<p>\[ \max(W, 162 - W) \]</p>
+		<p>games (if \(W = 81\) the two teams tie, and this expression still correctly returns \(81\), the shared record). Since \(W + (162-W) = 162\) is fixed, this simplifies nicely: writing \(n = 162\) and \(m = n/2 = 81\),</p>
+		<p>\[ \max(W, n-W) = m + |W - m|. \]</p>
+		<p>So the quantity we want is \(m + \mathbb{E}|W - m|\). To evaluate the expectation, use the symmetry of the binomial distribution about its mean:</p>
+		<p>\[ \mathbb{E}|W-m| = \frac{2}{2^n}\sum_{k=m+1}^{n}(k-m)\binom{n}{k}. \]</p>
+		<p>Applying the absorption identity \(k\binom{n}{k} = n\binom{n-1}{k-1}\) and simplifying the resulting sums (which telescope via the symmetry of \(\binom{n-1}{\cdot}\) about its own midpoint) gives a strikingly compact closed form:</p>
+		<p>\[ \mathbb{E}|W-m| = \frac{m\binom{n}{m}}{2^n} = \frac{m\binom{2m}{m}}{4^m}. \]</p>
+		<p>For \(n = 162\), \(m = 81\):</p>
+		<p>\[ \mathbb{E}|W-81| = \frac{81\binom{162}{81}}{4^{81}} \approx 5.0699. \]</p>
+		<p>(As a bonus, that same central term \(\binom{162}{81}/2^{162}\) is exactly the probability the two teams finish tied at 81&ndash;81 &mdash; about 6.26%.) Adding back the baseline of 81 wins:</p>
+		<p>\[ \mathbb{E}[\text{best record}] = 81 + 5.0699\ldots \approx 86.07. \]</p>
+
+		<div class="callout">
+			<p><strong>Answer:</strong> \(\displaystyle 81 + \frac{81\binom{162}{81}}{2^{162}} \approx \boxed{86.07}\) games.</p>
+		</div>
+
+		<h2>Generalizing to n Games</h2>
+		<p>Nothing above used the specific value 162, so for any even number of games \(n = 2m\) between two evenly-matched teams:</p>
+		<p>\[ \mathbb{E}[\text{best record}] = m + \frac{m\binom{2m}{m}}{4^m}. \]</p>
+		<p>By Stirling's approximation, \(\binom{2m}{m}/4^m \sim 1/\sqrt{\pi m}\) for large \(m\), so the correction term behaves like \(\sqrt{m/\pi}\), giving the tidy asymptotic</p>
+		<p>\[ \mathbb{E}[\text{best record}] \sim \frac{n}{2} + \sqrt{\frac{n}{2\pi}} \qquad (n \to \infty). \]</p>
+		<p>For \(n=162\) this asymptotic estimate gives \(81 + \sqrt{162/(2\pi)} \approx 86.078\), just a hair off the exact value of \(86.070\) &mdash; the two-team case is small enough that Stirling's approximation is already excellent.</p>
+
+		<h2>Extra Credit Solution</h2>
+		<p>With 30 teams playing a full round robin, every team's win total is entangled with every other's &mdash; a win for one team is always a loss for another, so the 30 season-ending records are not independent of each other. That coupling breaks the clean combinatorial trick used in the main solution, and we couldn't find an analytic way around it. So we turned to simulation instead.</p>
+		<p>Simulating 5,000,000 full round-robin seasons (30 teams, all 435 pairings, 5 games each) and averaging the best record each time converges to:</p>
+		<p>\[ \mathbb{E}[\text{best record}] \approx 84.98 \text{ games} \quad (\text{standard error} \approx 0.001). \]</p>
+
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> \(\displaystyle\boxed{\approx 84.98}\) games (via simulation; no clean closed form).</p>
+		</div>
+
+		<h2>Interactive Simulation</h2>
+		<p>Click the button to simulate more seasons of both leagues and watch the histograms of the "best record" converge to the values above. Each click adds 10,000 two-team seasons and 2,000 thirty-team round-robin seasons.</p>
+		<div class="controls">
+			<button id="sim-btn">Simulate More Seasons</button>
+		</div>
+		<div id="sim-stats"></div>
+		<canvas id="hist-canvas" width="760" height="480"></canvas>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/07/2026-07-31.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+		<script>
+		(function() {
+			const canvas = document.getElementById('hist-canvas');
+			const ctx = canvas.getContext('2d');
+			const btn = document.getElementById('sim-btn');
+			const stats = document.getElementById('sim-stats');
+
+			const N_TEAMS = 30;
+			const GAMES_PER_PAIR = 5;
+			const pairs = [];
+			for (let i = 0; i < N_TEAMS; i++) {
+				for (let j = i + 1; j < N_TEAMS; j++) pairs.push([i, j]);
+			}
+
+			let mainTrials = 0, mainSum = 0;
+			let mainHist = {}; // best-record value -> count
+
+			let ecTrials = 0, ecSum = 0;
+			let ecHist = {};
+
+			function simulateMainOnce() {
+				let w = 0;
+				for (let g = 0; g < 162; g++) {
+					if (Math.random() < 0.5) w++;
+				}
+				const best = Math.max(w, 162 - w);
+				mainHist[best] = (mainHist[best] || 0) + 1;
+				mainSum += best;
+				mainTrials++;
+			}
+
+			function simulateExtraOnce() {
+				const wins = new Array(N_TEAMS).fill(0);
+				for (let p = 0; p < pairs.length; p++) {
+					const [i, j] = pairs[p];
+					for (let g = 0; g < GAMES_PER_PAIR; g++) {
+						if (Math.random() < 0.5) wins[i]++; else wins[j]++;
+					}
+				}
+				let best = 0;
+				for (let t = 0; t < N_TEAMS; t++) if (wins[t] > best) best = wins[t];
+				ecHist[best] = (ecHist[best] || 0) + 1;
+				ecSum += best;
+				ecTrials++;
+			}
+
+			function drawHistogram(hist, x0, y0, w, h, color, label, theoretical) {
+				const keys = Object.keys(hist).map(Number);
+				if (keys.length === 0) return;
+				const minK = Math.min(...keys);
+				// Cap the displayed width so a single rare outlier season doesn't
+				// squash the whole histogram down to a sliver.
+				const maxK = Math.min(Math.max(...keys), minK + 49);
+				const visibleKeys = keys.filter(k => k <= maxK);
+				const maxCount = Math.max(...visibleKeys.map(k => hist[k]));
+				const barW = w / (maxK - minK + 1);
+
+				ctx.strokeStyle = '#888';
+				ctx.strokeRect(x0, y0, w, h);
+
+				for (let k = minK; k <= maxK; k++) {
+					const count = hist[k] || 0;
+					const barH = (count / maxCount) * (h - 20);
+					ctx.fillStyle = color;
+					ctx.fillRect(x0 + (k - minK) * barW, y0 + h - barH, Math.max(barW - 1, 1), barH);
+				}
+
+				ctx.fillStyle = '#333';
+				ctx.font = '12px sans-serif';
+				ctx.fillText(label, x0, y0 - 6);
+				ctx.fillText(String(minK), x0, y0 + h + 14);
+				ctx.fillText(String(maxK), x0 + w - 18, y0 + h + 14);
+
+				if (theoretical !== undefined && theoretical >= minK && theoretical <= maxK) {
+					const tx = x0 + (theoretical - minK) * barW;
+					ctx.strokeStyle = '#d1495b';
+					ctx.lineWidth = 2;
+					ctx.beginPath();
+					ctx.moveTo(tx, y0);
+					ctx.lineTo(tx, y0 + h);
+					ctx.stroke();
+					ctx.lineWidth = 1;
+				}
+			}
+
+			function draw() {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				drawHistogram(mainHist, 30, 40, 700, 160, '#2b5c9e',
+					'Main: best record out of 162 games (2 teams)', 86.0699);
+				drawHistogram(ecHist, 30, 280, 700, 160, '#2d6a4f',
+					'Extra credit: best record out of 145 games (30 teams)', 84.98);
+			}
+
+			function updateStats() {
+				const mainAvg = mainTrials ? (mainSum / mainTrials).toFixed(4) : '-';
+				const ecAvg = ecTrials ? (ecSum / ecTrials).toFixed(4) : '-';
+				stats.textContent =
+					`Main:         ${mainTrials.toLocaleString()} seasons simulated, average best record = ${mainAvg} (target ≈ 86.0699)\n` +
+					`Extra credit: ${ecTrials.toLocaleString()} seasons simulated, average best record = ${ecAvg} (target ≈ 84.98)`;
+			}
+
+			btn.addEventListener('click', () => {
+				for (let i = 0; i < 10000; i++) simulateMainOnce();
+				for (let i = 0; i < 2000; i++) simulateExtraOnce();
+				draw();
+				updateStats();
+			});
+
+			// Seed with an initial small batch so the charts aren't empty on load.
+			for (let i = 0; i < 2000; i++) simulateMainOnce();
+			for (let i = 0; i < 500; i++) simulateExtraOnce();
+			draw();
+			updateStats();
+		})();
+		</script>
+	</body>
+</html>
