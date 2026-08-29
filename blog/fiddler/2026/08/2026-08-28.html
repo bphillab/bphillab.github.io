@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>This Week's Fiddler - August 28, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			canvas {
+				display: block;
+				border: 1px solid #e0e0e0;
+				max-width: 100%;
+				background: #fff;
+				margin: 20px 0;
+			}
+			.controls {
+				margin: 10px 0;
+			}
+			.controls button {
+				padding: 8px 16px;
+				font-size: 16px;
+				cursor: pointer;
+			}
+			.controls input[type=number] {
+				padding: 6px 8px;
+				font-size: 16px;
+				width: 130px;
+			}
+			.controls label {
+				font-size: 14px;
+				margin-right: 10px;
+			}
+			#lookup-out, #strip-stats {
+				margin-top: 10px;
+				font-family: monospace;
+				white-space: pre-wrap;
+				font-size: 13px;
+			}
+			table.grid {
+				border-collapse: collapse;
+				margin: 14px 0;
+				font-size: 14px;
+			}
+			table.grid th, table.grid td {
+				border: 1px solid #ddd;
+				padding: 4px 9px;
+				text-align: center;
+			}
+			table.grid th {
+				background: #f4f4f4;
+			}
+			td.amb {
+				background: #fbe3e6;
+			}
+			td.det {
+				background: #e3f1e6;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: August 28, 2026</h1>
+		<p><em>Posted on August 28, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>In the New York Times word game <em>Spelling Bee</em>, each day has a maximum achievable point total. Reaching it earns the rank of "Queen Bee," but that maximum is never displayed. What <em>is</em> displayed is the cutoff for "Genius," defined as 70 percent of the maximum, rounded to the nearest whole number. You can therefore estimate the maximum by dividing the Genius cutoff by 0.7 &mdash; but the answer may be ambiguous, since several maxima can round to the same cutoff.</p>
+		<p><strong>Fiddler:</strong> Suppose a round has some very large, randomly chosen point total. What is the probability that this total can be determined exactly from its Genius cutoff?</p>
+		<p><strong>Extra Credit:</strong> Set Genius aside. The other ranks are Amazing (50 percent of the maximum), Great (40), Nice (25), Solid (15), Good (8), Moving Up (5), and Good Start (2), each rounded to the nearest whole number. Given all seven of <em>these</em> cutoffs, what is the probability that a very large, randomly chosen total can be determined exactly?</p>
+
+		<h2>Setting Up</h2>
+		<p>Let \(N\) be the maximum point total and let \(c_p(N) = \operatorname{round}(pN)\) be the cutoff at percentage \(p\). Since \(p &lt; 1\), the map \(N \mapsto c_p(N)\) is many-to-one, and the question is how often a given \(N\) is the <em>only</em> preimage of its own cutoff.</p>
+		<p>"Very large, randomly chosen" needs a word of care: there is no uniform distribution on all the positive integers, so the intended reading is <strong>natural density</strong> &mdash; the limiting fraction of \(N \in \{1, \dots, M\}\) that are unambiguous, as \(M \to \infty\). Every map here turns out to be periodic in \(N\), so these densities exist and are exactly rational.</p>
+		<p>Throughout I use <strong>round-half-up</strong>, so \(\operatorname{round}(x) = \lfloor x + 1/2 \rfloor\). Ties genuinely occur here (\(0.7 \times 15 = 10.5\)), and I return to the convention at the end &mdash; it does not affect the main answer but it does affect the extra credit.</p>
+
+		<h2>Main Solution</h2>
+		<p>The Genius cutoff is \(g = \operatorname{round}(0.7N)\). Because \(0.7N\) has a single decimal digit, its fractional part depends only on \(N \bmod 10\), so write \(N = 10q + j\) with \(j \in \{0, \dots, 9\}\). Then \(0.7N = 7q + 0.7j\), and since \(7q\) is an integer it passes straight through the rounding:</p>
+		<p>\[ g = 7q + \operatorname{round}(0.7j). \]</p>
+		<p>So the whole problem collapses to a table of ten cases:</p>
+		<table class="grid">
+			<tr><th>\(j\)</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr>
+			<tr><th>\(0.7j\)</th><td>0</td><td>0.7</td><td>1.4</td><td>2.1</td><td>2.8</td><td>3.5</td><td>4.2</td><td>4.9</td><td>5.6</td><td>6.3</td></tr>
+			<tr><th>\(g - 7q\)</th><td>0</td><td>1</td><td>1</td><td>2</td><td>3</td><td>4</td><td>4</td><td>5</td><td>6</td><td>6</td></tr>
+		</table>
+		<p>Two things to notice. First, the ten values of \(j\) produce cutoff offsets covering exactly \(\{0, 1, \dots, 6\}\), so the block \(N \in [10q, 10q+10)\) maps precisely onto \(g \in [7q, 7q+7)\). Different blocks therefore never interfere &mdash; the problem really is just this one table. Second, the offsets \(1\), \(4\), and \(6\) each arise twice, while \(0\), \(2\), \(3\), and \(5\) arise once:</p>
+		<table class="grid">
+			<tr><th>\(g - 7q\)</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>
+			<tr><th>from \(j\)</th><td class="det">0</td><td class="amb">1, 2</td><td class="det">3</td><td class="det">4</td><td class="amb">5, 6</td><td class="det">7</td><td class="amb">8, 9</td></tr>
+		</table>
+		<p>A total \(N = 10q + j\) is recoverable from its Genius cutoff exactly when \(j\) sits alone in its column, i.e. when</p>
+		<p>\[ N \equiv 0,\ 3,\ 4,\ \text{or } 7 \pmod{10}. \]</p>
+		<p>That is 4 residues out of 10.</p>
+
+		<div class="callout">
+			<p><strong>Answer:</strong> \(\displaystyle \frac{4}{10} = \boxed{\tfrac{2}{5}} = 40\%\).</p>
+		</div>
+
+		<p>Here is the same fact from the other direction, as a sanity check. Inverting the rounding, \(g = \operatorname{round}(0.7N)\) means \(0.7N \in [g - \tfrac12,\, g + \tfrac12)\), so</p>
+		<p>\[ N \in \left[\frac{10g - 5}{7},\ \frac{10g + 5}{7}\right), \]</p>
+		<p>an interval of width \(10/7 \approx 1.43\). Such an interval always contains one or two integers, never zero and never three. Over seven consecutive values of \(g\) the intervals must account for ten values of \(N\), so exactly three of the seven intervals hold two integers and four hold one. The unambiguous totals are the \(4\) sitting in singleton intervals out of \(10\) total &mdash; again \(2/5\). Concretely, near \(N = 100\):</p>
+		<table class="grid">
+			<tr><th>Genius cutoff</th><th>70</th><th>71</th><th>72</th><th>73</th><th>74</th><th>75</th><th>76</th></tr>
+			<tr><th>possible maxima</th><td class="det">100</td><td class="amb">101, 102</td><td class="det">103</td><td class="det">104</td><td class="amb">105, 106</td><td class="det">107</td><td class="amb">108, 109</td></tr>
+		</table>
+
+		<h2>Extra Credit Solution</h2>
+		<p>Now we are handed seven numbers, \(c_p(N)\) for \(p \in \{2, 5, 8, 15, 25, 40, 50\}\) percent, and want to know when they pin down \(N\). Writing each \(p = k/100\), all seven cutoffs are of the form \(\operatorname{round}(kN/100)\) with integer \(k\).</p>
+
+		<h3>Step 1: the 50% cutoff narrows things to a pair</h3>
+		<p>For the Amazing cutoff, \(\operatorname{round}(N/2) = \lceil N/2 \rceil\): even \(N = 2m\) gives \(m\), and odd \(N = 2m-1\) gives \(\operatorname{round}(m - \tfrac12) = m\) under round-half-up. So this single cutoff already tells us</p>
+		<p>\[ \operatorname{round}(N/2) = m \iff N \in \{2m-1,\ 2m\}. \]</p>
+		<p>Every ambiguity must therefore be between an odd number and the even number just above it. This is a big simplification: we never have to compare distant totals, only the pairs \(\{2m-1, 2m\}\). And if a pair <em>is</em> distinguished by some cutoff, then <strong>both</strong> of its members are determined; if not, both are ambiguous. So the answer is simply the density of pairs that some cutoff splits.</p>
+
+		<h3>Step 2: when does a cutoff split a pair?</h3>
+		<p>Let \(N\) be the even member of the pair. Using \(\operatorname{round}(x) = \lfloor x + \tfrac12\rfloor\), the cutoff \(c_k\) takes different values on \(N-1\) and \(N\) exactly when a rounding boundary falls in the interval \((N-1,\, N]\). The boundaries for cutoff \(k\) are the totals at which \(kN/100\) is exactly a half-integer:</p>
+		<p>\[ \frac{kN}{100} = t + \frac12 \iff N = (2t+1)\cdot\frac{50}{k}. \]</p>
+		<p>\[ \textbf{Cutoff } k \textbf{ splits the pair} \iff \text{some odd multiple of } \tfrac{50}{k} \text{ lies in } (N-1,\, N]. \]</p>
+		<p>Since \(N\) is even and \((N-1, N]\) contains exactly one integer &mdash; namely the even number \(N\) &mdash; this criterion is easy to apply case by case.</p>
+		<ul>
+			<li><strong>50%:</strong> \(50/k = 1\), so the boundaries are the <em>odd integers</em>. The only integer in \((N-1, N]\) is even, so <strong>50% never splits a pair.</strong> (Of course &mdash; it is what created the pair.)</li>
+			<li><strong>2%:</strong> \(50/k = 25\), so the boundaries are odd multiples of 25: \(25, 75, 125, \dots\), again all odd integers. <strong>The Good Start cutoff never splits a pair either</strong>, so the 2% rank is entirely useless here.</li>
+			<li><strong>25%:</strong> \(50/k = 2\), so the boundaries are \(2, 6, 10, 14, \dots\), the integers \(\equiv 2 \pmod 4\). Splits iff \(N \equiv 2 \pmod 4\) &mdash; half of all pairs.</li>
+			<li><strong>40%:</strong> \(50/k = 5/4\), so the boundaries are \(1.25, 3.75, 6.25, 8.75, 11.25, 13.75, \dots\), never integers. A boundary \(b\) lies in \((N-1, N]\) iff \(N = \lceil b \rceil\), and those ceilings run \(2, 4, 7, 9, 12, 14, 17, 19, \dots\). Keeping the even ones: splits iff \(N \equiv 2\) or \(4 \pmod{10}\).</li>
+		</ul>
+		<p>The remaining three cutoffs turn out to add nothing:</p>
+		<ul>
+			<li><strong>5%:</strong> boundaries at odd multiples of 10, so it splits iff \(N \equiv 10 \pmod{20}\) &mdash; but \(10 \equiv 2 \pmod 4\), so 25% already caught those.</li>
+			<li><strong>15%:</strong> \(50/k = 10/3\), giving splits iff \(N \equiv 4\) or \(10 \pmod{20}\); the first is covered by 40%, the second by 25%.</li>
+			<li><strong>8%:</strong> \(50/k = 25/4\), with boundaries \(6.25, 18.75, 31.25, 43.75, 56.25, 68.75, 81.25, 93.75\) per 100. Only four have even ceilings, giving \(N \equiv 32, 44, 82, 94 \pmod{100}\) &mdash; and \(32, 44 \equiv 2, 4 \pmod{10}\) are covered by 40%, while \(82, 94 \equiv 2 \pmod 4\) are covered by 25%.</li>
+		</ul>
+		<div class="callout">
+			<p><strong>Only Great (40%) and Nice (25%) do any work.</strong> Given the pairing forced by Amazing (50%), those two cutoffs determine exactly the same set of totals as all seven together. Good Start, Moving Up, Solid, and Good are pure redundancy.</p>
+		</div>
+
+		<h3>Step 3: count</h3>
+		<p>A pair with even member \(N\) is ambiguous iff neither surviving cutoff splits it:</p>
+		<p>\[ N \not\equiv 2 \pmod 4 \quad\text{and}\quad N \not\equiv 2, 4 \pmod{10}. \]</p>
+		<p>The first condition says \(N \equiv 0 \pmod 4\), so modulo 20 we start with \(N \in \{0, 4, 8, 12, 16\}\). The second condition then removes \(4\) (which is \(\equiv 4 \bmod 10\)) and \(12\) (which is \(\equiv 2 \bmod 10\)), leaving</p>
+		<p>\[ N \equiv 0,\ 8,\ 16 \pmod{20}. \]</p>
+		<p>So 3 of every 10 pairs are ambiguous, and the pattern has period 20. Written in terms of the totals themselves, the ambiguous \(N\) are those \(\equiv 0, 7, 8, 15, 16, 19 \pmod{20}\) &mdash; six residues out of twenty. Everything over one full period:</p>
+		<table class="grid">
+			<tr><th>pair \(\{N-1, N\}\), \(N \bmod 20\)</th><th>2</th><th>4</th><th>6</th><th>8</th><th>10</th><th>12</th><th>14</th><th>16</th><th>18</th><th>0</th></tr>
+			<tr><th>split by</th><td class="det">25, 40</td><td class="det">15, 40</td><td class="det">25</td><td class="amb">&mdash;</td><td class="det">5, 15, 25</td><td class="det">40</td><td class="det">25, 40</td><td class="amb">&mdash;</td><td class="det">25</td><td class="amb">&mdash;</td></tr>
+		</table>
+
+		<div class="callout">
+			<p><strong>Extra credit answer:</strong> \(\displaystyle 1 - \frac{3}{10} = \boxed{\tfrac{7}{10}} = 70\%\).</p>
+		</div>
+
+		<p>A concrete ambiguous pair is \(N = 215\) and \(N = 216\) (indeed \(216 \equiv 16 \bmod 20\)), which agree on all seven cutoffs:</p>
+		<table class="grid">
+			<tr><th>\(N\)</th><th>2%</th><th>5%</th><th>8%</th><th>15%</th><th>25%</th><th>40%</th><th>50%</th></tr>
+			<tr><th>215</th><td>4</td><td>11</td><td>17</td><td>32</td><td>54</td><td>86</td><td>108</td></tr>
+			<tr><th>216</th><td>4</td><td>11</td><td>17</td><td>32</td><td>54</td><td>86</td><td>108</td></tr>
+		</table>
+		<p>Shift by two and the pair \(\{217, 218\}\) separates, on the 25% cutoff alone (\(54\) versus \(55\)).</p>
+
+		<h2>A Note on Rounding Ties</h2>
+		<p>Ties are not hypothetical here. The main problem has one whenever \(N \equiv 5 \pmod{10}\), since then \(0.7N\) ends in \(.5\) &mdash; the \(j = 5\) row of the first table. Happily, the main answer is <em>robust</em>: under round-half-to-even the \(j=5\) case lands on \(7q+4\) or \(7q+3\) depending on the parity of \(q\), which reshuffles <em>which</em> residues are unambiguous but always leaves exactly four of the ten columns singletons. The density stays \(2/5\).</p>
+		<p>The extra credit is <em>not</em> robust, and it is worth knowing why. Step 1 leaned on \(\operatorname{round}(N/2) = \lceil N/2\rceil\), which is a round-half-up fact. Under round-half-to-even, \(N = 2m+1\) rounds to whichever of \(m, m+1\) is even, so the 50% cutoff groups totals into <em>triples</em> rather than pairs (for instance \(3, 4, 5\) all give \(2\)). With three candidates to separate instead of two, more totals stay ambiguous, and the density of determinable totals drops from \(7/10\) to \(9/20\). I checked both by brute force. Since "rounded to the nearest whole number" in a puzzle context conventionally means half-up, \(7/10\) is the intended answer &mdash; but the sensitivity is a reminder that the tie rule is load-bearing.</p>
+
+		<h2>Interactive: From Cutoffs Back to the Maximum</h2>
+		<p>Enter a maximum point total to see the cutoffs it produces, together with every other total that would produce the same ones. The first verdict uses the Genius cutoff alone (the main problem); the second uses all seven other ranks (the extra credit).</p>
+		<div class="controls">
+			<label for="lookup-n">Maximum total \(N\):</label>
+			<input type="number" id="lookup-n" value="215" min="1" max="100000">
+			<button id="lookup-prev">&minus;1</button>
+			<button id="lookup-next">+1</button>
+		</div>
+		<div id="lookup-out"></div>
+
+		<h2>Interactive: The Periodic Pattern</h2>
+		<p>Each cell is one point total, laid out in rows of 20 so that the periodicity shows up as vertical stripes. Green means the total is determined, red means it is ambiguous. The top grid uses the Genius cutoff alone (period 10, so the stripes repeat twice per row); the bottom uses the seven other ranks (period 20, one stripe pattern per row). Densities are computed exactly over a full period, not sampled.</p>
+		<div class="controls">
+			<button id="strip-prev">&larr; earlier</button>
+			<button id="strip-next">later &rarr;</button>
+			<label for="strip-base">start at \(N =\)</label>
+			<input type="number" id="strip-base" value="200" min="0" max="100000" step="20">
+		</div>
+		<canvas id="strip-canvas" width="760" height="440"></canvas>
+		<div id="strip-stats"></div>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/08/2026-08-21.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+		<script>
+		(function() {
+			// All arithmetic is done in integers so there is no floating-point
+			// rounding to confuse the rounding we are actually studying.
+			// round(k*N/100) with round-half-up == floor((2*k*N + 100) / 200).
+			const PCTS = [2, 5, 8, 15, 25, 40, 50];
+			const NAMES = {2: 'Good Start', 5: 'Moving Up', 8: 'Good', 15: 'Solid',
+			               25: 'Nice', 40: 'Great', 50: 'Amazing'};
+
+			function cutoff(k, N) {
+				return Math.floor((2 * k * N + 100) / 200);
+			}
+			// Genius: round(7N/10) == floor((14N + 10) / 20)
+			function genius(N) {
+				return Math.floor((14 * N + 10) / 20);
+			}
+			function vec(N) {
+				return PCTS.map(k => cutoff(k, N)).join(',');
+			}
+
+			// A total's rivals can only be very close by, so a small window suffices:
+			// Genius pins N to within an interval of width 10/7, and the 50% cutoff
+			// pins it to a pair. +/-4 is comfortably generous.
+			function rivalsGenius(N) {
+				const out = [];
+				const g = genius(N);
+				for (let M = Math.max(1, N - 4); M <= N + 4; M++) {
+					if (M !== N && genius(M) === g) out.push(M);
+				}
+				return out;
+			}
+			function rivalsSeven(N) {
+				const out = [];
+				const v = vec(N);
+				for (let M = Math.max(1, N - 4); M <= N + 4; M++) {
+					if (M !== N && vec(M) === v) out.push(M);
+				}
+				return out;
+			}
+
+			// ---------- lookup widget ----------
+			const nIn = document.getElementById('lookup-n');
+			const out = document.getElementById('lookup-out');
+			const prevBtn = document.getElementById('lookup-prev');
+			const nextBtn = document.getElementById('lookup-next');
+
+			function pad(s, w) {
+				s = String(s);
+				return ' '.repeat(Math.max(0, w - s.length)) + s;
+			}
+
+			function renderLookup() {
+				let N = parseInt(nIn.value, 10);
+				if (!isFinite(N) || N < 1) { out.textContent = 'Enter a positive integer.'; return; }
+
+				let lines = [];
+				lines.push('N = ' + N + '   (N mod 10 = ' + (N % 10) + ',  N mod 20 = ' + (N % 20) + ')');
+				lines.push('');
+				lines.push('Genius (70%)      ' + pad(genius(N), 6));
+				lines.push('');
+				for (const k of PCTS) {
+					lines.push(pad(NAMES[k], 12) + ' (' + pad(k, 2) + '%) ' + pad(cutoff(k, N), 6));
+				}
+				lines.push('');
+
+				const rg = rivalsGenius(N);
+				lines.push('From the Genius cutoff alone:');
+				lines.push(rg.length === 0
+					? '  DETERMINED - no other total gives Genius = ' + genius(N)
+					: '  AMBIGUOUS  - also consistent with ' + rg.join(', '));
+
+				const rs = rivalsSeven(N);
+				lines.push('From the seven other ranks:');
+				lines.push(rs.length === 0
+					? '  DETERMINED - no other total gives all seven cutoffs'
+					: '  AMBIGUOUS  - also consistent with ' + rs.join(', '));
+
+				out.textContent = lines.join('\n');
+			}
+
+			nIn.addEventListener('input', renderLookup);
+			prevBtn.addEventListener('click', () => {
+				nIn.value = Math.max(1, parseInt(nIn.value, 10) - 1);
+				renderLookup();
+			});
+			nextBtn.addEventListener('click', () => {
+				nIn.value = parseInt(nIn.value, 10) + 1;
+				renderLookup();
+			});
+			renderLookup();
+
+			// ---------- periodic-pattern grid ----------
+			const canvas = document.getElementById('strip-canvas');
+			const ctx = canvas.getContext('2d');
+			const stats = document.getElementById('strip-stats');
+			const baseIn = document.getElementById('strip-base');
+			const sPrev = document.getElementById('strip-prev');
+			const sNext = document.getElementById('strip-next');
+
+			const COLS = 20, ROWS = 8;
+			const CW = 34, CH = 20;
+
+			const GREEN = '#8fce9b', RED = '#e8949e';
+
+			function drawGrid(x0, y0, base, isDet, title) {
+				ctx.fillStyle = '#333';
+				ctx.font = 'bold 13px sans-serif';
+				ctx.fillText(title, x0, y0 - 20);
+
+				// column headers: N mod 20
+				ctx.font = '10px sans-serif';
+				ctx.fillStyle = '#777';
+				for (let c = 0; c < COLS; c++) {
+					ctx.fillText(pad((base + c) % 20, 2), x0 + c * CW + 9, y0 - 5);
+				}
+
+				for (let r = 0; r < ROWS; r++) {
+					for (let c = 0; c < COLS; c++) {
+						const N = base + r * COLS + c;
+						const det = isDet(N);
+						ctx.fillStyle = det ? GREEN : RED;
+						ctx.fillRect(x0 + c * CW, y0 + r * CH, CW - 1, CH - 1);
+						ctx.fillStyle = '#20302a';
+						ctx.font = '10px sans-serif';
+						ctx.fillText(String(N), x0 + c * CW + 3, y0 + r * CH + 14);
+					}
+				}
+			}
+
+			function detGenius(N) { return rivalsGenius(N).length === 0; }
+			function detSeven(N)  { return rivalsSeven(N).length === 0; }
+
+			function exactDensity(isDet, period, from) {
+				let d = 0;
+				for (let N = from; N < from + period; N++) if (isDet(N)) d++;
+				return d;
+			}
+
+			function drawAll() {
+				let base = parseInt(baseIn.value, 10);
+				if (!isFinite(base) || base < 1) base = 1;
+				// Snap to a multiple of 20 so the stripes line up with the columns.
+				base = Math.max(1, Math.round(base / 20) * 20);
+
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				drawGrid(20, 40, base, detGenius, 'Determined by the Genius cutoff alone (period 10)');
+				drawGrid(20, 260, base, detSeven, 'Determined by the seven other ranks (period 20)');
+
+				const gDen = exactDensity(detGenius, 20, base);
+				const sDen = exactDensity(detSeven, 20, base);
+				stats.textContent =
+					'Genius alone      : ' + gDen + '/20 of a period determined  = ' +
+						(gDen / 20).toFixed(3) + '   (exact answer 2/5 = 0.400)\n' +
+					'Seven other ranks : ' + sDen + '/20 of a period determined  = ' +
+						(sDen / 20).toFixed(3) + '   (exact answer 7/10 = 0.700)';
+			}
+
+			baseIn.addEventListener('input', drawAll);
+			sPrev.addEventListener('click', () => {
+				baseIn.value = Math.max(20, parseInt(baseIn.value, 10) - 160);
+				drawAll();
+			});
+			sNext.addEventListener('click', () => {
+				baseIn.value = parseInt(baseIn.value, 10) + 160;
+				drawAll();
+			});
+			drawAll();
+		})();
+		</script>
+	</body>
+</html>
