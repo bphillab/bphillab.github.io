@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>This Week's Fiddler - September 4, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			canvas {
+				display: block;
+				border: 1px solid #e0e0e0;
+				max-width: 100%;
+				background: #fdfbf2;
+				margin: 20px 0;
+			}
+			.controls {
+				margin: 10px 0;
+			}
+			.controls button {
+				padding: 8px 16px;
+				font-size: 16px;
+				cursor: pointer;
+			}
+			.controls label {
+				font-size: 14px;
+				margin-right: 10px;
+			}
+			#game-out, #batch-out {
+				margin-top: 10px;
+				font-family: monospace;
+				white-space: pre-wrap;
+				font-size: 13px;
+			}
+			table.grid {
+				border-collapse: collapse;
+				margin: 14px 0;
+				font-size: 14px;
+			}
+			table.grid th, table.grid td {
+				border: 1px solid #ddd;
+				padding: 4px 9px;
+				text-align: center;
+			}
+			table.grid th {
+				background: #f4f4f4;
+			}
+			td.you {
+				background: #e3ecf7;
+			}
+			td.opp {
+				background: #fbe8de;
+			}
+			pre.board {
+				font-family: monospace;
+				font-size: 15px;
+				line-height: 1.25;
+				letter-spacing: 2px;
+				margin: 10px 0 16px;
+			}
+			.swatch {
+				display: inline-block;
+				width: 11px;
+				height: 11px;
+				margin-right: 5px;
+				vertical-align: baseline;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: September 4, 2026</h1>
+		<p><em>Posted on September 4, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>In "asymmetric bingo" you play on a 5&times;5 board while your opponent plays on an 8&times;8. The 8&times;8 board carries the numbers 1 through 64 in a random arrangement; your 5&times;5 board carries 25 of those numbers, chosen and arranged at random without replacement. There are no free squares.</p>
+		<p>Numbers are drawn one at a time from 1 to 64 without replacement. If the drawn number is on your board, <em>you</em> mark it; otherwise your opponent marks it on theirs. Note that only one board is ever marked per draw. The game ends the moment somebody has bingo &mdash; five markers in a row, going across, down, or diagonally, somewhere on the board.</p>
+		<p><strong>Fiddler:</strong> Who is more likely to win, you or your opponent?</p>
+		<p><strong>Extra Credit:</strong> To at least the nearest hundredth, what is the probability that you win?</p>
+
+		<h2>Setting Up</h2>
+		<p>First, a reading of the rules. On a 5&times;5 board "five in a row" can only mean a whole row, column, or main diagonal &mdash; 12 lines. On an 8&times;8 board it has to mean <em>five consecutive</em> cells, which is also what "somewhere on the board" is pointing at: there are 4 starting positions in each of 8 rows and 8 columns, and 16 in each diagonal direction, for</p>
+		<p>\[ 32 + 32 + 32 = 96 \text{ lines}. \]</p>
+		<p>I come back at the end to what happens under the looser reading, because it actually flips the answer.</p>
+
+		<h3>The game factors into three independent pieces</h3>
+		<p>This is the observation that makes the problem tractable. Write the draw sequence as a uniformly random permutation of \(1, \dots, 64\), and label each draw \(\mathsf{Y}\) ("yours") or \(\mathsf{O}\) ("opponent's"). Then three separate random objects are in play, and they are <strong>mutually independent</strong>:</p>
+		<ol>
+			<li><strong>The interleaving.</strong> Your 25 numbers are a uniformly random subset, so the label sequence is a uniformly random arrangement of 25 \(\mathsf{Y}\)'s and 39 \(\mathsf{O}\)'s.</li>
+			<li><strong>Your board's fill order.</strong> Your 25 numbers are assigned to your 25 squares at random, so on the occasions when you do get to mark, your squares fill in a uniformly random order &mdash; a uniformly random permutation of the 25 cells.</li>
+			<li><strong>Your opponent's board's fill order.</strong> The 39 numbers <em>not</em> on your board land on a uniformly random 39-subset of the 64 squares, in a uniformly random order. Equivalently: take a uniformly random permutation of all 64 squares and mark them in that order, stopping after 39.</li>
+		</ol>
+		<p>Nothing about which numbers are where survives; only these three random orders matter. So define two independent counters, each measured in that player's <em>own</em> marks rather than in draws:</p>
+		<ul>
+			<li>\(X\) = how many of your marks it takes before your board first shows a line.</li>
+			<li>\(Y\) = how many marks it would take your opponent, in their random square order, before their board first shows a line.</li>
+		</ul>
+		<p>You are guaranteed to get all 25 of your marks eventually, and a full 5&times;5 board certainly has a line, so \(X\) is always finite. Your opponent only ever receives 39 marks, so they get bingo <em>iff</em> \(Y \le 39\).</p>
+
+		<h3>The race condition</h3>
+		<p>You win exactly when your \(X\)-th \(\mathsf{Y}\) appears before their \(Y\)-th \(\mathsf{O}\). Here a standard fact does all the work: in any arrangement of the labels, the \(x\)-th \(\mathsf{Y}\) precedes the \(y\)-th \(\mathsf{O}\) if and only if the first \(x + y - 1\) draws contain <em>at least</em> \(x\) of your numbers. (If they do, then at most \(y-1\) draws were your opponent's, so their \(y\)-th mark has not happened yet; if they do not, the reverse.) That is a hypergeometric tail, so</p>
+		<p>\[ \Pr[\text{you win}] = \sum_{x}\sum_{y} \Pr[X = x]\,\Pr[Y = y]\cdot H(x,y), \qquad H(x,y) = \sum_{i \ge x} \frac{\binom{25}{i}\binom{39}{n-i}}{\binom{64}{n}}, \quad n = x+y-1, \]</p>
+		<p>with \(H = 1\) once \(n \ge 64\). Everything now reduces to the two distributions.</p>
+
+		<h2>Your board: \(X\), exactly</h2>
+		<p>Since your squares fill in a uniformly random order, \(\Pr[X &gt; k]\) is just the fraction of \(k\)-subsets of the 25 cells that contain no complete line:</p>
+		<p>\[ \Pr[X &gt; k] = \frac{F_5(k)}{\binom{25}{k}}, \qquad F_5(k) = \sum_{S \subseteq \mathcal{L}} (-1)^{|S|} \binom{25 - |\bigcup S|}{\,k - |\bigcup S|\,}, \]</p>
+		<p>an inclusion&ndash;exclusion over the \(2^{12} = 4096\) subsets of the 12 lines &mdash; a rounding error's worth of computation. The tail:</p>
+		<table class="grid">
+			<tr><th>\(k\)</th><th>10</th><th>12</th><th>14</th><th>15</th><th>16</th><th>18</th><th>20</th><th>21</th></tr>
+			<tr><th>\(F_5(k)\)</th><td>3083468</td><td>4297872</td><td>2664548</td><td>1456572</td><td>587935</td><td>27088</td><td>48</td><td>0</td></tr>
+			<tr><th>\(\Pr[X &gt; k]\)</th><td>0.9433</td><td>0.8265</td><td>0.5978</td><td>0.4456</td><td>0.2878</td><td>0.0564</td><td>0.0009</td><td>0</td></tr>
+		</table>
+		<p>So \(X\) runs from 5 to 21, with \(\mathrm{E}[X] = 14.897\) and median 15. The two entries at the end are a nice check on the arithmetic: \(F_5(20) = 48\) says there are exactly 48 ways to mark 20 of the 25 squares without a line, i.e. exactly 48 minimal sets of 5 cells that block all 12 lines. Such a blocker needs one cell per row and one per column &mdash; a permutation matrix &mdash; and must also touch both diagonals, and there are indeed \(48\) permutations of \(\{1,\dots,5\}\) with a fixed point and an anti-fixed point.</p>
+
+		<h2>Your opponent's board: \(Y\) is the hard part</h2>
+		<p>The same identity holds, \(\Pr[Y &gt; k] = F_8(k)/\binom{64}{k}\), where \(F_8(k)\) counts the \(k\)-subsets of the 64 squares with no five consecutive marks in any direction. But now inclusion&ndash;exclusion is hopeless: \(2^{96}\) terms. The lines are short and local, though, which is exactly the setting for a transfer-matrix count.</p>
+
+		<h3>A frontier DP</h3>
+		<p>Sweep the board one row at a time. Horizontal lines never span rows, so they can be checked inside the row: of the 256 patterns for a row, the \(236\) with no five consecutive bits are the legal ones. Vertical and diagonal lines <em>do</em> span rows, so the state after finishing a row records, for each of the 8 columns, three run lengths ending at that row's cell &mdash; vertical, down-right, and down-left &mdash; each capped at 4. (A run reaching 5 is a bingo, so that branch is simply dropped.) Adding a row updates each of the 24 numbers from the previous row's values, so this is an honest transfer matrix; carrying a polynomial in \(z\) alongside each state tracks how many cells have been marked.</p>
+		<p>Left as stated this is far too big: after four rows the frontier holds \(15{,}053{,}610\) distinct states. The fix is a clamp:</p>
+		<div class="callout">
+			<p><strong>Dead runs are all the same run.</strong> After row \(r\) there are \(7 - r\) rows left. A vertical run of length \(v\) can never reach 5 if \(v + (7-r) &lt; 5\), so every such value behaves identically for the rest of the sweep and can be recorded as \(0\). The down-right run in column \(c\) has only \(\min(7-r,\,7-c)\) cells of room left, and the down-left run has \(\min(7-r,\,c)\); clamp those the same way.</p>
+		</div>
+		<p>The clamp is exact rather than approximate, because deadness propagates: if \(v + \min(7-r, 7-c) &lt; 5\) then the extended run satisfies \((v+1) + \min(6-r, 6-c) &lt; 5\) as well, so a run that has been zeroed can never be resurrected. With the clamp the frontier stays small and then collapses completely, since after the last row every run is dead:</p>
+		<table class="grid">
+			<tr><th>rows done</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th></tr>
+			<tr><th>frontier states</th><td>236</td><td>21860</td><td>610830</td><td>7950440</td><td>4216121</td><td>461478</td><td>12478</td><td>1</td></tr>
+		</table>
+		<p>The polynomial attached to that single surviving state is \(\sum_k F_8(k)\,z^k\). A few of its coefficients:</p>
+		<table class="grid">
+			<tr><th>\(k\)</th><th>10</th><th>20</th><th>25</th><th>30</th><th>35</th><th>39</th><th>45</th><th>52</th><th>53</th></tr>
+			<tr><th>\(\Pr[Y &gt; k]\)</th><td>0.99701</td><td>0.84786</td><td>0.58303</td><td>0.24862</td><td>0.04542</td><td>0.00428</td><td>7.1e&minus;6</td><td>6.1e&minus;13</td><td>0</td></tr>
+		</table>
+		<p>Summed over all \(k\), there are \(3{,}583{,}937{,}070{,}834{,}970{,}936\) line-free subsets in all, a shade over 19% of all \(2^{64}\) subsets. So \(Y\) runs from 5 to 53, with \(\mathrm{E}[Y] = 26.454\) and median 27 &mdash; and \(\Pr[Y &gt; 39] = 0.4276\%\) is the chance your opponent runs out of draws without ever getting bingo.</p>
+
+		<h3>An aside: the most stubborn board</h3>
+		<p>The DP reports \(F_8(52) = 2\) and \(F_8(53) = 0\), so you can mark 52 of the 64 squares without five in a row, and only two configurations manage it. They are mirror images of each other, and a separate exact cover search confirms both:</p>
+		<pre class="board">###.####      ####.###
+#.####.#      #.####.#
+####.###      ###.####
+##.####.      .####.##
+.####.##      ##.####.
+###.####      ####.###
+#.####.#      #.####.#
+####.###      ###.####</pre>
+		<p>Twelve blockers, at most one gap per line in every direction. Your opponent never gets near this, of course &mdash; they only ever mark 39 squares, and their squares are chosen at random, not adversarially.</p>
+
+		<h2>Putting it together</h2>
+		<p>Feeding the two exact distributions into the hypergeometric sum gives an exact rational answer:</p>
+		<div class="callout">
+			<p><strong>Fiddler answer:</strong> <strong>you</strong> are more likely to win, with the smaller board.</p>
+			<p><strong>Extra credit:</strong> \(\Pr[\text{you win}] = 0.665654538920\ldots = \boxed{0.67}\) to the nearest hundredth.</p>
+			<p style="font-size:12px;word-break:break-all;margin-bottom:0">Exactly \(\tfrac{168595011352371735292698028937805844025867}{253277040108360538108423570771821588537600}\).</p>
+		</div>
+		<p>Two independent checks agree. A direct simulation of the game itself &mdash; deal both boards, draw all 64 numbers, see who finishes first &mdash; gives \(0.6655 \pm 0.0011\) over 200,000 games. And a 200-million-sample simulation of the two fill orders matches the exact distributions of \(X\) and \(Y\) bin by bin, with a worst standardized residual of \(2.7\) across 63 bins.</p>
+
+		<h2>Why the small board wins</h2>
+		<p>Here is the cleanest way I found to see it. Convert each counter into the fraction of that player's <em>own</em> numbers they need:</p>
+		<table class="grid">
+			<tr><th></th><th>own numbers</th><th>marks needed</th><th>fraction needed</th></tr>
+			<tr><td>you (5&times;5)</td><td>25</td><td>\(\mathrm{E}[X] = 14.90\)</td><td class="you"><strong>59.6%</strong></td></tr>
+			<tr><td>opponent (8&times;8)</td><td>39</td><td>\(\mathrm{E}[Y] = 26.45\)</td><td class="opp"><strong>67.8%</strong></td></tr>
+		</table>
+		<p>Both players are drawing from one common shuffled sequence, so each player's \(k\)-th mark lands at roughly the same <em>relative</em> depth in the deck: your \(x\)-th mark around \(x/26\) of the way through, their \(y\)-th around \(y/40\). Whoever needs the smaller fraction of their own numbers finishes first, and 59.6% beats 67.8%. Made into a crude criterion &mdash; you win iff \(40X &lt; 26Y\) &mdash; this already predicts \(0.692\), close to the true \(0.666\). In draws rather than fractions: your bingo lands on draw \(37.2\) on average, your opponent's on draw \(42.9\), a head start of \(5.6\) draws.</p>
+		<p>So why does the 8&times;8 board's eightfold advantage in lines not pay off? Because it is diluted. Your board ends the deck 100% marked, which completes all 12 of its lines; your opponent's ends 39/64 = 61% marked, and a line needs <em>five</em> squares, so each of their 96 chances is worth only \(\binom{39}{5}/\binom{64}{5} = 7.6\%\). Line count enters linearly, density enters to the fifth power, and the fifth power very nearly eats the whole factor of eight. Comparing expected numbers of completed lines as the deck runs down:</p>
+		<table class="grid">
+			<tr><th>after draw</th><th>32</th><th>37</th><th>43</th><th>48</th><th>56</th><th>64</th></tr>
+			<tr><th>your lines</th><td class="you">0.23</td><td class="you">0.55</td><td class="you">1.31</td><td class="you">2.44</td><td class="you">5.76</td><td class="you">12.00</td></tr>
+			<tr><th>their lines</th><td class="opp">0.17</td><td class="opp">0.38</td><td class="opp">0.86</td><td class="opp">1.57</td><td class="opp">3.57</td><td class="opp">7.25</td></tr>
+		</table>
+		<p>Your opponent does get there in the end &mdash; more than seven completed lines on a full run, and a bingo 99.57% of the time. They just get there consistently about half a step behind, and half a step is the whole game.</p>
+
+		<h2>How much the rule reading matters</h2>
+		<p>Since the phrase "five in a row" is doing real work on an 8&times;8 board, here is the same calculation under four readings. The first is the one above; the others use the exact \(X\) distribution and the exact hypergeometric with a 3-million-sample estimate of \(Y\).</p>
+		<table class="grid">
+			<tr><th>what counts as bingo on the 8&times;8</th><th>lines</th><th>\(\mathrm{E}[Y]\)</th><th>\(\Pr[\text{you win}]\)</th></tr>
+			<tr><td>five consecutive, any diagonal</td><td>96</td><td>26.45</td><td class="you">0.6657 (exact)</td></tr>
+			<tr><td>five consecutive, only the two main diagonals</td><td>72</td><td>28.01</td><td class="you">0.7261</td></tr>
+			<tr><td>a full line of eight</td><td>18</td><td>43.09</td><td class="you">0.9916</td></tr>
+			<tr><td>any five within a row, column, or main diagonal</td><td>18 groups</td><td>18.28</td><td class="opp">0.2627</td></tr>
+		</table>
+		<p>The first three all favor you, and restricting the diagonals barely matters. The last one flips the game: if five markers scattered anywhere along a rank counts, your opponent's rows are 8 long instead of 5 and they get there first, two times out of three. I read the intended rule as consecutive &mdash; "somewhere on the board" is asking you to point at a location, and it is also the reading that makes the game closest to fair, which is the promise in the setup. But it is worth knowing that the puzzle's answer hinges on it.</p>
+
+		<h2>Interactive: Play a Game</h2>
+		<p>Both boards are dealt at random and the numbers are drawn in a random order; each draw marks exactly one board. Marked squares are shaded, the current draw is outlined, and the winning line is highlighted when the game ends.</p>
+		<div class="controls">
+			<button id="g-new">new game</button>
+			<button id="g-step">step</button>
+			<button id="g-play">play</button>
+			<button id="g-finish">finish</button>
+		</div>
+		<canvas id="game-canvas" width="580" height="336"></canvas>
+		<div id="game-out"></div>
+		<div class="controls" style="margin-top:18px">
+			<button id="b-run">simulate 20,000 more games</button>
+			<button id="b-reset">reset tally</button>
+		</div>
+		<div id="batch-out"></div>
+
+		<h2>Interactive: The Race</h2>
+		<p>Where each player's bingo lands. Toggle between counting in <em>draws</em> (the shared clock &mdash; the two curves are what the race actually looks like) and counting in each player's <em>own marks</em> (the distributions of \(X\) and \(Y\), which are what the calculation uses). All curves are the exact values, not simulated. Dashed lines mark the means.</p>
+		<p>Note that in the draws view the opponent's curve does not quite integrate to 1: the missing 0.43% is the chance they never get bingo at all.</p>
+		<div class="controls">
+			<button id="c-draws">in draws</button>
+			<button id="c-marks">in own marks</button>
+		</div>
+		<canvas id="race-canvas" width="760" height="380"></canvas>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/08/2026-08-28.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+		<script>
+		(function() {
+			const YOU = '#2a78d6', OPP = '#eb6834';
+			const YOU_FILL = '#dbe7f7', OPP_FILL = '#fbe3d5';
+			const INK = '#1f2c36', MUTED = '#5a6772', GRID = '#dbe5f0';
+			const EXACT = 0.665654538920;
+
+			/* ---------- line sets ---------- */
+			function lines5() {
+				const L = [];
+				for (let r = 0; r < 5; r++) L.push([0,1,2,3,4].map(c => r*5+c));
+				for (let c = 0; c < 5; c++) L.push([0,1,2,3,4].map(r => r*5+c));
+				L.push([0,1,2,3,4].map(i => i*5+i));
+				L.push([0,1,2,3,4].map(i => i*5+(4-i)));
+				return L;
+			}
+			function lines8() {
+				const L = [], D = [[0,1],[1,0],[1,1],[1,-1]];
+				for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) for (const [dr,dc] of D) {
+					const cells = [];
+					for (let t = 0; t < 5; t++) {
+						const rr = r+dr*t, cc = c+dc*t;
+						if (rr < 0 || rr > 7 || cc < 0 || cc > 7) break;
+						cells.push(rr*8+cc);
+					}
+					if (cells.length === 5) L.push(cells);
+				}
+				return L;
+			}
+			const L5 = lines5(), L8 = lines8();
+			// for each cell, the lines through it -- the only ones a new mark can complete
+			function byCell(L, n) {
+				const out = [];
+				for (let i = 0; i < n; i++) out.push(L.filter(l => l.includes(i)));
+				return out;
+			}
+			const C5 = byCell(L5, 25), C8 = byCell(L8, 64);
+
+			function shuffled(n) {
+				const a = [];
+				for (let i = 0; i < n; i++) a.push(i);
+				for (let i = n-1; i > 0; i--) {
+					const j = Math.floor(Math.random()*(i+1));
+					[a[i], a[j]] = [a[j], a[i]];
+				}
+				return a;
+			}
+
+			/* ---------- one game ---------- */
+			function newGame() {
+				const draw = shuffled(64);              // draw order (0-based numbers)
+				const nums = shuffled(64);              // nums[0..24] are yours
+				const mine = new Array(64).fill(false);
+				for (let i = 0; i < 25; i++) mine[nums[i]] = true;
+				const cell5 = shuffled(25), cell8 = shuffled(64);
+				const numToCell5 = new Array(64).fill(-1);
+				for (let i = 0; i < 25; i++) numToCell5[nums[i]] = cell5[i];
+				const numToCell8 = new Array(64);
+				for (let i = 0; i < 64; i++) numToCell8[i] = cell8[i];
+				const board5 = new Array(25).fill(-1), board8 = new Array(64).fill(-1);
+				for (let i = 0; i < 25; i++) board5[cell5[i]] = nums[i];
+				for (let i = 0; i < 64; i++) board8[cell8[i]] = i;
+				return {draw, mine, numToCell5, numToCell8, board5, board8,
+				        m5: new Array(25).fill(false), m8: new Array(64).fill(false),
+				        t: 0, winner: 0, winLine: null, last: null, myMarks: 0, oppMarks: 0};
+			}
+			// advance one draw; returns false when the game is over
+			function step(g) {
+				if (g.winner || g.t >= 64) return false;
+				const num = g.draw[g.t++];
+				if (g.mine[num]) {
+					const cell = g.numToCell5[num];
+					g.m5[cell] = true; g.myMarks++;
+					g.last = {side: 0, cell: cell, num: num};
+					for (const l of C5[cell]) if (l.every(i => g.m5[i])) { g.winner = 1; g.winLine = l; break; }
+				} else {
+					const cell = g.numToCell8[num];
+					g.m8[cell] = true; g.oppMarks++;
+					g.last = {side: 1, cell: cell, num: num};
+					for (const l of C8[cell]) if (l.every(i => g.m8[i])) { g.winner = 2; g.winLine = l; break; }
+				}
+				return !g.winner;
+			}
+			function playOut(g) { while (step(g)) {} return g.winner; }
+
+			/* ---------- board drawing ---------- */
+			const gc = document.getElementById('game-canvas'), gx = gc.getContext('2d');
+			const gout = document.getElementById('game-out');
+
+			function drawBoard(x0, y0, cw, n, board, marks, title, color, fill, win, last, side) {
+				gx.fillStyle = INK;
+				gx.font = 'bold 13px monospace';
+				gx.fillText(title, x0, y0 - 22);
+				const winSet = win ? new Set(win) : null;
+				for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+					const i = r*n+c, X = x0+c*cw, Y = y0+r*cw;
+					gx.fillStyle = marks[i] ? (winSet && winSet.has(i) ? color : fill) : '#fff';
+					gx.fillRect(X, Y, cw-2, cw-2);
+					gx.strokeStyle = GRID; gx.lineWidth = 1;
+					gx.strokeRect(X+0.5, Y+0.5, cw-3, cw-3);
+					gx.fillStyle = (winSet && winSet.has(i)) ? '#fff' : (marks[i] ? INK : MUTED);
+					gx.font = (winSet && winSet.has(i) ? 'bold ' : '') + (n === 5 ? '13px' : '11px') + ' monospace';
+					const s = String(board[i]+1);
+					gx.fillText(s, X + (cw-2-gx.measureText(s).width)/2, Y + cw/2 + 4);
+					if (last && last.side === side && last.cell === i) {
+						gx.strokeStyle = color; gx.lineWidth = 2.5;
+						gx.strokeRect(X+1, Y+1, cw-4, cw-4);
+					}
+				}
+			}
+			let g = newGame(), timer = null;
+
+			function ord(n) {
+				const t = n % 100;
+				if (t >= 11 && t <= 13) return n + 'th';
+				return n + ['th','st','nd','rd','th','th','th','th','th','th'][n % 10];
+			}
+			function renderGame() {
+				gx.clearRect(0, 0, gc.width, gc.height);
+				drawBoard(20, 46, 42, 5, g.board5, g.m5, 'you (5x5)', YOU, YOU_FILL,
+				          g.winner === 1 ? g.winLine : null, g.last, 0);
+				drawBoard(248, 46, 34, 8, g.board8, g.m8, 'opponent (8x8)', OPP, OPP_FILL,
+				          g.winner === 2 ? g.winLine : null, g.last, 1);
+				let s = 'draw ' + g.t + ' of 64';
+				if (g.last) s += '   |   number ' + (g.last.num+1) + ' -> ' + (g.last.side === 0 ? 'your board' : 'their board');
+				s += '\nmarks: you ' + g.myMarks + '/25, opponent ' + g.oppMarks + '/39';
+				if (g.winner === 1) s += '\n\nYOU WIN on draw ' + g.t + ' with your ' + ord(g.myMarks) + ' mark.';
+				else if (g.winner === 2) s += '\n\nOPPONENT WINS on draw ' + g.t + ' with their ' + ord(g.oppMarks) + ' mark.';
+				else if (g.t >= 64) s += '\n\n(no bingo -- cannot happen; your board is full)';
+				gout.textContent = s;
+			}
+			function stopPlay() {
+				if (timer) { clearInterval(timer); timer = null; }
+				document.getElementById('g-play').textContent = 'play';
+			}
+			document.getElementById('g-new').addEventListener('click', () => { stopPlay(); g = newGame(); renderGame(); });
+			document.getElementById('g-step').addEventListener('click', () => { stopPlay(); step(g); renderGame(); });
+			document.getElementById('g-finish').addEventListener('click', () => { stopPlay(); playOut(g); renderGame(); });
+			document.getElementById('g-play').addEventListener('click', function() {
+				if (timer) { stopPlay(); return; }
+				this.textContent = 'pause';
+				timer = setInterval(() => {
+					if (!step(g)) stopPlay();
+					renderGame();
+				}, 120);
+			});
+			renderGame();
+
+			/* ---------- batch tally ---------- */
+			const bout = document.getElementById('batch-out');
+			let bw = 0, bn = 0;
+			function renderBatch() {
+				if (!bn) { bout.textContent = 'no games simulated yet.'; return; }
+				const p = bw/bn, se = Math.sqrt(p*(1-p)/bn);
+				bout.textContent =
+					'games      ' + bn + '\n' +
+					'you win    ' + bw + '   (' + (100*p).toFixed(2) + '%)\n' +
+					'opponent   ' + (bn-bw) + '   (' + (100*(1-p)).toFixed(2) + '%)\n' +
+					'estimate   ' + p.toFixed(5) + ' +/- ' + se.toFixed(5) + '\n' +
+					'exact      ' + EXACT.toFixed(5) + '   (off by ' + ((p-EXACT)/se).toFixed(2) + ' standard errors)';
+			}
+			document.getElementById('b-run').addEventListener('click', function() {
+				this.disabled = true;
+				setTimeout(() => {
+					for (let i = 0; i < 20000; i++) { if (playOut(newGame()) === 1) bw++; bn++; }
+					renderBatch();
+					this.disabled = false;
+				}, 0);
+			});
+			document.getElementById('b-reset').addEventListener('click', () => { bw = bn = 0; renderBatch(); });
+			renderBatch();
+
+			/* ---------- exact distributions ---------- */
+			// P(bingo lands on draw d), d = 5..64
+			const DME = [0.00000157,0.00000787,0.00002361,0.00005509,0.00011017,0.00019829,0.00033044,0.00051909,0.00077821,0.00112308,0.00157017,0.00213695,0.00284152,0.00370225,0.00473721,0.00596356,0.00739669,0.00904934,0.01093048,0.01304416,0.01538820,0.01795292,0.02071988,0.02366074,0.02673637,0.02989632,0.03307872,0.03621085,0.03921035,0.04198729,0.04444704,0.04649403,0.04803620,0.04899014,0.04928655,0.04887573,0.04773270,0.04586149,0.04329811,0.04011165,0.03640319,0.03230221,0.02796040,0.02354297,0.01921806,0.01514478,0.01146117,0.00827316,0.00564597,0.00359944,0.00210810,0.00110676,0.00050129,0.00018348,0.00004770,0.00000630,0,0,0,0];
+			const DTH = [0.00000095,0.00000472,0.00001403,0.00003247,0.00006441,0.00011497,0.00018999,0.00029599,0.00044009,0.00062997,0.00087378,0.00118007,0.00155766,0.00201553,0.00256265,0.00320782,0.00395942,0.00482519,0.00581196,0.00692530,0.00816923,0.00954580,0.01105475,0.01269313,0.01445485,0.01633042,0.01830655,0.02036594,0.02248710,0.02464431,0.02680767,0.02894341,0.03101426,0.03298011,0.03479885,0.03642739,0.03782296,0.03894445,0.03975405,0.04021881,0.04031235,0.04001638,0.03932219,0.03823177,0.03675859,0.03492801,0.03277706,0.03035365,0.02771523,0.02492672,0.02205804,0.01918104,0.01636630,0.01367970,0.01117920,0.00891200,0.00691228,0.00519985,0.00377973,0.00264286];
+			// P(X = x), x = 5..21 ; P(Y = y), y = 5..53
+			const PX = [0.00022586,0.00112931,0.00338792,0.00790514,0.01578776,0.02824973,0.04635642,0.07049170,0.09944965,0.12923575,0.15217693,0.15782009,0.13766748,0.09376511,0.04406431,0.01138340,0.00090344];
+			const PY = [0.00001259,0.00006207,0.00018358,0.00042220,0.00083202,0.00147506,0.00241981,0.00373924,0.00550801,0.00779846,0.01067538,0.01418908,0.01836692,0.02320344,0.02864971,0.03460288,0.04089759,0.04730123,0.05351552,0.05918681,0.06392702,0.06734589,0.06909324,0.06890723,0.06666196,0.06240506,0.05637546,0.04899287,0.04081509,0.03246670,0.02455045,0.01756001,0.01181435,0.00743001,0.00433701,0.00233093,0.00114296,0.00050595,0.00019971,0.00006925,0.00002072,0.00000523,0.00000108,0.00000018,0.00000002,0,0,0,0];
+
+			const VIEWS = {
+				// labelAt: where to hang the direct label, picked so the two never collide
+				draws: {
+					xlab: 'draw number', lo: 5, hi: 64,
+					a: {name: 'your bingo lands here', tag: 'you', labelAt: 39, data: DME, mean: 37.24},
+					b: {name: "opponent's bingo lands here", tag: 'opponent', labelAt: 55, data: DTH, mean: 42.89}
+				},
+				marks: {
+					xlab: "the player's own mark number", lo: 5, hi: 53,
+					a: {name: 'X: your marks needed', tag: 'you', labelAt: 17, data: PX, mean: 14.90},
+					b: {name: 'Y: their marks needed', tag: 'opponent', labelAt: 38, data: PY, mean: 26.45}
+				}
+			};
+
+			/* ---------- race chart ---------- */
+			const rc = document.getElementById('race-canvas'), rx = rc.getContext('2d');
+			let view = 'draws';
+
+			function at(series, lo, k) {
+				const i = k - lo;
+				return (i >= 0 && i < series.data.length) ? series.data[i] : 0;
+			}
+			function drawRace() {
+				const v = VIEWS[view];
+				const P = {l: 62, r: 18, t: 30, b: 76};
+				const W = rc.width - P.l - P.r, H = rc.height - P.t - P.b;
+				rx.clearRect(0, 0, rc.width, rc.height);
+
+				let mx = 0;
+				for (const s of [v.a, v.b]) for (const y of s.data) mx = Math.max(mx, y);
+				// smallest round tick step that keeps the axis to at most 8 intervals
+				const step = [0.005, 0.01, 0.02, 0.025, 0.05].find(s => Math.ceil(mx/s) <= 8);
+				let ticks = Math.ceil(mx/step);
+				if (mx > 0.9*ticks*step) ticks++;   // headroom, so the peak label clears the legend
+				const ymax = ticks*step;
+				const dp = (step*100) % 1 ? 1 : 0;
+				const px = k => P.l + (k - v.lo)/(v.hi - v.lo)*W;
+				const py = y => P.t + H - y/ymax*H;
+
+				// grid + axes
+				rx.strokeStyle = GRID; rx.lineWidth = 1;
+				rx.fillStyle = MUTED; rx.font = '11px monospace';
+				for (let t = 0; t <= ticks; t++) {
+					const y = t*step, Y = Math.round(py(y)) + 0.5;
+					rx.beginPath(); rx.moveTo(P.l, Y); rx.lineTo(P.l+W, Y); rx.stroke();
+					const s = (100*y).toFixed(dp) + '%';
+					rx.fillText(s, P.l - 8 - rx.measureText(s).width, Y + 4);
+				}
+				const stepK = (v.hi - v.lo > 40) ? 10 : 5;
+				for (let k = Math.ceil(v.lo/stepK)*stepK; k <= v.hi; k += stepK) {
+					const X = Math.round(px(k)) + 0.5;
+					rx.strokeStyle = GRID;
+					rx.beginPath(); rx.moveTo(X, P.t); rx.lineTo(X, P.t+H); rx.stroke();
+					rx.fillStyle = MUTED;
+					const s = String(k);
+					rx.fillText(s, X - rx.measureText(s).width/2, P.t + H + 18);
+				}
+				rx.fillStyle = INK; rx.font = '12px monospace';
+				let s = v.xlab;
+				rx.fillText(s, P.l + (W - rx.measureText(s).width)/2, P.t + H + 38);
+				rx.save();
+				rx.translate(16, P.t + H/2); rx.rotate(-Math.PI/2);
+				s = 'probability';
+				rx.fillText(s, -rx.measureText(s).width/2, 0);
+				rx.restore();
+
+				// means, drawn behind the curves
+				for (const [ser, col] of [[v.a, YOU], [v.b, OPP]]) {
+					rx.strokeStyle = col; rx.lineWidth = 1.5;
+					rx.setLineDash([4, 4]);
+					rx.beginPath(); rx.moveTo(px(ser.mean), P.t); rx.lineTo(px(ser.mean), P.t+H); rx.stroke();
+					rx.setLineDash([]);
+				}
+
+				// curves
+				for (const [ser, col] of [[v.b, OPP], [v.a, YOU]]) {
+					rx.strokeStyle = col; rx.lineWidth = 2;
+					rx.lineJoin = 'round';
+					rx.beginPath();
+					for (let k = v.lo; k <= v.hi; k++) {
+						const X = px(k), Y = py(at(ser, v.lo, k));
+						if (k === v.lo) rx.moveTo(X, Y); else rx.lineTo(X, Y);
+					}
+					rx.stroke();
+					// direct label, so identity is never carried by color alone
+					rx.fillStyle = INK; rx.font = 'bold 12px monospace';
+					const lab = ser.tag, lw = rx.measureText(lab).width;
+					const lx = Math.max(P.l, Math.min(px(ser.labelAt) - lw/2, P.l + W - lw));
+					rx.fillText(lab, lx, py(at(ser, v.lo, ser.labelAt)) - 11);
+				}
+
+				// legend
+				rx.font = '11px monospace';
+				let legX = P.l;
+				for (const [ser, col] of [[v.a, YOU], [v.b, OPP]]) {
+					rx.fillStyle = col;
+					rx.fillRect(legX, 12, 11, 11);
+					rx.fillStyle = INK;
+					const t = ser.name + '  (mean ' + ser.mean.toFixed(2) + ', dashed)';
+					rx.fillText(t, legX + 16, 22);
+					legX += 22 + rx.measureText(t).width + 6;
+				}
+			}
+			function setView(v) {
+				view = v;
+				document.getElementById('c-draws').disabled = (v === 'draws');
+				document.getElementById('c-marks').disabled = (v === 'marks');
+				drawRace();
+			}
+			document.getElementById('c-draws').addEventListener('click', () => setView('draws'));
+			document.getElementById('c-marks').addEventListener('click', () => setView('marks'));
+			setView('draws');
+		})();
+		</script>
+	</body>
+</html>
