@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>This Week's Fiddler - September 11, 2026 - Benjamin Phillabaum, Data Cat</title>
+		<link rel="stylesheet" type="text/css" href="/css/main.css">
+		<style>
+			.callout {
+				padding: 10px 12px;
+				border: 1px solid #e0e0e0;
+				background: #fafafa;
+				margin: 14px 0 18px;
+				max-width: 760px;
+			}
+			canvas {
+				display: block;
+				border: 1px solid #e0e0e0;
+				max-width: 100%;
+				background: #fff;
+				margin: 20px 0;
+			}
+			.controls {
+				margin: 12px 0;
+			}
+			.controls button {
+				padding: 8px 16px;
+				font-size: 15px;
+				cursor: pointer;
+			}
+			.controls select, .controls input[type=number] {
+				padding: 6px 8px;
+				font-size: 15px;
+				margin-right: 12px;
+			}
+			.controls label {
+				font-size: 14px;
+				margin-right: 6px;
+				font-weight: bold;
+			}
+			#sim-out, #quiz-viz {
+				margin-top: 10px;
+				font-family: monospace;
+				white-space: pre-wrap;
+				font-size: 13px;
+			}
+			table.grid {
+				border-collapse: collapse;
+				margin: 14px 0;
+				font-size: 14px;
+				max-width: 100%;
+			}
+			table.grid th, table.grid td {
+				border: 1px solid #ddd;
+				padding: 6px 10px;
+				text-align: center;
+			}
+			table.grid th {
+				background: #f4f4f4;
+			}
+			td.opt {
+				background: #e3f1e6;
+				font-weight: bold;
+			}
+			td.glance {
+				background: #dbe7f7;
+				font-weight: bold;
+			}
+		</style>
+		<script defer src="/analytics.js"></script>
+		<script defer src="/mathjax.js"></script>
+	</head>
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="/cv">CV</a></li>
+				<li><a href="/blog">Blog</a></li>
+				<li><a href="/games">Games</a></li>
+			</ul>
+		</nav>
+
+		<h1>This Week's Fiddler: September 11, 2026</h1>
+		<p><em>Posted on September 11, 2026</em></p>
+
+		<h2>Problem</h2>
+		<p>Uh-oh, Charlie’s teacher is giving a pop quiz today! The quiz consists of three multiple choice questions, each with four choices (A, B, C, and D). Each correct answer is worth 1 point. Charlie didn’t study, and has absolutely no idea what the answers might be. That said, he still wants to maximize his score on the quiz.</p>
+		<p>Importantly, Charlie happens to know that his teacher is a little obsessive when it comes to creating quizzes. In particular, consecutive questions never have the same correct answer. For example, if the answer to one question is C, then the answer to the following question cannot be C.</p>
+		<p>Also Charlie is a bit of a, well, cheat. He glances over at the quiz of his neighbor, who definitely studied and knows the answer to every question. Charlie spots the correct answer to the first question on his neighbor’s quiz.</p>
+		<p>At this point, the neighbor carefully covers their quiz, meaning Charlie must rely on his own wits for the remaining two questions.</p>
+		<p><strong>Fiddler:</strong> On average, what score can Charlie expect to earn on this quiz?</p>
+		<p><strong>Extra Credit:</strong> Oh no, Charlie’s teacher is giving another pop quiz! This time, there are seven multiple choice questions, each with four choices (A, B, C, and D). Charlie still hasn’t studied, and his teacher remains obsessive about avoiding any repeating correct answers.</p>
+		<p>Charlie has one chance to glance over at his neighbor’s test and spot a single correct answer before the neighbor notices and prevents Charlie from seeing any others.</p>
+		<p>Which of the seven answers should Charlie look at? And, if he does so, then what score should he expect to earn on this quiz, on average?</p>
+
+		<h2>Setting Up: The Markov Chain of Questions</h2>
+		<p>Let \(C_k \in \{\text{A}, \text{B}, \text{C}, \text{D}\}\) be the correct answer to question \(k\). Because the teacher strictly avoids repeating the same answer on consecutive questions, each subsequent answer is chosen uniformly at random from the 3 remaining choices:</p>
+		<p>\[
+		P(C_{k+1} = j \mid C_k = i) = \begin{cases}
+		0 & \text{if } j = i, \\
+		\frac{1}{3} & \text{if } j \neq i.
+		\end{cases}
+		\]</p>
+		<p>This is a discrete-time Markov chain on 4 states with transition matrix:</p>
+		<p>\[
+		\mathbf{P} = \begin{pmatrix}
+		0 & 1/3 & 1/3 & 1/3 \\
+		1/3 & 0 & 1/3 & 1/3 \\
+		1/3 & 1/3 & 0 & 1/3 \\
+		1/3 & 1/3 & 1/3 & 0
+		\end{pmatrix} = \frac{1}{3}(\mathbf{J} - \mathbf{I}),
+		\]</p>
+		<p>where \(\mathbf{J}\) is the \(4 \times 4\) all-ones matrix and \(\mathbf{I}\) is the identity matrix. Notice that \(\mathbf{P}\) is symmetric and doubly stochastic with uniform stationary distribution \(\pi = (1/4, 1/4, 1/4, 1/4)\). Because the transition rule is symmetric across time, the distribution of answers at a graph distance \(d = |k - m|\) from an observed answer \(C_m\) depends purely on \(d\).</p>
+
+		<h3>The \(d\)-step Transition Probabilities</h3>
+		<p>By diagonalizing \(\mathbf{P}\) (or setting up the simple recurrence for returning to the starting state), the eigenvalues of \(\mathbf{P}\) are \(\lambda_1 = 1\) (with multiplicity 1) and \(\lambda_2 = -1/3\) (with multiplicity 3). Therefore, after \(d\) transitions:</p>
+		<p>\[
+		\mathbf{P}^d = \frac{1}{4}\mathbf{J} + \left(-\frac{1}{3}\right)^d \left(\mathbf{I} - \frac{1}{4}\mathbf{J}\right).
+		\]</p>
+		<p>Concretely, conditioned on seeing answer \(C_m\) at question \(m\), the probability that question \(k\) (at distance \(d = |k - m|\)) has answer \(j\) is:</p>
+		<ul>
+			<li><strong>Same answer (\(j = C_m\)):</strong>
+			\[
+			P(C_k = C_m \mid C_m) = \frac{1}{4} + \frac{3}{4}\left(-\frac{1}{3}\right)^d
+			\]</li>
+			<li><strong>Different answer (\(j \neq C_m\)):</strong> for each of the 3 alternative choices,
+			\[
+			P(C_k = j \mid C_m) = \frac{1}{4} - \frac{1}{4}\left(-\frac{1}{3}\right)^d
+			\]</li>
+		</ul>
+
+		<h3>Charlie's Optimal Guess at Distance \(d\)</h3>
+		<p>To maximize his expected score, Charlie simply picks whichever answer choice has the highest probability under the conditional distribution. The sign of \((-1/3)^d\) alternates with the parity of \(d\):</p>
+		<ul>
+			<li><strong>When \(d\) is even:</strong> \((-1/3)^d > 0\). The answer \(C_m\) has probability \(\frac{1}{4} + \frac{3}{4\cdot 3^d}\), which is strictly greater than any other choice. Charlie should guess <strong>\(C_m\)</strong>, achieving success probability:
+			\[
+			p(d) = \frac{1}{4} + \frac{3}{4\cdot 3^d}.
+			\]</li>
+			<li><strong>When \(d\) is odd:</strong> \((-1/3)^d < 0\). Each of the 3 non-\(C_m\) choices has probability \(\frac{1}{4} + \frac{1}{4\cdot 3^d} > P(C_k = C_m)\). Charlie should guess <strong>any choice other than \(C_m\)</strong>, achieving success probability:
+			\[
+			p(d) = \frac{1}{4} + \frac{1}{4\cdot 3^d}.
+			\]</li>
+		</ul>
+
+		<p>Evaluating the optimal success probabilities for distances \(d = 0, 1, \dots, 6\):</p>
+		<table class="grid">
+			<tr><th>Distance \(d\)</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>
+			<tr><th>Optimal Guess</th><td>\(C_m\)</td><td>Any \(\neq C_m\)</td><td>\(C_m\)</td><td>Any \(\neq C_m\)</td><td>\(C_m\)</td><td>Any \(\neq C_m\)</td><td>\(C_m\)</td></tr>
+			<tr><th>Success Prob \(p(d)\)</th><td>\(1\)</td><td>\(\frac{1}{3}\)</td><td>\(\frac{1}{3}\)</td><td>\(\frac{7}{27}\)</td><td>\(\frac{7}{27}\)</td><td>\(\frac{61}{243}\)</td><td>\(\frac{61}{243}\)</td></tr>
+			<tr><th>Decimal</th><td>1.0000</td><td>0.3333</td><td>0.3333</td><td>0.2593</td><td>0.2593</td><td>0.2510</td><td>0.2510</td></tr>
+		</table>
+
+		<h2>Main Solution: The 3-Question Quiz</h2>
+		<p>Charlie peeks at Question 1, so \(m = 1\). The distances to the three questions are \(d = 0, 1, 2\).</p>
+		<p>By linearity of expectation, Charlie's total expected score is the sum of his success probabilities across all three questions:</p>
+		<p>\[
+		\mathbb{E}[\text{Score}] = p(0) + p(1) + p(2) = 1 + \frac{1}{3} + \frac{1}{3} = \frac{5}{3} \approx 1.6667 \text{ points}.
+		\]</p>
+
+		<div class="callout">
+			<p><strong>Fiddler Answer:</strong> Charlie can expect to earn \(\displaystyle \frac{5}{3} = \mathbf{1\tfrac{2}{3}} \approx 1.667\) points on average.</p>
+		</div>
+
+		<h2>Extra Credit: The 7-Question Quiz</h2>
+		<p>Now there are 7 questions, and Charlie gets to choose which single question \(m \in \{1, 2, \dots, 7\}\) to observe. His expected score if he observes question \(m\) is:</p>
+		<p>\[
+		S(m) = \sum_{k=1}^7 p(|k - m|).
+		\]</p>
+		<p>Let's evaluate \(S(m)\) for each candidate index:</p>
+
+		<table class="grid">
+			<tr>
+				<th>Observed Question \(m\)</th>
+				<th>Distances \(\{|k-m|\}\)</th>
+				<th>Sum of Probabilities</th>
+				<th>Exact Expected Score</th>
+				<th>Decimal</th>
+			</tr>
+			<tr>
+				<td>\(m = 1\) or \(m = 7\)</td>
+				<td>\(0, 1, 2, 3, 4, 5, 6\)</td>
+				<td>\(1 + \frac{1}{3} + \frac{1}{3} + \frac{7}{27} + \frac{7}{27} + \frac{61}{243} + \frac{61}{243}\)</td>
+				<td>\(\frac{653}{243}\)</td>
+				<td>\(\approx 2.6872\)</td>
+			</tr>
+			<tr>
+				<td>\(m = 2\) or \(m = 6\)</td>
+				<td>\(1, 0, 1, 2, 3, 4, 5\)</td>
+				<td>\(1 + 3\left(\frac{1}{3}\right) + 2\left(\frac{7}{27}\right) + \frac{61}{243}\)</td>
+				<td>\(\frac{673}{243}\)</td>
+				<td>\(\approx 2.7695\)</td>
+			</tr>
+			<tr class="opt">
+				<td>\(m = 3\) or \(m = 5\)</td>
+				<td>\(2, 1, 0, 1, 2, 3, 4\)</td>
+				<td>\(1 + 4\left(\frac{1}{3}\right) + 2\left(\frac{7}{27}\right)\)</td>
+				<td>\(\frac{77}{27} = \frac{693}{243}\)</td>
+				<td>\(\approx 2.8519\)</td>
+			</tr>
+			<tr class="opt">
+				<td>\(m = 4\)</td>
+				<td>\(3, 2, 1, 0, 1, 2, 3\)</td>
+				<td>\(1 + 4\left(\frac{1}{3}\right) + 2\left(\frac{7}{27}\right)\)</td>
+				<td>\(\frac{77}{27} = \frac{693}{243}\)</td>
+				<td>\(\approx 2.8519\)</td>
+			</tr>
+		</table>
+
+		<h3>Why Questions 3, 4, and 5 are Tied</h3>
+		<p>Intuition might suggest that looking dead-center at Question 4 should be strictly optimal because it minimizes the maximum distance to any other question. However, moving from \(m=4\) (distances \(\{3, 2, 1, 0, 1, 2, 3\}\)) to \(m=3\) (distances \(\{2, 1, 0, 1, 2, 3, 4\}\)) simply trades one question at distance 3 for one question at distance 4.</p>
+		<p>Because \(p(3) = p(4) = 7/27\), this trade costs Charlie <strong>zero expected points</strong>! Thus, Questions 3, 4, and 5 all share the exact same maximal expected score of \(\frac{77}{27}\).</p>
+
+		<div class="callout">
+			<p><strong>Extra Credit Answer:</strong></p>
+			<p>Charlie should look at <strong>Question 3, 4, or 5</strong> (any of these three choices is optimal).</p>
+			<p>His maximum expected score is \(\displaystyle \frac{77}{27} = \mathbf{2\tfrac{23}{27}} \approx 2.8519\) points.</p>
+		</div>
+
+		<h2>Interactive: Strategy & Monte Carlo Simulator</h2>
+		<p>Explore Charlie's expected score for any quiz length \(N\) and choice of observed question \(m\). Run thousands of simulated quizzes generated under the teacher's no-repeat rule to verify empirical scores against theoretical expectations.</p>
+
+		<div class="controls">
+			<label for="quiz-n">Quiz Length \(N\):</label>
+			<input type="number" id="quiz-n" min="3" max="25" value="7" style="width:65px">
+			<label for="glance-m">Glance at Question \(m\):</label>
+			<select id="glance-m"></select>
+			<button id="btn-sim">Simulate 50,000 Quizzes</button>
+		</div>
+
+		<div id="quiz-viz"></div>
+		<div id="sim-out"></div>
+
+		<h2>Interactive: Expected Score by Glance Position</h2>
+		<p>The chart below plots Charlie's expected score \(S(m)\) as a function of the glanced question index \(m\).</p>
+
+		<canvas id="chart-canvas" width="760" height="320"></canvas>
+
+		<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/09/2026-09-04.html">Previous</a> | Next</p>
+		<p><a href="/blog">Back to blog</a></p>
+
+		<footer>
+			<ul>
+				<li><a href="mailto:bphillab@gmail.com">email</a></li>
+				<li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+			</ul>
+		</footer>
+
+		<script>
+		(function() {
+			const CHOICES = ['A', 'B', 'C', 'D'];
+			const K = 4;
+
+			function pDist(d) {
+				if (d === 0) return 1;
+				const r = Math.floor((d + 1) / 2);
+				return 0.25 + 0.25 * Math.pow(1/3, 2*r - 1);
+			}
+
+			function expectedScore(N, m) {
+				let sum = 0;
+				for (let k = 1; k <= N; k++) {
+					sum += pDist(Math.abs(k - m));
+				}
+				return sum;
+			}
+
+			const nInput = document.getElementById('quiz-n');
+			const mSelect = document.getElementById('glance-m');
+			const quizViz = document.getElementById('quiz-viz');
+			const simOut = document.getElementById('sim-out');
+			const simBtn = document.getElementById('btn-sim');
+			const canvas = document.getElementById('chart-canvas');
+			const ctx = canvas.getContext('2d');
+
+			function updateMOptions() {
+				const N = parseInt(nInput.value, 10);
+				const prevVal = parseInt(mSelect.value, 10) || Math.ceil(N / 2);
+				mSelect.innerHTML = '';
+				for (let i = 1; i <= N; i++) {
+					const opt = document.createElement('option');
+					opt.value = i;
+					opt.textContent = 'Question ' + i;
+					if (i === Math.min(prevVal, N)) opt.selected = true;
+					mSelect.appendChild(opt);
+				}
+				render();
+			}
+
+			function render() {
+				const N = parseInt(nInput.value, 10);
+				const m = parseInt(mSelect.value, 10);
+				if (!N || !m) return;
+
+				let exp = expectedScore(N, m);
+
+				let lines = [];
+				lines.push('--- Quiz Setup: N = ' + N + ' questions, Charlie glances at Question ' + m + ' ---');
+				lines.push('Expected Total Score: ' + exp.toFixed(4) + ' points\n');
+				lines.push('Q# | Dist d | Optimal Strategy      | Success Prob');
+				lines.push('---+--------+-----------------------+-------------');
+
+				for (let k = 1; k <= N; k++) {
+					const d = Math.abs(k - m);
+					const p = pDist(d);
+					let strat = '';
+					if (d === 0) strat = 'Looked! Guess C_' + m;
+					else if (d % 2 === 0) strat = 'Guess C_' + m + ' (same)';
+					else strat = 'Guess any != C_' + m + ' (diff)';
+
+					const qStr = (k < 10 ? ' ' : '') + k;
+					const dStr = (d < 10 ? ' ' : '') + d;
+					const pStr = p.toFixed(4) + (d === 0 ? ' (100%)' : ' (' + (p*100).toFixed(2) + '%)');
+					lines.push(qStr + ' |   ' + dStr + '   | ' + strat.padEnd(21) + ' | ' + pStr);
+				}
+
+				quizViz.textContent = lines.join('\n');
+				drawChart();
+			}
+
+			function drawChart() {
+				const N = parseInt(nInput.value, 10);
+				const currentM = parseInt(mSelect.value, 10);
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+				const W = canvas.width;
+				const H = canvas.height;
+				const padL = 60, padR = 30, padT = 40, padB = 45;
+				const plotW = W - padL - padR;
+				const plotH = H - padT - padB;
+
+				const scores = [];
+				let maxS = 0, minS = Infinity;
+				for (let i = 1; i <= N; i++) {
+					const s = expectedScore(N, i);
+					scores.push(s);
+					if (s > maxS) maxS = s;
+					if (s < minS) minS = s;
+				}
+
+				const yMin = Math.max(0, Math.floor(minS * 2) / 2);
+				const yMax = Math.ceil(maxS * 1.15 * 2) / 2;
+
+				// Grid lines
+				ctx.strokeStyle = '#e8e8e8';
+				ctx.lineWidth = 1;
+				ctx.fillStyle = '#666';
+				ctx.font = '11px sans-serif';
+				ctx.textAlign = 'right';
+
+				const numYSteps = 5;
+				for (let step = 0; step <= numYSteps; step++) {
+					const val = yMin + (step / numYSteps) * (yMax - yMin);
+					const y = padT + plotH - (val - yMin) / (yMax - yMin) * plotH;
+					ctx.beginPath();
+					ctx.moveTo(padL, y);
+					ctx.lineTo(W - padR, y);
+					ctx.stroke();
+					ctx.fillText(val.toFixed(2), padL - 8, y + 4);
+				}
+
+				// X axis labels
+				ctx.textAlign = 'center';
+				for (let i = 1; i <= N; i++) {
+					const x = padL + ((i - 0.5) / N) * plotW;
+					ctx.fillText('Q' + i, x, H - padB + 16);
+				}
+
+				// Title & Axis labels
+				ctx.fillStyle = '#222';
+				ctx.font = 'bold 13px sans-serif';
+				ctx.textAlign = 'center';
+				ctx.fillText('Expected Score S(m) by Observed Question m (N = ' + N + ')', W / 2, 22);
+
+				ctx.font = '11px sans-serif';
+				ctx.fillText('Observed Question (m)', W / 2, H - 8);
+
+				// Bars
+				const barW = Math.min(40, (plotW / N) * 0.7);
+				for (let i = 1; i <= N; i++) {
+					const s = scores[i - 1];
+					const xCenter = padL + ((i - 0.5) / N) * plotW;
+					const x = xCenter - barW / 2;
+					const h = ((s - yMin) / (yMax - yMin)) * plotH;
+					const y = padT + plotH - h;
+
+					const isOptimal = Math.abs(s - maxS) < 1e-7;
+					const isCurrent = (i === currentM);
+
+					if (isCurrent) {
+						ctx.fillStyle = '#2a78d6';
+					} else if (isOptimal) {
+						ctx.fillStyle = '#48b870';
+					} else {
+						ctx.fillStyle = '#b6cce6';
+					}
+
+					ctx.fillRect(x, y, barW, h);
+					ctx.strokeStyle = '#1e3d59';
+					ctx.lineWidth = 1;
+					ctx.strokeRect(x, y, barW, h);
+
+					// Value label on top
+					ctx.fillStyle = isCurrent || isOptimal ? '#111' : '#555';
+					ctx.font = (isCurrent || isOptimal ? 'bold ' : '') + '11px sans-serif';
+					ctx.fillText(s.toFixed(3), xCenter, y - 6);
+				}
+			}
+
+			function runSimulation() {
+				const N = parseInt(nInput.value, 10);
+				const m = parseInt(mSelect.value, 10);
+				const TRIALS = 50000;
+
+				let totalScore = 0;
+				let questionHits = new Array(N).fill(0);
+
+				for (let t = 0; t < TRIALS; t++) {
+					// Generate random valid answer key
+					const key = new Array(N);
+					key[0] = Math.floor(Math.random() * 4);
+					for (let i = 1; i < N; i++) {
+						const prev = key[i - 1];
+						const diff = 1 + Math.floor(Math.random() * 3);
+						key[i] = (prev + diff) % 4;
+					}
+
+					// Charlie observes key[m - 1]
+					const observed = key[m - 1];
+
+					// Charlie makes guesses
+					let trialScore = 0;
+					for (let k = 1; k <= N; k++) {
+						const d = Math.abs(k - m);
+						let guess;
+						if (d === 0) {
+							guess = observed;
+						} else if (d % 2 === 0) {
+							guess = observed;
+						} else {
+							// Pick any choice != observed uniformly among the 3
+							const diff = 1 + Math.floor(Math.random() * 3);
+							guess = (observed + diff) % 4;
+						}
+
+						if (guess === key[k - 1]) {
+							trialScore++;
+							questionHits[k - 1]++;
+						}
+					}
+					totalScore += trialScore;
+				}
+
+				const meanScore = totalScore / TRIALS;
+				const theoryScore = expectedScore(N, m);
+
+				let res = [];
+				res.push('--- Monte Carlo Results (' + TRIALS.toLocaleString() + ' simulated quizzes) ---');
+				res.push('Empirical Mean Score:  ' + meanScore.toFixed(4) + ' points');
+				res.push('Theoretical Expectation: ' + theoryScore.toFixed(4) + ' points');
+				res.push('Difference (Error):     ' + (meanScore - theoryScore > 0 ? '+' : '') + (meanScore - theoryScore).toFixed(4));
+				res.push('\nEmpirical Accuracy per Question:');
+				for (let k = 1; k <= N; k++) {
+					const empP = (questionHits[k - 1] / TRIALS);
+					const thP = pDist(Math.abs(k - m));
+					res.push('  Q' + k + ': ' + (empP * 100).toFixed(2) + '% (Theory: ' + (thP * 100).toFixed(2) + '%)');
+				}
+				simOut.textContent = res.join('\n');
+			}
+
+			nInput.addEventListener('change', updateMOptions);
+			mSelect.addEventListener('change', render);
+			simBtn.addEventListener('click', runSimulation);
+
+			updateMOptions();
+		})();
+		</script>
+	</body>
+</html>
