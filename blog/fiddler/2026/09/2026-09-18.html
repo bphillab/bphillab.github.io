@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>This Week's Fiddler - Sep 18, 2026 - Benjamin Phillabaum, Data Cat</title>
+  <link rel="stylesheet" type="text/css" href="/css/main.css">
+  <style>
+    .callout {
+      padding: 10px 12px;
+      border: 1px solid #e0e0e0;
+      background: #fafafa;
+      margin: 14px 0 18px;
+      max-width: 760px;
+    }
+    .solution-table {
+      max-width: 760px;
+    }
+    .solution-table td:first-child,
+    .solution-table th:first-child {
+      width: 180px;
+    }
+  </style>
+  <script defer src="/analytics.js"></script>
+  <script defer src="/mathjax.js"></script>
+</head>
+<body>
+<nav>
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/about">About</a></li>
+    <li><a href="/cv">CV</a></li>
+    <li><a href="/blog">Blog</a></li>
+    <li><a href="/games">Games</a></li>
+  </ul>
+</nav>
+
+<h1>This Week's Fiddler: Sep 18, 2026</h1>
+<p><em>Posted on Sep 18, 2026</em></p>
+
+<h2>Problem</h2>
+<p>My friend has three cups, labeled "A", "B", and "C" in a row. She picks two random cups and swaps their position. Then she does this again and again, picking a random pair each time, until all three cups are back in their original order. For example, here is one such sequence of swaps:</p>
+<p>
+  A, B, C (original)<br>
+  C, B, A (first and third were swapped)<br>
+  B, C, A (first and second were swapped)<br>
+  B, A, C (second and third were swapped)<br>
+  A, B, C (first and second were swapped)
+</p>
+<p>In this example, the cups returned to their original order after four swaps.</p>
+<p>On average, how many swaps would you expect until the cups return to their original order?</p>
+
+<h2>Main Solution</h2>
+<p>There are six possible arrangements of the three cups. At each step, we choose one of the three possible pairs of positions and swap them.</p>
+<p>One way to solve the problem is to use the symmetry of these six arrangements. The process is a random walk on the six possible permutations of \(A,B,C\). From any arrangement, there are exactly three possible next arrangements, each equally likely.</p>
+<p>Because the random walk is symmetric, in the long run it spends the same fraction of time at each of the six arrangements. So the stationary probability of being at the original arrangement \(ABC\) is</p>
+<p>\[
+  \pi(ABC)=\frac{1}{6}.
+  \]</p>
+<p>For a finite Markov chain, the expected return time to a state is the reciprocal of its stationary probability. Therefore, the expected number of swaps until returning to \(ABC\) is</p>
+<p>\[
+  \frac{1}{\pi(ABC)}=6.
+  \]</p>
+
+<div class="callout">
+  <p><strong>Answer:</strong> \( \boxed{6} \) swaps.</p>
+</div>
+
+<p>We can also check this with a direct equation. After one swap, the cups are certainly not in the original order. Let \(x\) be the expected additional number of swaps to return to \(ABC\) from any non-original arrangement.</p>
+<p>The six arrangements split into two types: the original arrangement, and the five others. But among the five others, not all are the same distance from \(ABC\). A cleaner version is to track whether the current arrangement has even or odd parity.</p>
+<p>Every swap changes parity. The original arrangement \(ABC\) is even. So the process can only return to \(ABC\) after an even number of swaps. The random walk alternates between the three even arrangements and the three odd arrangements.</p>
+<p>From any odd arrangement, one of the three swaps returns to \(ABC\), while the other two go to the other two even arrangements. Solving the corresponding small system again gives expected return time \(6\), matching the symmetry argument above.</p>
+
+<h2>This Week's Extra Credit</h2>
+<p>In total, there are six possible orders of the cups. Without any swaps, one of those orders, \(A,B,C\), has already been achieved.</p>
+<p>On average, how many swaps would you expect until the remaining five orders, and thus all six, are also achieved?</p>
+
+<h2>Extra Credit Solution</h2>
+<p>Now this is a cover time problem: starting from \(ABC\), how long does it take until we have visited all six arrangements?</p>
+<p>The key observation is that the six arrangements form the complete bipartite graph \(K_{3,3}\). The three even permutations are on one side, and the three odd permutations are on the other. Each swap changes parity, so every move crosses from one side to the other.</p>
+<p>Let</p>
+<p>\[
+  E_{e,o}
+  \]</p>
+<p>be the expected number of additional swaps needed to see all six arrangements, given that we are currently at an even arrangement, have already seen \(e\) of the three even arrangements, and have already seen \(o\) of the three odd arrangements.</p>
+<p>Similarly, let</p>
+<p>\[
+  O_{e,o}
+  \]</p>
+<p>be the corresponding expectation when we are currently at an odd arrangement.</p>
+<p>From an even arrangement, the next move goes to one of the three odd arrangements. If \(o\) odd arrangements have already been seen, then with probability \(o/3\) we revisit an old odd arrangement, and with probability \((3-o)/3\) we discover a new one. Thus</p>
+<p>\[
+  E_{e,o}
+  =
+  1+\frac{o}{3}O_{e,o}
+  +\frac{3-o}{3}O_{e,o+1}.
+  \]</p>
+<p>Similarly, from an odd arrangement,</p>
+<p>\[
+  O_{e,o}
+  =
+  1+\frac{e}{3}E_{e,o}
+  +\frac{3-e}{3}E_{e+1,o}.
+  \]</p>
+<p>The boundary condition is</p>
+<p>\[
+  E_{3,3}=O_{3,3}=0,
+  \]</p>
+<p>since once all six arrangements have been visited, there is nothing left to do.</p>
+
+<p>Working backward through these equations gives the following useful values:</p>
+
+<table class="solution-table">
+  <thead>
+  <tr>
+    <th>State</th>
+    <th>Expected remaining swaps</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr><td>\(E_{3,2}\)</td><td>\(5\)</td></tr>
+  <tr><td>\(O_{2,3}\)</td><td>\(5\)</td></tr>
+  <tr><td>\(E_{2,2}=O_{2,2}\)</td><td>\(8\)</td></tr>
+  <tr><td>\(E_{2,1}=O_{1,2}\)</td><td>\(\frac{68}{7}\)</td></tr>
+  <tr><td>\(E_{1,1}=O_{1,1}\)</td><td>\(\frac{157}{14}\)</td></tr>
+  </tbody>
+</table>
+
+<p>We start at \(ABC\), which is an even arrangement. We have seen one even arrangement and zero odd arrangements. The first swap must take us to a new odd arrangement, so</p>
+<p>\[
+  E_{1,0}=1+O_{1,1}.
+  \]</p>
+<p>Since</p>
+<p>\[
+  O_{1,1}=\frac{157}{14},
+  \]</p>
+<p>we get</p>
+<p>\[
+  E_{1,0}=1+\frac{157}{14}
+  =
+  \frac{171}{14}.
+  \]</p>
+
+<div class="callout">
+  <p><strong>Extra credit answer:</strong> \( \boxed{\frac{171}{14}} \), or approximately \( \boxed{12.214} \), swaps.</p>
+</div>
+
+<p>So the expected time to return to the original order is exactly \(6\) swaps, while the expected time to see every possible order is a little more than \(12\) swaps.</p>
+
+<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/09/2026-09-11.html">Previous</a> | Next</p>
+<p><a href="/blog">Back to blog</a></p>
+
+<footer>
+  <ul>
+    <li><a href="mailto:bphillab@gmail.com">email</a></li>
+    <li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+  </ul>
+</footer>
+</body>
+</html>
