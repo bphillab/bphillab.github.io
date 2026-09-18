@@ -18,6 +18,59 @@
     .solution-table th:first-child {
       width: 180px;
     }
+    canvas {
+      display: block;
+      max-width: 100%;
+      margin: 18px 0;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0;
+      max-width: 760px;
+    }
+    .controls label {
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .controls select {
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 6px 8px;
+      border: 1px solid #9eaaba;
+      background: #fff;
+      color: #1f2c36;
+    }
+    .controls input[type=number] {
+      width: 110px;
+      font-size: 0.9rem;
+    }
+    .readout {
+      padding: 12px 14px;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      margin: 12px 0 18px;
+      max-width: 760px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    .legend {
+      max-width: 760px;
+      color: #5a6772;
+      font-size: 0.82rem;
+    }
+    .swatch {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      margin-right: 4px;
+      border: 1px solid #1f2c36;
+      vertical-align: -1px;
+    }
   </style>
   <script defer src="/analytics.js"></script>
   <script defer src="/mathjax.js"></script>
@@ -145,6 +198,73 @@
 
 <p>So the expected time to return to the original order is exactly \(6\) swaps, while the expected time to see every possible order is a little more than \(12\) swaps.</p>
 
+<h2>The Exact Distribution of the Return Time</h2>
+<p>The average is \(6\), but the whole distribution of the return time is available in closed form, and it is worth having because it gives the simulation below something sharp to check against.</p>
+<p>Collapse the six arrangements into three classes: home (\(ABC\)), the two other even arrangements, and the three odd arrangements. From home, every swap lands on an odd arrangement. From an odd arrangement, exactly one of the three swaps goes home and the other two go to a non-home even arrangement. From a non-home even arrangement, all three swaps lead to odd arrangements, so home is never reachable in one step.</p>
+<p>The walk therefore visits an odd arrangement at swaps \(1, 3, 5, \dots\), and at each of those visits it goes home on the next swap with probability \(1/3\), independently of the past. So \(T/2\) is geometric with success probability \(1/3\):</p>
+<p>\[
+  P(T=2k)=\frac{1}{3}\left(\frac{2}{3}\right)^{k-1},
+  \qquad k=1,2,3,\dots
+  \]</p>
+<p>which confirms \(\mathbb{E}[T]=2\cdot 3=6\). Note that the median is only \(4\) swaps: the mean is dragged upward by a long tail.</p>
+
+<h2>Interactive: Walking the Six Arrangements</h2>
+<p>The six arrangements sit on the complete bipartite graph \(K_{3,3}\), with the three even arrangements on the left and the three odd ones on the right. Every swap follows one edge, which is why the walk strictly alternates sides. Step through it by hand, or let it run until both milestones are hit.</p>
+
+<div class="controls">
+  <button id="btn-step">Swap Once</button>
+  <button id="btn-run">Auto-Run</button>
+  <button id="btn-ff">Fast-Forward 1,000 Swaps</button>
+  <button id="btn-reset">Reset</button>
+  <label for="walk-speed">Speed:</label>
+  <select id="walk-speed">
+    <option value="900">Slow</option>
+    <option value="420" selected>Normal</option>
+    <option value="120">Fast</option>
+  </select>
+</div>
+
+<canvas id="walk-canvas" width="760" height="420"></canvas>
+<p class="legend">
+  <span class="swatch" style="background:#2b5d87"></span>current &nbsp;
+  <span class="swatch" style="background:#dde8f2"></span>already visited &nbsp;
+  <span class="swatch" style="background:#fdfbf2"></span>not yet visited &nbsp;
+  <span class="swatch" style="background:#fff;border-color:#b8473d"></span>home (\(ABC\))
+</p>
+<div id="walk-out" class="readout"></div>
+
+<h2>Interactive: Why the Answer Is \(1/\pi(ABC)\)</h2>
+<p>The symmetry argument claims the walk spends \(1/6\) of its time at each arrangement. This chart tracks the share of visits so far in the walk above, so fast-forwarding a few thousand swaps should flatten all six bars toward the dashed line at \(1/6\). The expected return time of \(6\) is just the reciprocal of that height.</p>
+
+<canvas id="occ-canvas" width="760" height="250"></canvas>
+
+<h2>Interactive: Monte Carlo Simulator</h2>
+<p>Each trial runs a fresh sequence of random swaps and records two things: the first swap at which the cups are back in their original order, and the first swap at which every arrangement has been seen. The number of cups is adjustable, which is a way to test the generalization below.</p>
+
+<div class="controls">
+  <label for="sim-cups">Number of cups:</label>
+  <select id="sim-cups">
+    <option value="3" selected>3 cups (6 arrangements)</option>
+    <option value="4">4 cups (24 arrangements)</option>
+    <option value="5">5 cups (120 arrangements)</option>
+  </select>
+  <label for="sim-trials">Trials:</label>
+  <input type="number" id="sim-trials" min="100" step="1000" value="100000">
+  <button id="btn-sim">Run Simulation</button>
+</div>
+
+<div id="sim-out" class="readout"></div>
+
+<canvas id="hist-return" width="760" height="280"></canvas>
+<canvas id="hist-cover" width="760" height="280"></canvas>
+
+<h2>Generalizing to \(n\) Cups</h2>
+<p>The symmetry argument never used the number three. With \(n\) cups, a swap picks one of the \(\binom{n}{2}\) pairs of positions, so the walk lives on a connected, regular graph whose vertices are the \(n!\) arrangements. A regular graph has a uniform stationary distribution, so \(\pi=1/n!\) and</p>
+<p>\[
+  \mathbb{E}[\text{swaps to return}]=n!.
+  \]</p>
+<p>That is \(6\) for three cups, \(24\) for four, and \(120\) for five, all of which the simulator above reproduces. The cover time has no comparably tidy closed form once \(n>3\), so for four and five cups the simulator reports the empirical value only; it climbs to roughly \(96\) swaps for four cups and \(713\) for five.</p>
+
 <p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/09/2026-09-11.html">Previous</a> | Next</p>
 <p><a href="/blog">Back to blog</a></p>
 
@@ -154,5 +274,681 @@
     <li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
   </ul>
 </footer>
+
+<script>
+  (function () {
+    'use strict';
+
+    // Colors mirror the site's CSS variables so the canvases match the page.
+    const INK = '#1f2c36';
+    const MUTED = '#5a6772';
+    const EDGE = '#cad3dd';
+    const GRID = '#ecf0f4';
+    const ACCENT = '#2b5d87';
+    const TINT = '#dde8f2';
+    const CARD = '#fdfbf2';
+    const RED = '#b8473d';
+    const MONO = '"IBM Plex Mono", Menlo, Consolas, monospace';
+
+    // ---------------------------------------------------------------
+    // Shared bar chart
+    // ---------------------------------------------------------------
+    // cfg: title, subtitle, xTitle, labels[], values[], overlay[]|null,
+    //      color(i), yFmt(v), yFloor, showValues, valueFmt(v), gapAfter,
+    //      labelAtLeftEdge, hline {y, label}, vline {coord, label},
+    //      legend[{color, text, dot}]
+    function barChart(ctx, cfg) {
+      const W = ctx.canvas.width, H = ctx.canvas.height;
+      const padL = 62, padR = 24, padT = cfg.subtitle ? 52 : 40, padB = 54;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const n = cfg.values.length;
+      const yFmt = cfg.yFmt || function (v) { return v.toFixed(2); };
+
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, W, H);
+
+      let maxV = 0;
+      cfg.values.forEach(function (v) { if (v > maxV) maxV = v; });
+      if (cfg.overlay) cfg.overlay.forEach(function (v) { if (v > maxV) maxV = v; });
+      if (cfg.hline) maxV = Math.max(maxV, cfg.hline.y);
+      const yMax = Math.max(maxV > 0 ? maxV * 1.28 : 1, cfg.yFloor || 0);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = INK;
+      ctx.font = 'bold 13px ' + MONO;
+      ctx.fillText(cfg.title, W / 2, 22);
+      if (cfg.subtitle) {
+        ctx.fillStyle = MUTED;
+        ctx.font = '11px ' + MONO;
+        ctx.fillText(cfg.subtitle, W / 2, 39);
+      }
+
+      // Horizontal grid and y labels.
+      ctx.font = '10px ' + MONO;
+      for (let s = 0; s <= 4; s++) {
+        const v = (s / 4) * yMax;
+        const y = padT + plotH - (v / yMax) * plotH;
+        ctx.strokeStyle = GRID;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(W - padR, y);
+        ctx.stroke();
+        ctx.fillStyle = MUTED;
+        ctx.textAlign = 'right';
+        ctx.fillText(yFmt(v), padL - 8, y + 3.5);
+      }
+      ctx.strokeStyle = EDGE;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padL, padT + plotH);
+      ctx.lineTo(W - padR, padT + plotH);
+      ctx.stroke();
+
+      // Slot geometry (an optional half-slot gap separates groups).
+      const gapAfter = cfg.gapAfter == null ? -1 : cfg.gapAfter;
+      const slots = n + (gapAfter >= 0 ? 0.6 : 0);
+      const slotW = plotW / slots;
+      function slotLeft(i) {
+        return padL + (i + (gapAfter >= 0 && i > gapAfter ? 0.6 : 0)) * slotW;
+      }
+      function slotCenter(i) { return slotLeft(i) + slotW / 2; }
+      const barW = Math.min(cfg.maxBarW || 44, slotW * 0.76);
+
+      const labelEvery = n <= 16 ? 1 : Math.ceil(n / 14);
+      for (let i = 0; i < n; i++) {
+        const v = cfg.values[i];
+        const h = (v / yMax) * plotH;
+        const xc = slotCenter(i);
+        const y = padT + plotH - h;
+        if (h > 0) {
+          ctx.fillStyle = cfg.color ? cfg.color(i) : TINT;
+          ctx.fillRect(xc - barW / 2, y, barW, h);
+          ctx.strokeStyle = ACCENT;
+          ctx.lineWidth = 1;
+          ctx.strokeRect(xc - barW / 2, y, barW, h);
+        }
+        if (i % labelEvery === 0) {
+          ctx.fillStyle = MUTED;
+          ctx.font = '10px ' + MONO;
+          ctx.textAlign = 'center';
+          // Bin labels name the left edge of the bin, so they sit there too.
+          ctx.fillText(cfg.labels[i], cfg.labelAtLeftEdge ? slotLeft(i) : xc, padT + plotH + 16);
+        }
+        if (cfg.showValues && n <= 16) {
+          ctx.fillStyle = INK;
+          ctx.font = '10px ' + MONO;
+          ctx.textAlign = 'center';
+          ctx.fillText((cfg.valueFmt || yFmt)(v), xc, y - 6);
+        }
+      }
+
+      // Theory overlay: red markers joined by a thin line.
+      if (cfg.overlay) {
+        ctx.strokeStyle = RED;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        for (let i = 0; i < cfg.overlay.length; i++) {
+          const y = padT + plotH - (cfg.overlay[i] / yMax) * plotH;
+          if (i === 0) ctx.moveTo(slotCenter(i), y); else ctx.lineTo(slotCenter(i), y);
+        }
+        ctx.stroke();
+        ctx.fillStyle = RED;
+        for (let i = 0; i < cfg.overlay.length; i++) {
+          const y = padT + plotH - (cfg.overlay[i] / yMax) * plotH;
+          ctx.beginPath();
+          ctx.arc(slotCenter(i), y, 2.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      if (cfg.hline) {
+        const y = padT + plotH - (cfg.hline.y / yMax) * plotH;
+        ctx.strokeStyle = RED;
+        ctx.lineWidth = 1.4;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(W - padR, y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        if (cfg.hline.label) {
+          ctx.fillStyle = RED;
+          ctx.font = '10px ' + MONO;
+          ctx.textAlign = 'right';
+          ctx.fillText(cfg.hline.label, W - padR - 2, y - 6);
+        }
+      }
+
+      if (cfg.vline) {
+        const x = padL + cfg.vline.coord * slotW;
+        ctx.strokeStyle = RED;
+        ctx.lineWidth = 1.4;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.moveTo(x, padT);
+        ctx.lineTo(x, padT + plotH);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = RED;
+        ctx.font = '10px ' + MONO;
+        ctx.textAlign = x > W / 2 ? 'right' : 'left';
+        ctx.fillText(cfg.vline.label, x + (x > W / 2 ? -4 : 4), padT + 10);
+      }
+
+      if (cfg.legend) {
+        ctx.font = '10px ' + MONO;
+        ctx.textAlign = 'left';
+        let ly = padT + 12;
+        cfg.legend.forEach(function (item) {
+          const lx = W - padR - 226;
+          if (item.dash) {
+            ctx.strokeStyle = item.color;
+            ctx.lineWidth = 1.4;
+            ctx.setLineDash([5, 3]);
+            ctx.beginPath();
+            ctx.moveTo(lx, ly - 3);
+            ctx.lineTo(lx + 12, ly - 3);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          } else if (item.dot) {
+            ctx.fillStyle = item.color;
+            ctx.beginPath();
+            ctx.arc(lx + 5, ly - 3, 3, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.fillStyle = item.color;
+            ctx.fillRect(lx, ly - 7, 10, 8);
+            ctx.strokeStyle = ACCENT;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(lx, ly - 7, 10, 8);
+          }
+          ctx.fillStyle = MUTED;
+          ctx.fillText(item.text, lx + 15, ly);
+          ly += 15;
+        });
+      }
+
+      if (cfg.xTitle) {
+        ctx.fillStyle = MUTED;
+        ctx.font = '11px ' + MONO;
+        ctx.textAlign = 'center';
+        ctx.fillText(cfg.xTitle, W / 2, H - 12);
+      }
+    }
+
+    // ---------------------------------------------------------------
+    // Part 1: the walk on the six arrangements
+    // ---------------------------------------------------------------
+    const EVENS = ['ABC', 'BCA', 'CAB'];
+    const ODDS = ['ACB', 'CBA', 'BAC'];
+    const NODES = EVENS.concat(ODDS);
+    const NODE_INDEX = {};
+    NODES.forEach(function (key, i) { NODE_INDEX[key] = i; });
+    const SWAP_PAIRS = [[0, 1], [0, 2], [1, 2]];
+    const NODE_POS = NODES.map(function (key, i) {
+      return { x: i < 3 ? 232 : 528, y: 104 + (i % 3) * 72 };
+    });
+    const NODE_R = 28;
+    const CUP_TOP = 334, CUP_H = 62, CUP_GAP = 118;
+    const COVER_MEAN = 171 / 14;
+
+    const walkCanvas = document.getElementById('walk-canvas');
+    const walkCtx = walkCanvas.getContext('2d');
+    const occCtx = document.getElementById('occ-canvas').getContext('2d');
+    const walkOut = document.getElementById('walk-out');
+    const stepBtn = document.getElementById('btn-step');
+    const runBtn = document.getElementById('btn-run');
+    const ffBtn = document.getElementById('btn-ff');
+    const resetBtn = document.getElementById('btn-reset');
+    const speedSel = document.getElementById('walk-speed');
+
+    let row, swaps, lastPair, prevKey, visited, visitCounts, firstReturn, coverAt, timer = null;
+
+    function walkDone() { return firstReturn !== null && coverAt !== null; }
+
+    function stopAuto() {
+      if (timer) { clearInterval(timer); timer = null; }
+      runBtn.textContent = 'Auto-Run';
+    }
+
+    function resetWalk() {
+      stopAuto();
+      row = ['A', 'B', 'C'];
+      swaps = 0;
+      lastPair = null;
+      prevKey = null;
+      visited = { ABC: true };
+      visitCounts = [1, 0, 0, 0, 0, 0];
+      firstReturn = null;
+      coverAt = null;
+      renderWalk();
+    }
+
+    function stepWalk() {
+      const pair = SWAP_PAIRS[(Math.random() * 3) | 0];
+      prevKey = row.join('');
+      const held = row[pair[0]];
+      row[pair[0]] = row[pair[1]];
+      row[pair[1]] = held;
+      lastPair = pair;
+      swaps++;
+      const key = row.join('');
+      visitCounts[NODE_INDEX[key]]++;
+      visited[key] = true;
+      if (key === 'ABC' && firstReturn === null) firstReturn = swaps;
+      if (Object.keys(visited).length === 6 && coverAt === null) coverAt = swaps;
+    }
+
+    function drawGraph() {
+      const ctx = walkCtx;
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, walkCanvas.width, walkCanvas.height);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = MUTED;
+      ctx.font = 'bold 12px ' + MONO;
+      ctx.fillText('EVEN ARRANGEMENTS', 232, 40);
+      ctx.fillText('ODD ARRANGEMENTS', 528, 40);
+      ctx.font = '10px ' + MONO;
+      ctx.fillText('even number of swaps from ABC', 232, 58);
+      ctx.fillText('odd number of swaps from ABC', 528, 58);
+
+      const curKey = row.join('');
+      for (let i = 0; i < 3; i++) {
+        for (let j = 3; j < 6; j++) {
+          const traversed = prevKey !== null &&
+            ((NODES[i] === prevKey && NODES[j] === curKey) ||
+             (NODES[j] === prevKey && NODES[i] === curKey));
+          ctx.strokeStyle = traversed ? RED : EDGE;
+          ctx.lineWidth = traversed ? 2.2 : 1;
+          ctx.beginPath();
+          ctx.moveTo(NODE_POS[i].x, NODE_POS[i].y);
+          ctx.lineTo(NODE_POS[j].x, NODE_POS[j].y);
+          ctx.stroke();
+        }
+      }
+
+      for (let i = 0; i < 6; i++) {
+        const key = NODES[i], pos = NODE_POS[i];
+        const isCurrent = key === curKey;
+        const seen = !!visited[key];
+        if (key === 'ABC') {
+          ctx.strokeStyle = RED;
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.arc(pos.x, pos.y, NODE_R + 5, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, NODE_R, 0, Math.PI * 2);
+        ctx.fillStyle = isCurrent ? ACCENT : (seen ? TINT : CARD);
+        ctx.fill();
+        ctx.strokeStyle = isCurrent ? ACCENT : (seen ? ACCENT : EDGE);
+        ctx.lineWidth = isCurrent ? 2 : 1.2;
+        ctx.stroke();
+        ctx.fillStyle = isCurrent ? '#fff' : (seen ? INK : MUTED);
+        ctx.font = 'bold 13px ' + MONO;
+        ctx.textAlign = 'center';
+        ctx.fillText(key, pos.x, pos.y + 4.5);
+      }
+
+      ctx.strokeStyle = EDGE;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(40, 288);
+      ctx.lineTo(720, 288);
+      ctx.stroke();
+    }
+
+    function drawCups() {
+      const ctx = walkCtx;
+      for (let i = 0; i < 3; i++) {
+        const cx = 380 + (i - 1) * CUP_GAP;
+        const moved = lastPair !== null && (lastPair[0] === i || lastPair[1] === i);
+        ctx.beginPath();
+        ctx.moveTo(cx - 26, CUP_TOP);
+        ctx.lineTo(cx + 26, CUP_TOP);
+        ctx.lineTo(cx + 34, CUP_TOP + CUP_H);
+        ctx.lineTo(cx - 34, CUP_TOP + CUP_H);
+        ctx.closePath();
+        ctx.fillStyle = moved ? TINT : CARD;
+        ctx.fill();
+        ctx.strokeStyle = moved ? RED : INK;
+        ctx.lineWidth = moved ? 2 : 1.2;
+        ctx.stroke();
+        ctx.textAlign = 'center';
+        ctx.fillStyle = INK;
+        ctx.font = 'bold 22px ' + MONO;
+        ctx.fillText(row[i], cx, CUP_TOP + 42);
+        ctx.fillStyle = MUTED;
+        ctx.font = '10px ' + MONO;
+        ctx.fillText('position ' + (i + 1), cx, CUP_TOP + CUP_H + 18);
+      }
+
+      if (lastPair === null) return;
+      const xa = 380 + (lastPair[0] - 1) * CUP_GAP;
+      const xb = 380 + (lastPair[1] - 1) * CUP_GAP;
+      const tipY = CUP_TOP - 8;
+      ctx.strokeStyle = RED;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(xa, tipY);
+      ctx.quadraticCurveTo((xa + xb) / 2, CUP_TOP - 44, xb, tipY);
+      ctx.stroke();
+      ctx.fillStyle = RED;
+      [xa, xb].forEach(function (x) {
+        ctx.beginPath();
+        ctx.moveTo(x, tipY + 5);
+        ctx.lineTo(x - 4, tipY - 3);
+        ctx.lineTo(x + 4, tipY - 3);
+        ctx.closePath();
+        ctx.fill();
+      });
+    }
+
+    function drawOccupancy() {
+      let total = 0;
+      visitCounts.forEach(function (c) { total += c; });
+      barChart(occCtx, {
+        title: 'Share of visits to each arrangement',
+        subtitle: total + (total === 1 ? ' visit so far (the start counts)' : ' visits so far (the start counts)'),
+        xTitle: 'arrangement',
+        labels: NODES,
+        values: visitCounts.map(function (c) { return c / total; }),
+        gapAfter: 2,
+        color: function (i) { return NODES[i] === row.join('') ? ACCENT : TINT; },
+        yFmt: function (v) { return (v * 100).toFixed(0) + '%'; },
+        yFloor: 0.4,
+        showValues: true,
+        valueFmt: function (v) { return (v * 100).toFixed(1) + '%'; },
+        hline: { y: 1 / 6 },
+        legend: [
+          { color: TINT, text: 'share of visits' },
+          { color: RED, dash: true, text: 'stationary 1/6 = 16.7%' }
+        ]
+      });
+    }
+
+    function updateWalkReadout() {
+      const curKey = row.join('');
+      const parity = NODE_INDEX[curKey] < 3 ? 'even' : 'odd';
+      const seenCount = Object.keys(visited).length;
+      function line(label, value, note) {
+        return label.padEnd(25) + value + (note ? '   ' + note : '');
+      }
+      const lines = [
+        line('Swaps so far:', String(swaps)),
+        line('Current arrangement:', curKey + '  (' + parity + ')'),
+        line('Last swap:', lastPair === null ? '(none yet)' :
+          'positions ' + (lastPair[0] + 1) + ' and ' + (lastPair[1] + 1)),
+        line('Arrangements seen:', seenCount + ' of 6'),
+        '',
+        line('First return to ABC:', firstReturn === null ? 'not yet' : 'swap ' + firstReturn,
+          '(expected 6)'),
+        line('All six seen:', coverAt === null ? 'not yet' : 'swap ' + coverAt,
+          '(expected 171/14 = ' + COVER_MEAN.toFixed(3) + ')')
+      ];
+      if (walkDone()) lines.push('', 'Both milestones reached. Reset to run it again.');
+      walkOut.textContent = lines.join('\n');
+    }
+
+    function renderWalk() {
+      drawGraph();
+      drawCups();
+      drawOccupancy();
+      updateWalkReadout();
+    }
+
+    stepBtn.addEventListener('click', function () {
+      stopAuto();
+      if (walkDone()) resetWalk();
+      stepWalk();
+      renderWalk();
+    });
+
+    runBtn.addEventListener('click', function () {
+      if (timer) { stopAuto(); return; }
+      if (walkDone()) resetWalk();
+      runBtn.textContent = 'Pause';
+      timer = setInterval(function () {
+        stepWalk();
+        renderWalk();
+        if (walkDone()) stopAuto();
+      }, parseInt(speedSel.value, 10));
+    });
+
+    ffBtn.addEventListener('click', function () {
+      stopAuto();
+      for (let k = 0; k < 1000; k++) stepWalk();
+      renderWalk();
+    });
+
+    resetBtn.addEventListener('click', resetWalk);
+
+    speedSel.addEventListener('change', function () {
+      if (timer) { stopAuto(); runBtn.click(); }
+    });
+
+    // ---------------------------------------------------------------
+    // Part 2: Monte Carlo over n cups
+    // ---------------------------------------------------------------
+    const FACT = [1, 1, 2, 6, 24, 120];
+    const MAX_TRIALS = { 3: 500000, 4: 100000, 5: 20000 };
+    const DEFAULT_TRIALS = { 3: 100000, 4: 20000, 5: 3000 };
+
+    const cupsSel = document.getElementById('sim-cups');
+    const trialsInput = document.getElementById('sim-trials');
+    const simBtn = document.getElementById('btn-sim');
+    const simOut = document.getElementById('sim-out');
+    const retCtx = document.getElementById('hist-return').getContext('2d');
+    const covCtx = document.getElementById('hist-cover').getContext('2d');
+
+    // Index a permutation by its Lehmer code, so identity is always 0.
+    function rankPerm(p, n) {
+      let rank = 0;
+      for (let i = 0; i < n; i++) {
+        let smaller = 0;
+        for (let j = i + 1; j < n; j++) if (p[j] < p[i]) smaller++;
+        rank = rank * (n - i) + smaller;
+      }
+      return rank;
+    }
+
+    // One trajectory per trial, recording both stopping times.
+    function runTrials(n, trials) {
+      const total = FACT[n];
+      const seen = new Uint8Array(total);
+      const p = new Int32Array(n);
+      const rets = new Int32Array(trials);
+      const covs = new Int32Array(trials);
+      for (let t = 0; t < trials; t++) {
+        seen.fill(0);
+        for (let i = 0; i < n; i++) p[i] = i;
+        seen[0] = 1;
+        let count = 1, steps = 0, ret = -1, cov = -1;
+        while (ret < 0 || cov < 0) {
+          const i = (Math.random() * n) | 0;
+          let j = (Math.random() * (n - 1)) | 0;
+          if (j >= i) j++;
+          const held = p[i];
+          p[i] = p[j];
+          p[j] = held;
+          steps++;
+          const r = rankPerm(p, n);
+          if (!seen[r]) {
+            seen[r] = 1;
+            count++;
+            if (count === total) cov = steps;
+          }
+          if (r === 0 && ret < 0) ret = steps;
+        }
+        rets[t] = ret;
+        covs[t] = cov;
+      }
+      return { rets: rets, covs: covs };
+    }
+
+    function summarize(data) {
+      let sum = 0, max = 0;
+      for (let i = 0; i < data.length; i++) {
+        sum += data[i];
+        if (data[i] > max) max = data[i];
+      }
+      const sorted = Array.prototype.slice.call(data).sort(function (a, b) { return a - b; });
+      return {
+        mean: sum / data.length,
+        median: sorted[Math.floor(sorted.length / 2)],
+        p90: sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.9))],
+        max: max
+      };
+    }
+
+    function niceStep(x) {
+      const steps = [2, 4, 10, 20, 40, 100, 200, 400, 1000, 2000, 4000];
+      for (let i = 0; i < steps.length; i++) if (steps[i] >= x) return steps[i];
+      return steps[steps.length - 1];
+    }
+
+    // Bin into equal-width buckets with a trailing overflow bucket.
+    function binned(data, mean) {
+      const width = niceStep(mean * 2.6 / 18);
+      const count = 18;
+      const values = new Array(count + 1).fill(0);
+      for (let i = 0; i < data.length; i++) {
+        values[Math.min(count, Math.floor(data[i] / width))]++;
+      }
+      const labels = values.map(function (_, i) {
+        return i === count ? (count * width) + '+' : String(i * width);
+      });
+      return {
+        width: width,
+        labels: labels,
+        values: values.map(function (c) { return c / data.length; })
+      };
+    }
+
+    function drawReturnHist(n, rets, stats) {
+      if (n === 3) {
+        // Every return time is even, so the exact pmf can be plotted bar by bar.
+        const bars = 14;
+        const values = new Array(bars + 1).fill(0);
+        for (let i = 0; i < rets.length; i++) {
+          const k = rets[i] / 2;
+          values[Math.min(bars, k - 1)]++;
+        }
+        const overlay = [];
+        for (let k = 1; k <= bars; k++) overlay.push((1 / 3) * Math.pow(2 / 3, k - 1));
+        overlay.push(Math.pow(2 / 3, bars));
+        const labels = [];
+        for (let k = 1; k <= bars; k++) labels.push(String(2 * k));
+        labels.push((2 * bars + 2) + '+');
+        barChart(retCtx, {
+          title: 'Swaps until the cups return to ABC',
+          subtitle: rets.length.toLocaleString() + ' trials, 3 cups',
+          xTitle: 'number of swaps (odd counts are impossible)',
+          labels: labels,
+          values: values.map(function (c) { return c / rets.length; }),
+          overlay: overlay,
+          yFmt: function (v) { return (v * 100).toFixed(0) + '%'; },
+          legend: [
+            { color: TINT, text: 'simulated' },
+            { color: RED, dot: true, text: 'exact (1/3)(2/3)^(k-1)' }
+          ],
+          // Bars sit at exact values here: T = 2k is the bar centered on slot k - 0.5.
+          vline: { coord: stats.mean / 2 - 0.5, label: 'mean ' + stats.mean.toFixed(3) }
+        });
+        return;
+      }
+      const hist = binned(rets, stats.mean);
+      barChart(retCtx, {
+        title: 'Swaps until the cups return to their original order',
+        subtitle: rets.length.toLocaleString() + ' trials, ' + n + ' cups',
+        xTitle: 'number of swaps (bin left edge)',
+        labels: hist.labels,
+        values: hist.values,
+        labelAtLeftEdge: true,
+        yFmt: function (v) { return (v * 100).toFixed(0) + '%'; },
+        vline: { coord: stats.mean / hist.width, label: 'mean ' + stats.mean.toFixed(2) }
+      });
+    }
+
+    function drawCoverHist(n, covs, stats) {
+      const hist = binned(covs, stats.mean);
+      const theory = n === 3 ? COVER_MEAN : null;
+      barChart(covCtx, {
+        title: 'Swaps until every arrangement has appeared',
+        subtitle: covs.length.toLocaleString() + ' trials, ' + n + ' cups (' + FACT[n] + ' arrangements)',
+        xTitle: 'number of swaps (bin left edge)',
+        labels: hist.labels,
+        values: hist.values,
+        labelAtLeftEdge: true,
+        yFmt: function (v) { return (v * 100).toFixed(0) + '%'; },
+        vline: theory === null
+          ? { coord: stats.mean / hist.width, label: 'mean ' + stats.mean.toFixed(1) }
+          : { coord: theory / hist.width, label: 'theory 171/14 = ' + theory.toFixed(3) }
+      });
+    }
+
+    function runSimulation() {
+      const n = parseInt(cupsSel.value, 10);
+      const asked = parseInt(trialsInput.value, 10);
+      let trials = isNaN(asked) ? DEFAULT_TRIALS[n] : Math.max(100, asked);
+      const clamped = trials > MAX_TRIALS[n];
+      if (clamped) trials = MAX_TRIALS[n];
+      trialsInput.value = trials;
+
+      const started = Date.now();
+      const out = runTrials(n, trials);
+      const elapsed = (Date.now() - started) / 1000;
+      const retStats = summarize(out.rets);
+      const covStats = summarize(out.covs);
+
+      function pad(label) { return label.padEnd(22); }
+      const lines = [
+        '--- ' + trials.toLocaleString() + ' trials with ' + n + ' cups (' +
+          FACT[n] + ' arrangements, ' + (n * (n - 1) / 2) + ' possible swaps) ---',
+        '',
+        'Swaps until the cups return to their original order',
+        '  ' + pad('simulated mean') + retStats.mean.toFixed(4),
+        '  ' + pad('theory  n!') + FACT[n],
+        '  ' + pad('median / 90th / max') + retStats.median + ' / ' + retStats.p90 + ' / ' + retStats.max,
+        '',
+        'Swaps until every arrangement has appeared',
+        '  ' + pad('simulated mean') + covStats.mean.toFixed(4),
+        '  ' + pad('theory') + (n === 3 ? '171/14 = ' + COVER_MEAN.toFixed(4) : '(no closed form)'),
+        '  ' + pad('median / 90th / max') + covStats.median + ' / ' + covStats.p90 + ' / ' + covStats.max,
+        '',
+        'Ran in ' + elapsed.toFixed(2) + ' s.'
+      ];
+      if (clamped) lines.push('Trials capped at ' + MAX_TRIALS[n].toLocaleString() + ' for ' + n + ' cups.');
+      simOut.textContent = lines.join('\n');
+
+      drawReturnHist(n, out.rets, retStats);
+      drawCoverHist(n, out.covs, covStats);
+    }
+
+    cupsSel.addEventListener('change', function () {
+      trialsInput.value = DEFAULT_TRIALS[parseInt(cupsSel.value, 10)];
+    });
+
+    simBtn.addEventListener('click', function () {
+      simBtn.disabled = true;
+      simBtn.textContent = 'Running...';
+      // Yield once so the button repaints before the synchronous run.
+      setTimeout(function () {
+        try {
+          runSimulation();
+        } finally {
+          simBtn.disabled = false;
+          simBtn.textContent = 'Run Simulation';
+        }
+      }, 30);
+    });
+
+    resetWalk();
+    runSimulation();
+  })();
+</script>
 </body>
 </html>
