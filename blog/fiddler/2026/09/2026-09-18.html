@@ -790,38 +790,41 @@
     }
 
     function summarize(data) {
-      let sum = 0, max = 0;
-      for (let i = 0; i < data.length; i++) {
-        sum += data[i];
-        if (data[i] > max) max = data[i];
-      }
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) sum += data[i];
       const sorted = Array.prototype.slice.call(data).sort(function (a, b) { return a - b; });
+      function q(f) { return sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * f))]; }
       return {
         mean: sum / data.length,
-        median: sorted[Math.floor(sorted.length / 2)],
-        p90: sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.9))],
-        max: max
+        min: sorted[0],
+        median: q(0.5),
+        p90: q(0.9),
+        p99: q(0.99),
+        max: sorted[sorted.length - 1]
       };
     }
 
     function niceStep(x) {
-      const steps = [2, 4, 10, 20, 40, 100, 200, 400, 1000, 2000, 4000];
+      const steps = [2, 4, 6, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
       for (let i = 0; i < steps.length; i++) if (steps[i] >= x) return steps[i];
       return steps[steps.length - 1];
     }
 
-    // Bin into equal-width buckets with a trailing overflow bucket.
-    function binned(data, mean) {
-      const width = niceStep(mean * 2.6 / 18);
-      const count = 18;
+    // Equal-width buckets spanning the bulk of the data, plus an overflow bucket.
+    // Both tails are heavy, so the top edge tracks the 99th percentile, not the max.
+    function binned(data, stats) {
+      const width = niceStep(Math.max(1, stats.p99 - stats.min) / 20);
+      const floor = Math.floor(stats.min / width) * width;
+      const count = Math.max(6, Math.min(20, Math.ceil((stats.p99 - floor) / width)));
       const values = new Array(count + 1).fill(0);
       for (let i = 0; i < data.length; i++) {
-        values[Math.min(count, Math.floor(data[i] / width))]++;
+        values[Math.min(count, Math.floor((data[i] - floor) / width))]++;
       }
       const labels = values.map(function (_, i) {
-        return i === count ? (count * width) + '+' : String(i * width);
+        return i === count ? (floor + count * width) + '+' : String(floor + i * width);
       });
       return {
+        floor: floor,
         width: width,
         labels: labels,
         values: values.map(function (c) { return c / data.length; })
@@ -860,7 +863,7 @@
         });
         return;
       }
-      const hist = binned(rets, stats.mean);
+      const hist = binned(rets, stats);
       barChart(retCtx, {
         title: 'Swaps until the cups return to their original order',
         subtitle: rets.length.toLocaleString() + ' trials, ' + n + ' cups',
@@ -869,12 +872,15 @@
         values: hist.values,
         labelAtLeftEdge: true,
         yFmt: function (v) { return (v * 100).toFixed(0) + '%'; },
-        vline: { coord: stats.mean / hist.width, label: 'mean ' + stats.mean.toFixed(2) }
+        vline: {
+          coord: (stats.mean - hist.floor) / hist.width,
+          label: 'mean ' + stats.mean.toFixed(2)
+        }
       });
     }
 
     function drawCoverHist(n, covs, stats) {
-      const hist = binned(covs, stats.mean);
+      const hist = binned(covs, stats);
       const theory = n === 3 ? COVER_MEAN : null;
       barChart(covCtx, {
         title: 'Swaps until every arrangement has appeared',
@@ -885,8 +891,14 @@
         labelAtLeftEdge: true,
         yFmt: function (v) { return (v * 100).toFixed(0) + '%'; },
         vline: theory === null
-          ? { coord: stats.mean / hist.width, label: 'mean ' + stats.mean.toFixed(1) }
-          : { coord: theory / hist.width, label: 'theory 171/14 = ' + theory.toFixed(3) }
+          ? {
+            coord: (stats.mean - hist.floor) / hist.width,
+            label: 'mean ' + stats.mean.toFixed(1)
+          }
+          : {
+            coord: (theory - hist.floor) / hist.width,
+            label: 'theory 171/14 = ' + theory.toFixed(3)
+          }
       });
     }
 
