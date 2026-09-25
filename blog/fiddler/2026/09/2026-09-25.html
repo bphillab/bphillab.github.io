@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>This Week's Fiddler - Sep 25, 2026 - Benjamin Phillabaum, Data Cat</title>
+  <link rel="stylesheet" type="text/css" href="/css/main.css">
+  <style>
+    .callout {
+      padding: 10px 12px;
+      border: 1px solid #e0e0e0;
+      background: #fafafa;
+      margin: 14px 0 18px;
+      max-width: 760px;
+    }
+    .solution-table {
+      max-width: 760px;
+      margin: 14px 0;
+      border-collapse: collapse;
+    }
+    .solution-table th, .solution-table td {
+      padding: 8px 12px;
+      border: 1px solid #cad3dd;
+      text-align: left;
+    }
+    .solution-table th {
+      background: #f4f6f8;
+    }
+    .solution-table td:first-child,
+    .solution-table th:first-child {
+      width: 220px;
+    }
+    canvas {
+      display: block;
+      max-width: 100%;
+      margin: 18px 0;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0;
+      max-width: 760px;
+    }
+    .controls label {
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .controls select, .controls button {
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 6px 10px;
+      border: 1px solid #9eaaba;
+      background: #fff;
+      color: #1f2c36;
+      cursor: pointer;
+    }
+    .controls button:hover {
+      background: #f0f4f8;
+    }
+    .controls input[type=range] {
+      flex: 1;
+      min-width: 160px;
+      max-width: 260px;
+    }
+    .controls input[type=number] {
+      width: 110px;
+      font-size: 0.9rem;
+      padding: 5px 8px;
+      border: 1px solid #9eaaba;
+    }
+    .readout {
+      padding: 12px 14px;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      margin: 12px 0 18px;
+      max-width: 760px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    .legend {
+      max-width: 760px;
+      color: #5a6772;
+      font-size: 0.82rem;
+    }
+    .swatch {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      margin-right: 4px;
+      border: 1px solid #1f2c36;
+      vertical-align: -1px;
+    }
+  </style>
+  <script defer src="/analytics.js"></script>
+  <script defer src="/mathjax.js"></script>
+</head>
+<body>
+<nav>
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/about">About</a></li>
+    <li><a href="/cv">CV</a></li>
+    <li><a href="/blog">Blog</a></li>
+    <li><a href="/games">Games</a></li>
+  </ul>
+</nav>
+
+<h1>This Week's Fiddler: Sep 25, 2026</h1>
+<p><em>Posted on Sep 25, 2026</em></p>
+
+<h2>Problem</h2>
+<p>Congratulations—you just won your school's tabletop football championship! You flicked your lucky paper football to victory countless times, and would now like to frame it for posterity.</p>
+<p>The football is an equilateral triangle with a side length of \(1\) inch. What is the side length of the smallest square frame that will contain the football?</p>
+
+<h2>Main Solution</h2>
+<p>Framing an object efficiently is an exercise in minimizing enclosing dimensions and wasted material. We want to find the smallest square frame (with side length \(s\)) that completely bounds an equilateral triangle of side length \(1\).</p>
+
+<p>A natural starting inclination is to align one edge of the triangle flush against the bottom edge of the frame. In this standard horizontal configuration:</p>
+<ul>
+  <li>The horizontal width is the base edge: \(W = 1\).</li>
+  <li>The vertical height is the triangle's altitude: \(H = \frac{\sqrt{3}}{2} \approx 0.8660\).</li>
+</ul>
+<p>Because the frame must be square, its side length is constrained by the larger of the two perpendicular spans: \(\max(W, H) = \max(1, \sqrt{3}/2) = 1\). However, keeping one edge horizontal leaves considerable dead space along the height (\(1 - \sqrt{3}/2 \approx 0.134\) inches of unused vertical gap). We can achieve greater spatial efficiency by tilting the triangle.</p>
+
+<p>Let the orientation angle \(\theta\) represent the angle of one triangle edge relative to the horizontal axis. Place the triangle vertices at:</p>
+<p>\[
+\begin{aligned}
+  V_0 &= (0, 0), \\
+  V_1 &= (\cos\theta, \sin\theta), \\
+  V_2 &= \left(\cos\left(\theta + \frac{\pi}{3}\right), \sin\left(\theta + \frac{\pi}{3}\right)\right).
+\end{aligned}
+\]</p>
+
+<p>For any angle \(\theta \in [0, \pi/6]\) (that is, \(0^\circ \le \theta \le 30^\circ\)), all three vertices lie in the first quadrant. The horizontal span (width) and vertical span (height) of the triangle are:</p>
+<p>\[
+\begin{aligned}
+  W(\theta) &= \max(0, \cos\theta, \cos(\theta + \pi/3)) - \min(0, \cos\theta, \cos(\theta + \pi/3)) = \cos\theta, \\
+  H(\theta) &= \max(0, \sin\theta, \sin(\theta + \pi/3)) - \min(0, \sin\theta, \sin(\theta + \pi/3)) = \sin\left(\theta + \frac{\pi}{3}\right) = \cos\left(\theta - \frac{\pi}{6}\right).
+\end{aligned}
+\]</p>
+
+<p>The smallest square frame enclosing the triangle at orientation \(\theta\) must have side length</p>
+<p>\[
+  S(\theta) = \max(W(\theta), H(\theta)) = \max\left(\cos\theta, \cos\left(\theta - \frac{\pi}{6}\right)\right).
+\]</p>
+
+<p>As \(\theta\) increases from \(0^\circ\) to \(30^\circ\):</p>
+<ul>
+  <li>\(W(\theta) = \cos\theta\) decreases strictly from \(1\) to \(\frac{\sqrt{3}}{2}\).</li>
+  <li>\(H(\theta) = \cos(\theta - \pi/6)\) increases strictly from \(\frac{\sqrt{3}}{2}\) to \(1\).</li>
+</ul>
+<p>By symmetry and monotonicity, the minimum of the upper envelope occurs precisely where the width and height are equal:</p>
+<p>\[
+  \cos\theta = \cos\left(\theta - \frac{\pi}{6}\right)
+  \quad\Longrightarrow\quad
+  \theta = \frac{\pi}{12} = 15^\circ.
+\]</p>
+
+<p>At this optimal tilt of \(15^\circ\) (or equivalently \(45^\circ\) or \(75^\circ\) under rotational symmetry), all four interior walls of the square frame make contact with the triangle: two vertices touch the bottom and left edges, while the remaining two vertices touch the top and right edges. The required side length is minimized:</p>
+<p>\[
+  S_{\min} = \cos\left(15^\circ\right) = \frac{\sqrt{6} + \sqrt{2}}{4} = \frac{\sqrt{2 + \sqrt{3}}}{2} \approx 0.9659258\dots \text{ inches.}
+\]</p>
+
+<div class="callout">
+  <p><strong>Answer:</strong> \( \boxed{\frac{\sqrt{6} + \sqrt{2}}{4}} \approx \boxed{0.9659} \) inches.</p>
+</div>
+
+<p>Tilting the football reduces the required frame area from \(1.000\text{ in}^2\) down to \(\cos^2(15^\circ) = \frac{2+\sqrt{3}}{4} \approx 0.9330\text{ in}^2\), an area savings of approximately \(6.7\%\).</p>
+
+<h2>This Week's Extra Credit</h2>
+<p>To add a little excitement to the framing process, your new plan is to spin the triangular football by a random angle, and then frame it with a square that is not rotated. That is, the square consists of two perfectly horizontal sides and two perfectly vertical sides.</p>
+<p>On average, what can you expect the side length of the smallest resulting square frame to be?</p>
+
+<h2>Extra Credit Solution</h2>
+<p>When the orientation angle \(\Theta\) is drawn uniformly at random from \([0, 2\pi)\), we want the expected side length \(\mathbb{E}[S(\Theta)]\).</p>
+
+<p>Because an equilateral triangle has 3-fold rotational symmetry and reflection symmetry, and an axis-aligned square has 4-fold rotational symmetry and reflection symmetry, the side length function \(S(\theta)\) repeats every \(\pi/6\) radians (\(30^\circ\)) and is mirror-symmetric about \(\pi/12\) (\(15^\circ\)). Thus, the global expectation across all \(360^\circ\) reduces to the average value of \(\cos\theta\) on the fundamental domain \([0, \pi/12]\):</p>
+
+<p>\[
+\begin{aligned}
+  \mathbb{E}[S] &= \frac{1}{\pi/12} \int_0^{\pi/12} \cos\theta \, d\theta \\
+  &= \frac{12}{\pi} \Big[ \sin\theta \Big]_0^{\pi/12} \\
+  &= \frac{12}{\pi} \sin\left(\frac{\pi}{12}\right).
+\end{aligned}
+\]</p>
+
+<p>Using the exact half-angle formula \(\sin(15^\circ) = \frac{\sqrt{6} - \sqrt{2}}{4}\), we obtain:</p>
+
+<p>\[
+  \mathbb{E}[S] = \frac{12}{\pi} \cdot \frac{\sqrt{6} - \sqrt{2}}{4} = \frac{3(\sqrt{6} - \sqrt{2})}{\pi} \approx 0.9886159\dots \text{ inches.}
+\]</p>
+
+<div class="callout">
+  <p><strong>Extra credit answer:</strong> \( \boxed{\frac{3(\sqrt{6} - \sqrt{2})}{\pi}} \approx \boxed{0.9886} \) inches.</p>
+</div>
+
+<h2>Distribution of the Frame Size</h2>
+<p>Beyond the expected value, the entire probability distribution of the frame side length can be characterized analytically. For any side length \(s\) in the interval \([\cos(15^\circ), 1]\):</p>
+<p>\[
+  F(s) = \mathbb{P}(S \le s) = \mathbb{P}(\cos\theta \le s) = 1 - \frac{12}{\pi} \arccos(s).
+\]</p>
+<p>Differentiating with respect to \(s\) gives the probability density function (PDF):</p>
+<p>\[
+  f(s) = \frac{dF}{ds} = \frac{12}{\pi \sqrt{1 - s^2}}, \qquad \frac{\sqrt{6}+\sqrt{2}}{4} \le s \le 1.
+\]</p>
+
+<table class="solution-table">
+  <thead>
+  <tr>
+    <th>Property</th>
+    <th>Exact Value</th>
+    <th>Numerical Value</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr><td>Minimum Side Length (\(s_{\min}\))</td><td>\(\frac{\sqrt{6}+\sqrt{2}}{4}\)</td><td>\(0.965926\) in</td></tr>
+  <tr><td>Maximum Side Length (\(s_{\max}\))</td><td>\(1\)</td><td>\(1.000000\) in</td></tr>
+  <tr><td>Expected Side Length (\(\mathbb{E}[S]\))</td><td>\(\frac{3(\sqrt{6}-\sqrt{2})}{\pi}\)</td><td>\(0.988616\) in</td></tr>
+  <tr><td>Expected Frame Area (\(\mathbb{E}[S^2]\))</td><td>\(\frac{1}{2} + \frac{3}{2\pi}\)</td><td>\(0.977465\text{ in}^2\)</td></tr>
+  <tr><td>Standard Deviation (\(\sigma_S\))</td><td>\(\sqrt{\frac{1}{2}+\frac{3}{2\pi} - \frac{18(4-2\sqrt{3})}{\pi^2}}\)</td><td>\(0.010167\) in</td></tr>
+  <tr><td>Median Side Length</td><td>\(\cos(7.5^\circ) = \frac{\sqrt{2+\sqrt{2+\sqrt{3}}}}{2}\)</td><td>\(0.991445\) in</td></tr>
+  </tbody>
+</table>
+
+<p>Because the derivative of the cosine function vanishes at \(\theta = 0\), the density \(f(s)\) diverges as \(s \to 1^-\). As a result, random spins cluster disproportionately near the maximum frame size of \(1\) inch, pulling the median (\(\approx 0.9914\) in) and mean (\(\approx 0.9886\) in) close to the upper limit.</p>
+
+<h2>Interactive: Rotating Frame & Envelope Visualizer</h2>
+<p>Explore how tilting the triangular paper football changes its horizontal width \(W\), vertical height \(H\), and the required bounding square \(S(\theta)\). Drag the slider or click a preset angle to examine the optimal \(15^\circ\) configuration where all four frame boundaries meet the triangle.</p>
+
+<div class="controls">
+  <label for="angle-slider">Angle \(\theta\):</label>
+  <input type="range" id="angle-slider" min="0" max="90" step="0.5" value="15">
+  <span id="angle-display" style="font-weight: bold; min-width: 50px;">15.0°</span>
+  <button id="btn-snap-0">0° (Flat)</button>
+  <button id="btn-snap-15">15° (Optimal)</button>
+  <button id="btn-snap-30">30°</button>
+  <button id="btn-snap-45">45°</button>
+  <button id="btn-animate">Animate</button>
+</div>
+
+<canvas id="geom-canvas" width="760" height="420"></canvas>
+<p class="legend">
+  <span class="swatch" style="background:#2b5d87"></span>Paper football (equilateral triangle) &nbsp;
+  <span class="swatch" style="background:#dde8f2"></span>Wasted frame area &nbsp;
+  <span class="swatch" style="background:#b8473d"></span>Bounding square frame (\(S = \max(W,H)\))
+</p>
+<div id="geom-out" class="readout"></div>
+
+<canvas id="curve-canvas" width="760" height="240"></canvas>
+
+<h2>Interactive: Monte Carlo Simulator</h2>
+<p>Simulate spinning the triangular football by uniformly random angles in \([0, 2\pi)\). Compare the empirical distribution of square frame side lengths against the theoretical density \(f(s) = \frac{12}{\pi\sqrt{1-s^2}}\).</p>
+
+<div class="controls">
+  <label for="sim-trials">Trials:</label>
+  <input type="number" id="sim-trials" min="1000" step="10000" value="100000">
+  <button id="btn-sim">Run Simulation</button>
+</div>
+
+<div id="sim-out" class="readout"></div>
+
+<canvas id="hist-canvas" width="760" height="280"></canvas>
+
+<p><strong>More Fiddlers:</strong> <a href="/blog/fiddler/2026/09/2026-09-18.html">Previous</a> | Next</p>
+<p><a href="/blog">Back to blog</a></p>
+
+<footer>
+  <ul>
+    <li><a href="mailto:bphillab@gmail.com">email</a></li>
+    <li><a href="https://github.com/bphillab">github.com/bphillab</a></li>
+  </ul>
+</footer>
+
+<script>
+  (function () {
+    'use strict';
+
+    // Site theme palette
+    const INK = '#1f2c36';
+    const MUTED = '#5a6772';
+    const EDGE = '#cad3dd';
+    const GRID = '#ecf0f4';
+    const ACCENT = '#2b5d87';
+    const TINT = '#dde8f2';
+    const CARD = '#fdfbf2';
+    const RED = '#b8473d';
+    const GOLD = '#d48817';
+    const MONO = '"IBM Plex Mono", Menlo, Consolas, monospace';
+
+    // ---------------------------------------------------------------
+    // Part 1: Interactive Geometry & Function Curve
+    // ---------------------------------------------------------------
+    const angleSlider = document.getElementById('angle-slider');
+    const angleDisplay = document.getElementById('angle-display');
+    const geomCanvas = document.getElementById('geom-canvas');
+    const geomCtx = geomCanvas.getContext('2d');
+    const curveCanvas = document.getElementById('curve-canvas');
+    const curveCtx = curveCanvas.getContext('2d');
+    const geomOut = document.getElementById('geom-out');
+    const animBtn = document.getElementById('btn-animate');
+
+    let animTimer = null;
+
+    function getTriangleMetrics(deg) {
+      const rad = deg * Math.PI / 180;
+      // Vertices of unit equilateral triangle rotated by rad:
+      const v0 = { x: 0, y: 0 };
+      const v1 = { x: Math.cos(rad), y: Math.sin(rad) };
+      const v2 = { x: Math.cos(rad + Math.PI / 3), y: Math.sin(rad + Math.PI / 3) };
+
+      const xs = [v0.x, v1.x, v2.x];
+      const ys = [v0.y, v1.y, v2.y];
+      const minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+      const minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+
+      const w = maxX - minX;
+      const h = maxY - minY;
+      const s = Math.max(w, h);
+
+      return {
+        rad: rad,
+        deg: deg,
+        v0: v0,
+        v1: v1,
+        v2: v2,
+        minX: minX,
+        maxX: maxX,
+        minY: minY,
+        maxY: maxY,
+        w: w,
+        h: h,
+        s: s,
+        areaTri: Math.sqrt(3) / 4,
+        areaSquare: s * s,
+        wastedArea: s * s - Math.sqrt(3) / 4
+      };
+    }
+
+    function drawGeometry(m) {
+      const ctx = geomCtx;
+      const W = geomCanvas.width, H = geomCanvas.height;
+
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, W, H);
+
+      // Centering and scaling
+      const scale = 250; // pixels per inch
+      const cx = W / 2;
+      const cy = H / 2;
+
+      // Center of bounding square in world coordinates:
+      const sqMidX = (m.minX + m.maxX) / 2;
+      const sqMidY = (m.minY + m.maxY) / 2;
+
+      // Function to transform world coord (x, y) to canvas (X, Y)
+      function toScreen(x, y) {
+        return {
+          x: cx + (x - sqMidX) * scale,
+          y: cy - (y - sqMidY) * scale
+        };
+      }
+
+      // Draw square frame:
+      const sqHalf = m.s / 2;
+      const sqTopLeft = toScreen(sqMidX - sqHalf, sqMidY + sqHalf);
+      const sqSize = m.s * scale;
+
+      // Draw bounding square background
+      ctx.fillStyle = TINT;
+      ctx.fillRect(sqTopLeft.x, sqTopLeft.y, sqSize, sqSize);
+
+      // Draw bounding box (W x H) outline if different from square
+      const bbTopLeft = toScreen(m.minX, m.maxY);
+      const bbW = m.w * scale;
+      const bbH = m.h * scale;
+      ctx.strokeStyle = '#95a5b5';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(bbTopLeft.x, bbTopLeft.y, bbW, bbH);
+      ctx.setLineDash([]);
+
+      // Draw paper football (triangle)
+      const p0 = toScreen(m.v0.x, m.v0.y);
+      const p1 = toScreen(m.v1.x, m.v1.y);
+      const p2 = toScreen(m.v2.x, m.v2.y);
+
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.closePath();
+      ctx.fillStyle = '#2b5d87';
+      ctx.fill();
+      ctx.strokeStyle = '#183b58';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Paper football fold crease line (altitude from one vertex to opposite midpoint)
+      const pMid = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
+      ctx.beginPath();
+      ctx.moveTo(p2.x, p2.y);
+      ctx.lineTo(pMid.x, pMid.y);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Draw vertices
+      [p0, p1, p2].forEach(function (p) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.strokeStyle = '#183b58';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+
+      // Draw square frame border
+      ctx.strokeStyle = RED;
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(sqTopLeft.x, sqTopLeft.y, sqSize, sqSize);
+
+      // Dimension annotations
+      ctx.font = '11px ' + MONO;
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'center';
+
+      // Width indicator
+      const dimY = sqTopLeft.y + sqSize + 18;
+      ctx.strokeStyle = MUTED;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(sqTopLeft.x, dimY);
+      ctx.lineTo(sqTopLeft.x + sqSize, dimY);
+      ctx.moveTo(sqTopLeft.x, dimY - 4);
+      ctx.lineTo(sqTopLeft.x, dimY + 4);
+      ctx.moveTo(sqTopLeft.x + sqSize, dimY - 4);
+      ctx.lineTo(sqTopLeft.x + sqSize, dimY + 4);
+      ctx.stroke();
+      ctx.fillText('Frame side s = ' + m.s.toFixed(4) + ' in', cx, dimY + 16);
+
+      // Height indicator on left
+      const dimX = sqTopLeft.x - 18;
+      ctx.beginPath();
+      ctx.moveTo(dimX, sqTopLeft.y);
+      ctx.lineTo(dimX, sqTopLeft.y + sqSize);
+      ctx.moveTo(dimX - 4, sqTopLeft.y);
+      ctx.lineTo(dimX + 4, sqTopLeft.y);
+      ctx.moveTo(dimX - 4, sqTopLeft.y + sqSize);
+      ctx.lineTo(dimX + 4, sqTopLeft.y + sqSize);
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(dimX - 12, cy);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText('W = ' + m.w.toFixed(4) + ' in,  H = ' + m.h.toFixed(4) + ' in', 0, 0);
+      ctx.restore();
+    }
+
+    function drawCurve(curDeg) {
+      const ctx = curveCtx;
+      const W = curveCanvas.width, H = curveCanvas.height;
+      const padL = 62, padR = 24, padT = 36, padB = 42;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = INK;
+      ctx.font = 'bold 12px ' + MONO;
+      ctx.fillText('Bounding Square Side Length S(\u03b8) vs Orientation Angle \u03b8', W / 2, 20);
+
+      const minVal = 0.84, maxVal = 1.02;
+
+      // Grid & Y labels
+      ctx.font = '10px ' + MONO;
+      for (let s = 0; s <= 4; s++) {
+        const v = minVal + (s / 4) * (maxVal - minVal);
+        const y = padT + plotH - ((v - minVal) / (maxVal - minVal)) * plotH;
+        ctx.strokeStyle = GRID;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(W - padR, y);
+        ctx.stroke();
+        ctx.fillStyle = MUTED;
+        ctx.textAlign = 'right';
+        ctx.fillText(v.toFixed(2), padL - 8, y + 3.5);
+      }
+
+      // Bottom axis
+      ctx.strokeStyle = EDGE;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padL, padT + plotH);
+      ctx.lineTo(W - padR, padT + plotH);
+      ctx.stroke();
+
+      // X ticks (0 to 90 deg)
+      for (let deg = 0; deg <= 90; deg += 15) {
+        const x = padL + (deg / 90) * plotW;
+        ctx.strokeStyle = EDGE;
+        ctx.beginPath();
+        ctx.moveTo(x, padT + plotH);
+        ctx.lineTo(x, padT + plotH + 4);
+        ctx.stroke();
+        ctx.fillStyle = MUTED;
+        ctx.textAlign = 'center';
+        ctx.fillText(deg + '°', x, padT + plotH + 16);
+      }
+
+      // Draw W(theta) dashed, H(theta) dotted, S(theta) solid red
+      function getY(val) {
+        return padT + plotH - ((val - minVal) / (maxVal - minVal)) * plotH;
+      }
+
+      // Width W(theta)
+      ctx.strokeStyle = '#8fa3b8';
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      for (let deg = 0; deg <= 90; deg += 0.5) {
+        const mm = getTriangleMetrics(deg);
+        const x = padL + (deg / 90) * plotW;
+        const y = getY(mm.w);
+        if (deg === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Height H(theta)
+      ctx.strokeStyle = '#c5a059';
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath();
+      for (let deg = 0; deg <= 90; deg += 0.5) {
+        const mm = getTriangleMetrics(deg);
+        const x = padL + (deg / 90) * plotW;
+        const y = getY(mm.h);
+        if (deg === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // S(theta)
+      ctx.strokeStyle = RED;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let deg = 0; deg <= 90; deg += 0.5) {
+        const mm = getTriangleMetrics(deg);
+        const x = padL + (deg / 90) * plotW;
+        const y = getY(mm.s);
+        if (deg === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Minimum guideline at 15 deg, 45 deg, 75 deg
+      [15, 45, 75].forEach(function (optDeg) {
+        const ox = padL + (optDeg / 90) * plotW;
+        const oy = getY((Math.sqrt(6) + Math.sqrt(2)) / 4);
+        ctx.strokeStyle = '#2b5d87';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(ox, padT);
+        ctx.lineTo(ox, padT + plotH);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.arc(ox, oy, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#2b5d87';
+        ctx.fill();
+      });
+
+      // Current angle marker
+      const curM = getTriangleMetrics(curDeg);
+      const curX = padL + (curDeg / 90) * plotW;
+      const curY = getY(curM.s);
+
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(curX, padT);
+      ctx.lineTo(curX, padT + plotH);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(curX, curY, 5.5, 0, Math.PI * 2);
+      ctx.fillStyle = RED;
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Legend
+      ctx.font = '10px ' + MONO;
+      ctx.textAlign = 'left';
+      const legX = W - padR - 330, legY = padT + 12;
+
+      ctx.strokeStyle = RED;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(legX, legY); ctx.lineTo(legX + 16, legY); ctx.stroke();
+      ctx.fillStyle = MUTED;
+      ctx.fillText('S(\u03b8) = max(W,H)', legX + 22, legY + 3);
+
+      ctx.strokeStyle = '#8fa3b8';
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(legX + 130, legY); ctx.lineTo(legX + 146, legY); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillText('Width W(\u03b8)', legX + 152, legY + 3);
+
+      ctx.strokeStyle = '#c5a059';
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath();
+      ctx.moveTo(legX + 230, legY); ctx.lineTo(legX + 246, legY); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillText('Height H(\u03b8)', legX + 252, legY + 3);
+    }
+
+    function updateReadout(m) {
+      function line(label, val) { return label.padEnd(28) + val; }
+      const optS = (Math.sqrt(6) + Math.sqrt(2)) / 4;
+      const diffOpt = ((m.s - optS) / optS) * 100;
+      const isOptimal = Math.abs(m.deg % 30 - 15) < 0.25;
+
+      const lines = [
+        line('Orientation angle \u03b8:', m.deg.toFixed(1) + '°  (' + (m.rad).toFixed(4) + ' rad)'),
+        line('Horizontal width (W):', m.w.toFixed(5) + ' in'),
+        line('Vertical height (H):', m.h.toFixed(5) + ' in'),
+        line('Bounding square side (s):', m.s.toFixed(5) + ' in' + (isOptimal ? '   [GLOBAL MINIMUM]' : '')),
+        line('Bounding square area:', m.areaSquare.toFixed(5) + ' in²'),
+        line('Paper football area:', m.areaTri.toFixed(5) + ' in²'),
+        line('Wasted frame area:', m.wastedArea.toFixed(5) + ' in²  (' + ((m.wastedArea / m.areaSquare) * 100).toFixed(2) + '% of frame)'),
+        line('Excess side over optimal:', diffOpt.toFixed(2) + '%')
+      ];
+      geomOut.textContent = lines.join('\n');
+    }
+
+    function renderInteractive() {
+      const deg = parseFloat(angleSlider.value);
+      angleDisplay.textContent = deg.toFixed(1) + '°';
+      const m = getTriangleMetrics(deg);
+      drawGeometry(m);
+      drawCurve(deg);
+      updateReadout(m);
+    }
+
+    angleSlider.addEventListener('input', function () {
+      if (animTimer) { clearInterval(animTimer); animTimer = null; animBtn.textContent = 'Animate'; }
+      renderInteractive();
+    });
+
+    function setAngle(deg) {
+      if (animTimer) { clearInterval(animTimer); animTimer = null; animBtn.textContent = 'Animate'; }
+      angleSlider.value = deg;
+      renderInteractive();
+    }
+
+    document.getElementById('btn-snap-0').addEventListener('click', function () { setAngle(0); });
+    document.getElementById('btn-snap-15').addEventListener('click', function () { setAngle(15); });
+    document.getElementById('btn-snap-30').addEventListener('click', function () { setAngle(30); });
+    document.getElementById('btn-snap-45').addEventListener('click', function () { setAngle(45); });
+
+    animBtn.addEventListener('click', function () {
+      if (animTimer) {
+        clearInterval(animTimer);
+        animTimer = null;
+        animBtn.textContent = 'Animate';
+      } else {
+        animBtn.textContent = 'Pause';
+        animTimer = setInterval(function () {
+          let cur = parseFloat(angleSlider.value) + 0.5;
+          if (cur > 90) cur = 0;
+          angleSlider.value = cur;
+          renderInteractive();
+        }, 30);
+      }
+    });
+
+    // ---------------------------------------------------------------
+    // Part 2: Monte Carlo Simulator
+    // ---------------------------------------------------------------
+    const trialsInput = document.getElementById('sim-trials');
+    const simBtn = document.getElementById('btn-sim');
+    const simOut = document.getElementById('sim-out');
+    const histCanvas = document.getElementById('hist-canvas');
+    const histCtx = histCanvas.getContext('2d');
+
+    const THEORY_MEAN = 3 * (Math.sqrt(6) - Math.sqrt(2)) / Math.PI;
+    const MIN_S = (Math.sqrt(6) + Math.sqrt(2)) / 4;
+
+    function runSimulation() {
+      const trials = Math.max(1000, Math.min(1000000, parseInt(trialsInput.value, 10) || 100000));
+      trialsInput.value = trials;
+
+      const started = Date.now();
+      const sVals = new Float64Array(trials);
+
+      let sumS = 0;
+      let sumS2 = 0;
+
+      for (let t = 0; t < trials; t++) {
+        const theta = Math.random() * (Math.PI * 2);
+        const cos0 = Math.cos(theta), sin0 = Math.sin(theta);
+        const cos1 = Math.cos(theta + Math.PI / 3), sin1 = Math.sin(theta + Math.PI / 3);
+
+        const minX = Math.min(0, cos0, cos1);
+        const maxX = Math.max(0, cos0, cos1);
+        const minY = Math.min(0, sin0, sin1);
+        const maxY = Math.max(0, sin0, sin1);
+
+        const w = maxX - minX;
+        const h = maxY - minY;
+        const s = Math.max(w, h);
+
+        sVals[t] = s;
+        sumS += s;
+        sumS2 += s * s;
+      }
+
+      const elapsed = (Date.now() - started) / 1000;
+      const simMean = sumS / trials;
+      const simMeanS2 = sumS2 / trials;
+      const simVar = simMeanS2 - simMean * simMean;
+      const simStd = Math.sqrt(Math.max(0, simVar));
+
+      sVals.sort();
+      function q(f) { return sVals[Math.min(sVals.length - 1, Math.floor(sVals.length * f))]; }
+
+      const med = q(0.5);
+      const p10 = q(0.1);
+      const p90 = q(0.9);
+      const minEmp = sVals[0];
+      const maxEmp = sVals[sVals.length - 1];
+
+      function pad(l) { return l.padEnd(26); }
+      const lines = [
+        '--- ' + trials.toLocaleString() + ' Random Rotations \u0398 \u223c Uniform[0, 2\u03c0) ---',
+        '',
+        'Square Frame Side Length (S):',
+        '  ' + pad('Simulated Mean') + simMean.toFixed(6) + ' in',
+        '  ' + pad('Theoretical Mean') + THEORY_MEAN.toFixed(6) + ' in  (3(\u221a6 - \u221a2)/\u03c0)',
+        '  ' + pad('Discrepancy') + Math.abs(simMean - THEORY_MEAN).toExponential(3) + ' in',
+        '  ' + pad('Median / 10th / 90th') + med.toFixed(5) + ' / ' + p10.toFixed(5) + ' / ' + p90.toFixed(5) + ' in',
+        '  ' + pad('Min observed') + minEmp.toFixed(6) + ' in  (Theory min: ' + MIN_S.toFixed(6) + ' in)',
+        '  ' + pad('Max observed') + maxEmp.toFixed(6) + ' in  (Theory max: 1.000000 in)',
+        '  ' + pad('Std Deviation (\u03c3)') + simStd.toFixed(6) + ' in',
+        '',
+        'Square Frame Area (S²):',
+        '  ' + pad('Simulated Mean Area') + simMeanS2.toFixed(6) + ' in²',
+        '  ' + pad('Theoretical Mean Area') + (0.5 + 1.5 / Math.PI).toFixed(6) + ' in²  (1/2 + 3/(2\u03c0))',
+        '',
+        'Simulation completed in ' + elapsed.toFixed(3) + ' s.'
+      ];
+      simOut.textContent = lines.join('\n');
+
+      drawHistogram(sVals, simMean);
+    }
+
+    function drawHistogram(sVals, simMean) {
+      const ctx = histCtx;
+      const W = histCanvas.width, H = histCanvas.height;
+      const padL = 62, padR = 24, padT = 44, padB = 48;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = INK;
+      ctx.font = 'bold 12px ' + MONO;
+      ctx.fillText('Distribution of Smallest Square Frame Side Length S', W / 2, 20);
+      ctx.fillStyle = MUTED;
+      ctx.font = '11px ' + MONO;
+      ctx.fillText(sVals.length.toLocaleString() + ' random spins', W / 2, 36);
+
+      const numBins = 24;
+      const binMin = MIN_S;
+      const binMax = 1.0;
+      const binWidth = (binMax - binMin) / numBins;
+
+      const counts = new Uint32Array(numBins);
+      for (let i = 0; i < sVals.length; i++) {
+        const idx = Math.min(numBins - 1, Math.max(0, Math.floor((sVals[i] - binMin) / binWidth)));
+        counts[idx]++;
+      }
+
+      // Convert counts to density: density = count / (N * binWidth)
+      const densities = new Float64Array(numBins);
+      let maxDensity = 0;
+      for (let b = 0; b < numBins; b++) {
+        densities[b] = counts[b] / (sVals.length * binWidth);
+        if (densities[b] > maxDensity) maxDensity = densities[b];
+      }
+
+      const yMax = Math.max(maxDensity * 1.15, 30);
+
+      // Grid
+      ctx.font = '10px ' + MONO;
+      for (let s = 0; s <= 4; s++) {
+        const v = (s / 4) * yMax;
+        const y = padT + plotH - (v / yMax) * plotH;
+        ctx.strokeStyle = GRID;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(W - padR, y);
+        ctx.stroke();
+        ctx.fillStyle = MUTED;
+        ctx.textAlign = 'right';
+        ctx.fillText(v.toFixed(0), padL - 8, y + 3.5);
+      }
+
+      // Axis
+      ctx.strokeStyle = EDGE;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padL, padT + plotH);
+      ctx.lineTo(W - padR, padT + plotH);
+      ctx.stroke();
+
+      const slotW = plotW / numBins;
+
+      // Draw Histogram Bars
+      for (let b = 0; b < numBins; b++) {
+        const h = (densities[b] / yMax) * plotH;
+        const x = padL + b * slotW;
+        const y = padT + plotH - h;
+        ctx.fillStyle = TINT;
+        ctx.fillRect(x + 1, y, slotW - 2, h);
+        ctx.strokeStyle = ACCENT;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + 1, y, slotW - 2, h);
+
+        if (b % 4 === 0 || b === numBins - 1) {
+          const val = binMin + b * binWidth;
+          ctx.fillStyle = MUTED;
+          ctx.textAlign = 'center';
+          ctx.fillText(val.toFixed(3), x + slotW / 2, padT + plotH + 16);
+        }
+      }
+
+      // Overlay theoretical PDF: f(s) = 12 / (pi * sqrt(1 - s^2))
+      ctx.strokeStyle = RED;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      let startedPath = false;
+      for (let px = 0; px <= plotW; px += 2) {
+        const s = binMin + (px / plotW) * (binMax - binMin);
+        if (s >= 0.9998) continue; // avoid asymptote infinity at boundary
+        const pdf = 12 / (Math.PI * Math.sqrt(Math.max(1e-6, 1 - s * s)));
+        const y = padT + plotH - (pdf / yMax) * plotH;
+        const cx = padL + px;
+        if (!startedPath) {
+          ctx.moveTo(cx, y);
+          startedPath = true;
+        } else {
+          ctx.lineTo(cx, y);
+        }
+      }
+      ctx.stroke();
+
+      // Theoretical Mean Line
+      const meanX = padL + ((THEORY_MEAN - binMin) / (binMax - binMin)) * plotW;
+      ctx.strokeStyle = RED;
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([5, 3]);
+      ctx.beginPath();
+      ctx.moveTo(meanX, padT);
+      ctx.lineTo(meanX, padT + plotH);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = RED;
+      ctx.font = '10px ' + MONO;
+      ctx.textAlign = 'right';
+      ctx.fillText('mean ' + THEORY_MEAN.toFixed(4), meanX - 5, padT + 12);
+
+      // Legend
+      ctx.font = '10px ' + MONO;
+      ctx.textAlign = 'left';
+      const legX = W - padR - 260, legY = padT + 12;
+
+      ctx.fillStyle = TINT;
+      ctx.fillRect(legX, legY - 7, 10, 8);
+      ctx.strokeStyle = ACCENT;
+      ctx.strokeRect(legX, legY - 7, 10, 8);
+      ctx.fillStyle = MUTED;
+      ctx.fillText('Empirical Density', legX + 16, legY);
+
+      ctx.strokeStyle = RED;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(legX, legY + 14); ctx.lineTo(legX + 12, legY + 14); ctx.stroke();
+      ctx.fillText('Exact PDF  12/(\u03c0\u221a(1-s²))', legX + 16, legY + 17);
+
+      ctx.fillStyle = MUTED;
+      ctx.font = '11px ' + MONO;
+      ctx.textAlign = 'center';
+      ctx.fillText('Square Frame Side Length s (inches)', W / 2, H - 10);
+    }
+
+    simBtn.addEventListener('click', function () {
+      simBtn.disabled = true;
+      simBtn.textContent = 'Running...';
+      setTimeout(function () {
+        try {
+          runSimulation();
+        } finally {
+          simBtn.disabled = false;
+          simBtn.textContent = 'Run Simulation';
+        }
+      }, 20);
+    });
+
+    renderInteractive();
+    runSimulation();
+  })();
+</script>
+</body>
+</html>
